@@ -2,7 +2,9 @@
 
 # Load required modules
 module load samtools
-module load minimap2
+module load bwa
+module load gatk
+module load java
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -88,14 +90,40 @@ else
     READS_1=${READS[0]}
     READS_2=${READS[1]}
 
-    print_progress "Starting the pipeline: Aligning reads, fixing mates, sorting, marking duplicates, and creating final BAM..."
+    print_progress "Starting the pipeline: Aligning reads, sorting, marking duplicates, calibrating,mand creating final BAM..."
 
     set -o pipefail 
     
-    minimap2 -t 8 -a -x sr $REFERENCE $READS_1 $READS_2 | \
-    samtools fixmate -u -m - - | \
-    samtools sort -u -@8 -T /tmp/example_prefix - -o $BAM | \
-    samtools markdup -@8 - -O bam,level=1 $BAM
+   # Create named pipes
+    mkfifo sorted.bam marked_duplicates.bam recal_data.table
+
+    # Step 1: BWA MEM and Samtools sort
+    bwa mem -t 8 $REFERENCE $READS_1 $READS_2 | samtools sort -l 1 -@8 -o sorted.bam -T /tmp/example_prefix -
+    wait  
+
+    # Step 2: Picard MarkDuplicates
+    java -jar picard.jar MarkDuplicates \
+        I=sorted.bam \
+        O=marked_duplicates.bam
+    wait  
+
+    # Step 3: GATK BaseRecalibrator
+    gatk BaseRecalibrator \
+        -I marked_duplicates.bam \
+        -R $REFERENCE \
+        --known-sites sites_of_variation.vcf \
+        -O recal_data.table
+    wait  
+
+    # Step 4: GATK ApplyBQSR
+    gatk ApplyBQSR \
+        -R $REFERENCE \
+        -I marked_duplicates.bam \
+        --bqsr-recal-file recal_data.table \
+        -O $BAM
+
+    # Clean up named pipes
+    rm sorted.bam marked_duplicates.bam recal_data.table
 
     print_progress "Pipeline completed successfully. Output is in $BAM."
 fi
