@@ -94,8 +94,8 @@ else
     
     minimap2 -t 8 -a -x sr $REFERENCE $READS_1 $READS_2 | \
     samtools fixmate -u -m - - | \
-    samtools sort -u -@8 -T /tmp/example_prefix - -o $BAM #| \
-    #samtools markdup -@8 - -O bam,level=1 $BAM
+    samtools sort -u -@8 -T /tmp/example_prefix - -o $BAM | \
+    samtools markdup -@8 - -O bam,level=1 $BAM
 
     print_progress "Pipeline completed successfully. Output is in $BAM."
 fi
