@@ -1,4 +1,4 @@
-Pipelines in this repository
+# Pipelines in this repository
 
-# 1: Fastq --> bam
-[fastq_to_bam.sh] (fastq_to_bam.md)
+### 1: Convert FASTQ (paired-end reads) to BAM file
+[fastq --> bam readme] (fastq_to_bam.md)
