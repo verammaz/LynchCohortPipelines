@@ -35,12 +35,12 @@ Required arguments:
 ```
 
 Optional arguments:
-| Parameter                 | Default       | Description   |	
-| :------------------------ |:-------------:| :-------------|
-| --view_final | 0 | Flag to create .fai files for reference genome and final aligned bam file, which is required for viewing results in IGV.
-| --run_index | 0 | Flag for running the indexing step.
---keep_intermediate | 0 | Flag to keep intermediate files produced during pipeline execution.
---post_process | 0 | Flag to carry out post processing of aligned and sorted bam file (mark duplicates, base recalibration).
+| Parameter                 | Description   |	
+| :------------------------ | :-------------|
+| --view_final |  Flag to create .fai files for reference genome and final aligned bam file, which is required for viewing results in IGV.
+| --run_index | Flag for running the indexing step.
+--keep_intermediate | Flag to keep intermediate files produced during pipeline execution.
+--post_process | Flag to carry out post processing of aligned and sorted bam file (mark duplicates, base recalibration).
 
 
 
