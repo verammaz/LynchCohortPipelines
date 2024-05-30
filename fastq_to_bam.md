@@ -3,17 +3,17 @@ This script runs a FASTQ --> BAM pipeline by calling a sequence mapper and then 
 
 ## Pipeline Overview:
 
-[Burrows-Wheeler Alignment tool] (https://bio-bwa.sourceforge.net/bwa.shtml)
+[Burrows-Wheeler Alignment tool](https://bio-bwa.sourceforge.net/bwa.shtml)
 
 0. Indexing the reference (bwa_index)
 1. Alignment (bwa_mem) and sorting (samtools sort)
 
 Optional post-processing:
 
-2. [Picard MarkDuplictaes] (https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard)
-3. [GATK BaseRecalibrator] (https://gatk.broadinstitute.org/hc/en-us/articles/360036898312-BaseRecalibrator)
+2. [Picard MarkDuplictaes](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard)
+3. [GATK BaseRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360036898312-BaseRecalibrator)
     - *Note:* vcf file with sites of variation required for this step. Specify path to this file in top of script in the 'SITES_OF_VARIATION' variable.
-4. [GATK ApplyBQSR] (https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
+4. [GATK ApplyBQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
 
 ## Running on Minerva (HPC cluster):
 *Note:* required modules (bwa, samtools, picard, java, gatk) are already available on Minerva 
