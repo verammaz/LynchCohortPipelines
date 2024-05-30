@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#################################################################################################################
-#specify file path for sites_of_variation.vcf (required for GATK BaseRecalibrator and subsequent GATK ApplyBQSR)
-SITES_OF_VARIATION="" 
-#################################################################################################################
+##############################################
+#specify file path for sites_of_variation.vcf 
+SITES_OF_VARIATION="sites_of_variation.vcf" 
+##############################################
 
 # Function to print progress with timestamp
 print_progress() {
@@ -29,7 +29,7 @@ Usage: $0 [options] -f <reference.fa> -r <read1.fastq,read2.fastq> -o <output_pr
 
 Required Arguments:
   -f <reference.fa>                Reference genome file in FASTA format.
-  -r <read1.fastq,read2.fastq>     Comma-separated list of two FASTQ files.
+  -r <read1.fastq,read2.fastq>     Comma-separated list of two FASTQ files (no space).
   -o <output_prefix>               Prefix for output files.
 
 Options:
@@ -37,7 +37,7 @@ Options:
   -v                               Enable verbose mode.
   --run_index                      Run bwa_index step (required for bwa_mem alignment, once per reference genome)
   --keep_intermediate              Keep intermediate files generated during the pipeline.
-  --view_final                     View final BAM file using samtools and less.
+  --view_final                     Index refernece and final BAM file for IGV viewing.
   --post_process                   Carry out post processing of BAM file after alignment and sorting (mark duplicates, base quality recallibration)
 
 
@@ -148,7 +148,7 @@ if [ $POST_PROCESS -eq 1 ]; then
         gatk BaseRecalibrator \
             -I "${OUTPUT_PREFIX}_marked_dup.bam" \
             -R $REFERENCE \
-            --known-sites sites_of_variation.vcf \
+            --known-sites $SITES_OF_VARIATION \
             -O "${OUTPUT_PREFIX}_recal_data.table"
         wait  
 
@@ -181,8 +181,11 @@ fi
 
 # View the final BAM file if the -v flag is set
 if [ $VIEW -eq 1 ]; then
-    print_progress "Viewing the final BAM file..."
-    samtools view -h "${OUTPUT_PREFIX}_final.bam" | less -S
+    print_progress "Producing .fai files required for IGV viewing..."
+    samtools index "${OUTPUT_PREFIX}_final.bam" 
+    if [-f "$REFERENCE.fai" ]; then
+        samtools faidx $REFERENCE
+    fi
 fi
 
 exit 1
