@@ -128,7 +128,7 @@ fi
 
 # Step 1: BWA MEM and Samtools sort
 print_progress "Aligning and sorting..."
-bwa mem -t 8 $REFERENCE $READS_1 $READS_2 | samtools sort -l 1 -@8 -o "${OUTPUT_PREFIX}_sorted.bam" -
+bwa mem -t 8 $REFERENCE $READS_1 $READS_2 | samtools sort -@8 -o "${OUTPUT_PREFIX}_sorted.bam" -
 wait  
 
 if [ $POST_PROCESS -eq 1 ]; then
