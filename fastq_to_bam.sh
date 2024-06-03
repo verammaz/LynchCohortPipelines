@@ -2,7 +2,7 @@
 
 ##############################################
 #specify file path for sites_of_variation.vcf 
-SITES_OF_VARIATION="sites_of_variation.vcf" 
+SITES_OF_VARIATION="dbsnp_138.b37.vcf"  #(this file compatible with grch37/b37 assembly)
 ##############################################
 
 # Function to print progress with timestamp
@@ -47,7 +47,7 @@ EOF
 
 # Variables
 READS=()
-REFERENCE=
+REF_FASTA=
 OUTPUT_PREFIX=
 VIEW=0
 VERBOSE=0
@@ -64,7 +64,7 @@ while [[ "$#" -gt 0 ]]; do
         --view_final) VIEW=1 ;;
         --post_process) POST_PROCESS=1 ;;
         --run_index) INDEX=1 ;;
-        -f) REFERENCE="$2"; shift ;;
+        -f) REF_FASTA="$2"; shift ;;
         -r) READS="$2"; shift ;;
         -o) OUTPUT_PREFIX="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
@@ -73,7 +73,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Check that mandatory arguments are provided
-if [ -z "$REFERENCE" ] || [ -z "$READS" ] || [ -z "$OUTPUT_PREFIX" ]; then
+if [ -z "$REF_FASTA" ] || [ -z "$READS" ] || [ -z "$OUTPUT_PREFIX" ]; then
     echo "Error: Not all required arguemnts provided."
     usage
 fi
@@ -90,6 +90,18 @@ fi
 READS_1=${READ_ARRAY[0]}
 READS_2=${READ_ARRAY[1]}
 
+# Check fastq read files
+if [ ! -f "$READS_1" ] || [ ! -f "$READS_2" ]; then
+    echo "Error: One or both fastq read files do not exist or are not readable."
+    exit 1
+fi
+
+# Check reference genome file
+if [ ! -f "${REF_FASTA}" ]; then
+    echo "Reference file not found!"
+    exit 1
+fi
+
 
 # If verbose mode is enabled, print the parameters
 if [ $VERBOSE -eq 1 ]; then
@@ -101,7 +113,7 @@ if [ $VERBOSE -eq 1 ]; then
     VIEW_STR=$( [ $VIEW -eq 1 ] && echo "true" || echo "false" )
 
     echo "---------------------------------------------"
-    echo "Reference: $REFERENCE"
+    echo "Reference: $REF_FASTA"
     echo "Read1: $READS_1"
     echo "Read2: $READS_2"
     echo "Output Prefix: $OUTPUT_PREFIX"
@@ -115,6 +127,14 @@ fi
 
 # Run fastq-->bam pipeline
 
+# File Names
+SORTED_BAM="${OUTPUT_PREFIX}_sorted.bam"
+MARKDUP_TXT="${OUTPUT_PREFIX}_markdup_metrics.txt"
+MARKDUP_BAM="${OUTPUT_PREFIX}_markdup.bam"
+MARKDUP_RG_BAM="${MARKDUP_BAM}_rg.bam"
+RECAL="${OUTPUT_PREFIX}_recal_data.table"
+FINAL_BAM="${OUTPUT_PREFIX}_final.bam"
+
 echo "---------------------------------------------"
 print_progress "Starting the pipeline..."
 echo "---------------------------------------------"
@@ -123,68 +143,82 @@ set -o pipefail
 
 if [ $INDEX -eq 1 ]; then
     print_progress "Indexing the reference..."
-    bwa index -a bwtsw $REFERENCE
+    bwa index -a bwtsw $REF_FASTA
 fi
 
-# Step 1: BWA MEM and Samtools sort
-print_progress "Aligning and sorting..."
-bwa mem -t 8 $REFERENCE $READS_1 $READS_2 | samtools sort -@8 -o "${OUTPUT_PREFIX}_sorted.bam" -
-wait  
+#Step 1: BWA MEM and Samtools sort
+#print_progress "Aligning and sorting..."
+#bwa mem -M -t 8 $REF_FASTA $READS_1 $READS_2 | samtools sort -@8 -o $SORTED_BAM -
+#wait  
 
 if [ $POST_PROCESS -eq 1 ]; then
 
     # Step 2: Picard MarkDuplicates
-    print_progress "Marking duplictaes (Picard MarkDuplicates)..."
-    java -jar $PICARD MarkDuplicates \
-        I="${OUTPUT_PREFIX}_sorted.bam" \
-        O="${OUTPUT_PREFIX}_marked_dup.bam" \
-        M="${OUTPUT_PREFIX}_marked_dup_metrics.txt"
-    wait  
+    #print_progress "Marking duplictaes (Picard MarkDuplicates)..."
+    #java -jar $PICARD MarkDuplicates \
+        #I=$SORTED_BAM \
+        #O=$MARKDUP_BAM \
+        #M=$MARKDUP_TXT
+    #wait  
 
     if [ -f "$SITES_OF_VARIATION" ]; then
 
-        # Step 3: GATK BaseRecalibrator
+        if [ ! -f "${REF_FASTA%.*}.dict" ]; then
+            gatk CreateSequenceDictionary -R $REF_FASTA
+        fi
+        if [ ! -f "${SITES_OF_VARIATION}.idx" ]; then
+            gatk IndexFeatureFile -I $SITES_OF_VARIATION
+        fi
+
+        # Step 3 Prep: GATK AddOrReplaceReadGroups (GATK BaseRecalibrator is read group aware)
+        print_progress "Adding read groups (Picard AddOrReplaceReadGroups)..."
+        java -jar $PICARD AddOrReplaceReadGroups \
+            I=$MARKDUP_BAM \
+            O=$MARKDUP_RG_BAM \
+            RGID=4 RGLB=lib1 RGPL=ILLUMINA RGPU=unit1 RGSM=20
+
+        #Step 3: GATK BaseRecalibrator
         print_progress "Recalibrating bases (GATK BaseRecalibrator)..."
         gatk BaseRecalibrator \
-            -I "${OUTPUT_PREFIX}_marked_dup.bam" \
-            -R $REFERENCE \
+            -I $MARKDUP_RG_BAM \
+            -R $REF_FASTA \
             --known-sites $SITES_OF_VARIATION \
-            -O "${OUTPUT_PREFIX}_recal_data.table"
+            -O $RECAL
         wait  
 
         # Step 4: GATK ApplyBQSR
         print_progress "Applying base recalibaration (GATK ApplyBQSR)..."
         gatk ApplyBQSR \
-            -R $REFERENCE \
-            -I "${OUTPUT_PREFIX}_marked_dup.bam" \
-            --bqsr-recal-file "${OUTPUT_PREFIX}_recal_data.table" \
-            -O "${OUTPUT_PREFIX}_final.bam"
+            -R $REF_FASTA \
+            -I $MARKDUP_RG_BAM \
+            --bqsr-recal-file $RECAL \
+            -O $FINAL_BAM
     
     else
-        echo "Sites of variation file $SITES_OF_VARIATION not found."
-        echo "Cannot run GATK BaseRecalibrator without sites_of_variation.vcf file."
-        echo "Terminating post processing after Picard MarkDuplicates..."
-        mv "${OUTPUT_PREFIX}_marked_dup.bam" "${OUTPUT_PREFIX}_final.bam"
+        echo "WARNING: Sites of variation file $SITES_OF_VARIATION not found."
+        echo "WARNING: Cannot run GATK BaseRecalibrator."
+        print_progress "Terminating post processing after Picard MarkDuplicates..."
+        mv $MARKDUP_BAM $FINAL_BAM
     fi
 else
-    mv "${OUTPUT_PREFIX}_sorted.bam" "${OUTPUT_PREFIX}_final.bam"
+    mv $SORTED_BAM $FINAL_BAM
 fi
 
-print_progress "Pipeline completed successfully. Output is in ${OUTPUT_PREFIX}_final.bam."
+print_progress "Pipeline completed successfully. Output is in ${FINAL_BAM}."
 
 
 # Remove intermediate files if necessary
 if [ $KEEP_INTERMEDIATE -eq 0 ] && [ $POST_PROCESS -eq 1 ]; then
     print_progress "Removing intermediate files..."
-    rm -f "${OUTPUT_PREFIX}_sorted.bam", "${OUTPUT_PREFIX}_marked_dup.bam", "${OUTPUT_PREFIX}_recal_table.table", "${OUTPUT_PREFIX}_marked_dup_metrics.txt"
+    rm -f $SORTED_BAM $MARKDUP_TXT $MARKDUP_BAM $MARKDUP_RG_BAM $RECAL
 fi
 
 # View the final BAM file if the -v flag is set
 if [ $VIEW -eq 1 ]; then
     print_progress "Producing .fai files required for IGV viewing..."
-    samtools index "${OUTPUT_PREFIX}_final.bam" 
-    if [-f "$REFERENCE.fai" ]; then
-        samtools faidx $REFERENCE
+    samtools index $FINAL_BAM
+    if [ -f "${REF_FASTA}.fai" ]; then
+        samtools faidx $REF_FASTA
     fi
 fi
 
