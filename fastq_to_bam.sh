@@ -147,19 +147,19 @@ if [ $INDEX -eq 1 ]; then
 fi
 
 #Step 1: BWA MEM and Samtools sort
-#print_progress "Aligning and sorting..."
-#bwa mem -M -t 8 $REF_FASTA $READS_1 $READS_2 | samtools sort -@8 -o $SORTED_BAM -
-#wait  
+print_progress "Aligning and sorting..."
+bwa mem -M -t 8 $REF_FASTA $READS_1 $READS_2 | samtools sort -@8 -o $SORTED_BAM -
+wait  
 
 if [ $POST_PROCESS -eq 1 ]; then
 
     # Step 2: Picard MarkDuplicates
-    #print_progress "Marking duplictaes (Picard MarkDuplicates)..."
-    #java -jar $PICARD MarkDuplicates \
-        #I=$SORTED_BAM \
-        #O=$MARKDUP_BAM \
-        #M=$MARKDUP_TXT
-    #wait  
+    print_progress "Marking duplictaes (Picard MarkDuplicates)..."
+    java -jar $PICARD MarkDuplicates \
+        I=$SORTED_BAM \
+        O=$MARKDUP_BAM \
+        M=$MARKDUP_TXT
+    wait  
 
     if [ -f "$SITES_OF_VARIATION" ]; then
 
