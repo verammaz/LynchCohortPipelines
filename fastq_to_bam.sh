@@ -16,6 +16,8 @@ print_progress "Loading required modules..."
 module load samtools >/dev/null 2>&1
 module load bwa >/dev/null 2>&1
 module load gatk >/dev/null 2>&1
+module load java/1.8.0_66 >/dev/null 2>&1
+module load picard/2.2.4 >/dev/null 2>&1
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -124,11 +126,12 @@ fi
 
 
 #############################################################################################
-Run fastq-->bam pipeline
+#Run fastq-->bam pipeline
 
 # File Names
 RAW_BAM="${OUTPUT_PREFIX}_raw.bam"
 MARKDUP_BAM="${OUTPUT_PREFIX}_markdup.bam"
+MARKDUP_TXT="${OUTPUT_PREFIX}_markdup_metrics.txt"
 RECAL="${OUTPUT_PREFIX}_recal_data.table"
 FINAL_BAM="${OUTPUT_PREFIX}_final.bam"
 
@@ -156,7 +159,7 @@ get_verbosity_flag() {
     if [ "$VERBOSE" -eq 0 ]; then
         case $tool_name in
             bwa) echo "-v 2" ;;
-            markdup) echo "--spark-verbosity WARN" ;;
+            markdup) echo "--VERBOSITY WARN" ;;
             baserecal) echo "--verbosity WARN" ;;
             *) echo "" ;;
         esac
@@ -177,22 +180,26 @@ construct_read_group_id() {
     echo "$header" | cut -f 1-3 -d":" | sed 's/@//' | sed 's/:/_/g'
 }
 
+
+# Step 1: BWA MEM Alignment and Coordinate Sorting
+
 # Construct the read group ID
 id=$(construct_read_group_id "$READS_1")
 
-# Step 1: BWA MEM Alignment
+print_progress "Aligning (bwa-mem) and sorting (samtools sort)"
 bwa mem -t 48 $REF_FASTA $READS_1 $READS_2 \
-        -R "@RG\tID:${id}\tPL:ILLUMINA"  $(get_verbosity_flag bwa) | samtools view -bS - > $RAW_BAM
+        -R "@RG\tID:${id}\tPL:ILLUMINA"  $(get_verbosity_flag bwa) | samtools sort -@48 - -o $RAW_BAM
 wait    
 
 if [ $POST_PROCESS -eq 1 ]; then
 
-    # Step 2: GATK MarkDuplicatesSpark
-    print_progress "Marking duplictates (GATK MarkDuplicatesSpark)..."
-    gatk MarkDuplicatesSpark \
-        -I $RAW_BAM \
-        -O $MARKDUP_BAM \
-        --QUIET $(get_verbosity_flag markdup)
+    # Step 2: Picard MarkDuplicates
+    print_progress "Marking duplictates (Picard MarkDuplicates)..."
+    java -jar $PICARD MarkDuplicates \
+        I=$RAW_BAM \
+        O=$MARKDUP_BAM \
+        M=$MARKDUP_TXT \
+        $(get_verbosity_flag markdup)
     wait  
 
     if [ -f "$SITES_OF_VARIATION" ]; then
@@ -238,7 +245,7 @@ print_progress "Pipeline completed successfully. Output is in ${FINAL_BAM}."
 # Remove intermediate files if necessary
 if [ $KEEP_INTERMEDIATE -eq 0 ] && [ $POST_PROCESS -eq 1 ]; then
     print_progress "Removing intermediate files..."
-    rm -f $RAW_BAM $MARKDUP_BAM "${MARKDUP_BAM}.bai" "${MARKDUP_BAM}.sbi" $RECAL 
+    rm -f $RAW_BAM $MARKDUP_BAM "${MARKDUP_BAM}.bai" "${MARKDUP_BAM}.sbi" $MARKDUP_TXT $RECAL 
 fi
 
 # Index _raw.bam file (other .bam outputs indexed by post-processing tools)
