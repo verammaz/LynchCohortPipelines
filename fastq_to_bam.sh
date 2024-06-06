@@ -123,7 +123,8 @@ if [ $VERBOSE -eq 1 ]; then
 fi
 
 
-# Run fastq-->bam pipeline
+#############################################################################################
+Run fastq-->bam pipeline
 
 # File Names
 RAW_BAM="${OUTPUT_PREFIX}_raw.bam"
@@ -138,29 +139,50 @@ echo "---------------------------------------------"
 set -o pipefail 
 
 if [ $INDEX -eq 1 ]; then
-    print_progress "Indexing the reference..."
-    bwa index -a bwtsw $REF_FASTA
+# As indexing reference takes time and is only required once per reference, double check that indexing step is required:)
+    if [ ! -f "$REF_FASTA.amb" ] || \
+           [ ! -f "$REF_FASTA.ann" ] || \
+           [ ! -f "$REF_FASTA.bwt" ] || \
+           [ ! -f "$REF_FASTA.pac" ] || \
+           [ ! -f "$REF_FASTA.sa" ]; then
+        print_progress "Indexing the reference..."
+        bwa index -a bwtsw $REF_FASTA
+    fi
 fi
 
-
-# Function to read the first line of a file, handling gzipped and non-gzipped files
-read_first_line() {
-    local file=$1
-    if [[ $file == *.gz ]]; then
-        gunzip -c "$file" | head -n 1
+# Function to get verbosity flag for a given tool
+get_verbosity_flag() {
+    local tool_name=$1
+    if [ "$VERBOSE" -eq 0 ]; then
+        case $tool_name in
+            bwa) echo "-v 2" ;;
+            markdup) echo "--spark-verbosity WARN" ;;
+            baserecal) echo "--verbosity WARN" ;;
+            *) echo "" ;;
+        esac
     else
-        head -n 1 "$file"
+        echo ""
     fi
 }
 
-# Get the header from the first reads fastq file
-header=$(read_first_line "$READS_1")
-# Extract and format the read group ID
-id=$(echo "$header" | cut -f 1-3 -d":" | sed 's/@//' | sed 's/:/_/g')
+# Function to construct the read group ID
+construct_read_group_id() {
+    local file=$1
+    local header
+    if [[ $file == *.gz ]]; then
+        header=$(gunzip -c "$file" | head -n 1)
+    else
+        header=$(head -n 1 "$file")
+    fi
+    echo "$header" | cut -f 1-3 -d":" | sed 's/@//' | sed 's/:/_/g'
+}
+
+# Construct the read group ID
+id=$(construct_read_group_id "$READS_1")
 
 # Step 1: BWA MEM Alignment
 bwa mem -t 48 $REF_FASTA $READS_1 $READS_2 \
-        -R "@RG\tID:${id}\tPL:ILLUMINA" | samtools view -bS - > $RAW_BAM
+        -R "@RG\tID:${id}\tPL:ILLUMINA"  $(get_verbosity_flag bwa) | samtools view -bS - > $RAW_BAM
 wait    
 
 if [ $POST_PROCESS -eq 1 ]; then
@@ -170,7 +192,7 @@ if [ $POST_PROCESS -eq 1 ]; then
     gatk MarkDuplicatesSpark \
         -I $RAW_BAM \
         -O $MARKDUP_BAM \
-        --QUIET --spark-verbosity WARN
+        --QUIET $(get_verbosity_flag markdup)
     wait  
 
     if [ -f "$SITES_OF_VARIATION" ]; then
@@ -188,7 +210,8 @@ if [ $POST_PROCESS -eq 1 ]; then
             -I $MARKDUP_BAM \
             -R $REF_FASTA \
             --known-sites $SITES_OF_VARIATION \
-            -O $RECAL
+            -O $RECAL \
+            $(get_verbosity_flag baserecal)
         wait  
 
         # Step 4: GATK ApplyBQSR
@@ -196,7 +219,8 @@ if [ $POST_PROCESS -eq 1 ]; then
         gatk ApplyBQSR \
             -I $MARKDUP_BAM \
             --bqsr-recal-file $RECAL \
-            -O $FINAL_BAM
+            -O $FINAL_BAM \
+            $(get_verbosity_flag baserecal)
     
     else
         echo "WARNING: Sites of variation file $SITES_OF_VARIATION not found."
