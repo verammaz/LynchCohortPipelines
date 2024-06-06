@@ -6,27 +6,26 @@ This script runs a FASTQ --> BAM pipeline by calling a sequence mapper / aligner
 [Burrows-Wheeler Alignment tool](https://bio-bwa.sourceforge.net/bwa.shtml)
 
 0. Indexing the reference (bwa_index)
-1. Alignment (bwa_mem) and sorting (samtools sort)
+1. Alignment (bwa_mem) and conversion to BAM format (samtools)
 
 Optional post-processing:
 
-2. [Picard MarkDuplictaes](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard)
+2. [GATK MarkDuplicatesSpark](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
 3. [GATK BaseRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360036898312-BaseRecalibrator)
     - *Note:* vcf file with sites of variation required for this step. Specify path to this file in top of script in the 'SITES_OF_VARIATION' variable.
-    - Pre step: [GATK AddOrReplaceReadGroups](https://gatk.broadinstitute.org/hc/en-us/articles/360037226472-AddOrReplaceReadGroups-Picard)
-4. [Picard ApplyBQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
+4. [GATK ApplyBQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
 
 ## Running on Minerva (HPC cluster):
-*Note:* required modules (bwa, samtools, picard, java, gatk) are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
+*Note:* required modules (bwa, samtools, gatk) are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
 
 All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome, run
 
 ```bash
-path/to/file/fastq_to_bam.sh -f <reference.fa> -r <fastq1,fastq2> -o <output_prefix> --run_index
+path/to/file/fastq_to_bam.sh -f <reference.fa> -r <fastq1,fastq2> -o <output_prefix> --index_ref
 ```
-On  subsequent execution using the same reference, run without the `--run_index` option. Keep reference and index files in the same directory.
+On  subsequent execution using the same reference, run without the `--index_ref` option. Keep reference and index files in the same directory.
 
-### Usage
+### Usage 
 
 Required arguments:
 ```
@@ -39,12 +38,14 @@ Optional arguments:
 
 | Parameter                 | Description   |	
 | :----------------------------------------: | :------: |
-| `--view_final` |  Flag to create .fai files for reference genome and final aligned bam file, which is required for viewing results in IGV.
-| `--run_index` | Flag for running the indexing step.
+| `-v` | Enable verbose mode. |
+| `-h` | Display usage message. |
+| `--igv` |  Flag to create .bai files for BAM files, which is required for viewing alignments in IGV.
+| `--index_ref` | Flag for running the indexing step for reference.
 | `--keep_intermediate` | Flag to keep intermediate files produced during pipeline execution.
-| `--post_process` | Flag to carry out post processing of aligned and sorted bam file (mark duplicates, base recalibration).
+| `--post_process` | Flag to carry out post processing of initial alignment bam file (mark duplicates, base recalibration).
 
-### Submitting a job (bsub)
+### Submitting a Job (bsub)
 
 Submit to LSF job scheduler with the following header:
 
@@ -52,12 +53,12 @@ Submit to LSF job scheduler with the following header:
 #!/bin/bash --login
 
 #BSUB -J fastq_to_bam
-#BSUB -P acc_Project Name
-#BSUB -q queue_name
-#BSUB -n 8
-#BSUB -M 163840 
-#BSUB -R "rusage[mem=24576]"
-#BSUB -W 10:00
+#BSUB -P acc_ProjectName
+#BSUB -q express (or premium) 
+#BSUB -n 48
+#BSUB -M 32000 
+#BSUB -R span[hosts=1]
+#BSUB -W 03:00
 #BSUB -oo fastq_to_bam.out
 #BSUB -eo fastq_to_bam.err
 ```
