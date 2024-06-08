@@ -158,9 +158,9 @@ get_verbosity_flag() {
     local tool_name=$1
     if [ "$VERBOSE" -eq 0 ]; then
         case $tool_name in
-            bwa) echo "-v 2" ;;
-            markdup) echo "--VERBOSITY WARN" ;;
-            baserecal) echo "--verbosity WARN" ;;
+            bwa) echo "-v 1" ;;
+            markdup) echo "VERBOSITY=ERROR" ;;
+            baserecal) echo "--verbosity ERROR" ;;
             *) echo "" ;;
         esac
     else
