@@ -10,13 +10,13 @@ This script runs a FASTQ --> BAM pipeline by calling a sequence mapper / aligner
 
 Optional post-processing:
 
-2. [GATK MarkDuplicatesSpark](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
+2. [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard)
 3. [GATK BaseRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360036898312-BaseRecalibrator)
     - *Note:* vcf file with sites of variation required for this step. Specify path to this file in top of script in the 'SITES_OF_VARIATION' variable.
 4. [GATK ApplyBQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
 
 ## Running on Minerva (HPC cluster):
-*Note:* required modules (bwa, samtools, gatk) are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
+*Note:* required modules (bwa, samtools, java, picard, gatk) are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
 
 All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome, run
 
