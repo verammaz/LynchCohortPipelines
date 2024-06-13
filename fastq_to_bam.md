@@ -52,15 +52,15 @@ Submit to LSF job scheduler with the following header:
 ```bash
 #!/bin/bash --login
 
-#BSUB -J fastq_to_bam
+#BSUB -J fastq2bam
 #BSUB -P acc_ProjectName
-#BSUB -q express (or premium) 
-#BSUB -n 48
+#BSUB -q queue_name 
+#BSUB -n 8
 #BSUB -M 32000 
 #BSUB -R span[hosts=1]
-#BSUB -W 03:00
-#BSUB -oo fastq_to_bam.out
-#BSUB -eo fastq_to_bam.err
+#BSUB -W 05:00
+#BSUB -o fastq2bam_%J.out
+#BSUB -e fastq2bam_%J.err
 ```
 
 
