@@ -189,8 +189,8 @@ id=$(construct_read_group_id "$READS_1")
 sample=$(basename "$READS_1" | cut -d'_' -f1)
 
 print_progress "Aligning (bwa-mem) and sorting (samtools sort)"
-bwa mem -M -t 48 $REF_FASTA $READS_1 $READS_2 \
-        -R "@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA" $(get_verbosity_flag bwa) | samtools sort -@48 - -o $RAW_BAM
+bwa mem -M -t 8 $REF_FASTA $READS_1 $READS_2 \
+        -R "@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA" $(get_verbosity_flag bwa) | samtools sort -@8 - -o $RAW_BAM
 wait   
 
 if [ $POST_PROCESS -eq 1 ]; then
