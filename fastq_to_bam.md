@@ -58,10 +58,16 @@ Submit to LSF job scheduler with the following header:
 #BSUB -n 8
 #BSUB -M 32000 
 #BSUB -R span[hosts=1]
-#BSUB -W 05:00
+#BSUB -W HH:MM
 #BSUB -o fastq2bam_%J.out
 #BSUB -e fastq2bam_%J.err
 ```
+*Note:* Can reduce computational time (aligent is main bottleneck) by increasing number of cores. To take full adavntage of cores, change the number threads specified in lines 192-193 in the [fastq_to_bam script](https://github.com/verammaz/bioinformatics/blob/main/fastq_to_bam.sh): 
+```bash
+bwa mem -M -t 8 $REF_FASTA $READS_1 $READS_2 \
+        -R "@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA" $(get_verbosity_flag bwa) | samtools sort -@8 - -o $RAW_BAM
+```
+to match the number of cores requested with `#BSUB -n`. All cores must be on same host node. 
 
 
 
