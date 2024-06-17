@@ -196,7 +196,7 @@ wait
 if [ $POST_PROCESS -eq 1 ]; then
 
     # Step 2: Picard MarkDuplicates
-    print_progress "Marking duplictates (Picard MarkDuplicates)..."
+    print_progress "Marking duplicates (Picard MarkDuplicates)..."
     java -jar $PICARD MarkDuplicates \
         I=$RAW_BAM \
         O=$MARKDUP_BAM \
