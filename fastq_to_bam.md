@@ -16,7 +16,6 @@ Optional post-processing:
 4. [GATK ApplyBQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
 
 ## Running on Minerva (HPC cluster):
-*Note:* required modules (bwa, samtools, java, picard, gatk) are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
 
 All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome, run
 
@@ -27,12 +26,23 @@ On  subsequent execution using the same reference, run without the `--index_ref`
 
 ### Usage 
 
+Required modules:
+- [bwa](https://sourceforge.net/projects/bio-bwa/files/)
+- [samtools](https://github.com/samtools/samtools)
+- java (version 1.8)
+- [picard](https://broadinstitute.github.io/picard/)
+- [gatk](https://gatk.broadinstitute.org/hc/en-us)
+
+*Note:* required modules are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
+
 Required arguments:
 ```
 -f          Reference genome fasta file
 -r          Two read fastq files, separated by a comma (no space)
 -o          Output files prefix
 ```
+
+*Note:* current version assumes all reads in fastq files come from same sample and are run on same Illumina sequencing lane, and uses this to set the @RG tag in the BAM files. Read about the [@RG tag](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups). 
 
 Optional arguments:
 
@@ -62,7 +72,7 @@ Submit to LSF job scheduler with the following header:
 #BSUB -o fastq2bam_%J.out
 #BSUB -e fastq2bam_%J.err
 ```
-*Note:* Can reduce computational time (aligent is main bottleneck) by increasing number of cores. To take full adavntage of cores, change the number threads specified in lines 192-193 in the [fastq_to_bam script](https://github.com/verammaz/bioinformatics/blob/main/fastq_to_bam.sh): 
+*Note:* Can reduce computational time (alignment is main bottleneck) by increasing number of cores. To take full advantage of cores, change the number of threads specified in lines 192-193 in the [fastq_to_bam script](https://github.com/verammaz/bioinformatics/blob/main/fastq_to_bam.sh): 
 ```bash
 bwa mem -M -t 8 $REF_FASTA $READS_1 $READS_2 \
         -R "@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA" $(get_verbosity_flag bwa) | samtools sort -@8 - -o $RAW_BAM

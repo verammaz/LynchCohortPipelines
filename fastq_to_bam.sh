@@ -248,7 +248,7 @@ print_progress "Pipeline completed successfully. Output is in ${FINAL_BAM}."
 # Remove intermediate files if necessary
 if [ $KEEP_INTERMEDIATE -eq 0 ] && [ $POST_PROCESS -eq 1 ]; then
     print_progress "Removing intermediate files..."
-    rm -f $RAW_BAM $MARKDUP_BAM "${MARKDUP_BAM}.bai" "${MARKDUP_BAM}.sbi" $MARKDUP_TXT $RECAL 
+    rm -f $RAW_BAM $MARKDUP_BAM "${MARKDUP_BAM%.*}.bai" $MARKDUP_TXT $RECAL 
 fi
 
 # Index _raw.bam file (other .bam outputs indexed by post-processing tools)
