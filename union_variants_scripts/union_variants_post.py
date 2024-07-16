@@ -86,7 +86,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
     parser.add_argument("-file_info", required=True)
-    parser.add_argument("--ignore_samples", nargs="+")
+    parser.add_argument("-samples", required=True, nargs="+")
     parser.add_argument("--single_file", action="store_true")
 
     args = parser.parse_args()
@@ -98,12 +98,9 @@ def main():
     out_dir = patient_info['Directory'].iloc[0]
     Samples = {}
 
-    ignore_samples = args.ignore_samples if args.ignore_samples is not None else []
-    Samples = {}
-
     for index, row in patient_info.iterrows():
         sample = row['Sample']
-        if sample not in ignore_samples:
+        if sample in args.samples:
             Samples[sample] = {'bam': row['BAM'],'vcf': row['VCF'].split(', '), 'bamcounts': row['BAM_COUNTS']}
     
     variants_pkl = os.path.join(out_dir, patient_info['VARIANTS'][0])

@@ -5,8 +5,6 @@ regions_file=$2
 readcounts_file=$3
 ref_file=$4
 
-module load bam-readcount >/dev/null 2>&1
-
 echo "------------------------"
 echo "Running bam-readcount"
 echo "BAM File: ${bam_file}"

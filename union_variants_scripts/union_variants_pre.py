@@ -44,11 +44,15 @@ def parse_strelka_vcf_line(line):
     ref, alt = line_fields[3], line_fields[4]
 
     if len(alt) != len(ref):
-        assert(format == "DP:DP2:TAR:TIR:TOR:DP50:FDP50:SUBDP50:BCN50")
+        if format != "DP:DP2:TAR:TIR:TOR:DP50:FDP50:SUBDP50:BCN50":
+            #print(f"Warning: strelka indel format not recognized.")
+            return None, None
         alt_count = counts[3].split(",")[1] # use TIR tier2
         total_count = counts[0]
     else:
-        assert(format == "DP:FDP:SDP:SUBDP:AU:CU:GU:TU")
+        if format != "DP:FDP:SDP:SUBDP:AU:CU:GU:TU":
+            #print(f"Warning: strelka snv format not recognized.")
+            return None, None
         BASE_TO_FORMATID = {"A": 4, "C": 5, "G": 6, "T": 7}
         total_count, alt_count = counts[0], counts[BASE_TO_FORMATID[alt]].split(',')[1]
     
@@ -58,7 +62,9 @@ def parse_strelka_vcf_line(line):
 def parse_mutect_vcf_line(line):
     line_fields = line.split('\t')
     format = line_fields[8]
-    assert(format == "GT:AD:AF:DP:F1R2:F2R1:FAD:SB")
+    if format != "GT:AD:AF:DP:F1R2:F2R1:FAD:SB":
+        #print("Warning: mutect snv format not recognized.")
+        return None, None
     counts = line_fields[10].split(":")
     alt_count = counts[1][1]
     total_count = counts[3]
@@ -85,7 +91,7 @@ def read_vcf(file, sample_name, variants_dict, pass_filter=True):
 
         # VCF file columns: CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, NORMAL, TUMOR
         
-        # Ignoring 'NORMAL' counts
+        # Ignoring 'NORMAL' counts --> #TODO: add option to not ignore
         # TODO: add option to not overwrite existing vcf 'TUMOR' counts / report discrepancies between vcf and bam counts
 
         chrom, pos, id, ref, alt, _, _, _, _, _, tumor_counts = line.split('\t')
@@ -97,8 +103,13 @@ def read_vcf(file, sample_name, variants_dict, pass_filter=True):
         elif caller == 'strelka':
             total_counts, alt_counts = parse_mutect_vcf_line(line)
         else:
-            print(f"{file}: unkown variant caller")
+            print(f"Warning: {file} unkown variant caller")
+            return None
         
+        if total_counts == None and alt_counts == None:
+            print(f"Warning: unable to parse vcf line")
+            continue
+
         variant_id = f"{chrom}_{pos}_{ref}_{alt}"
 
         if variant_id in variants_dict.keys():
@@ -121,7 +132,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
     parser.add_argument("-file_info", required=True, help="config file with sample file infos")
-    parser.add_argument("--ignore_samples", nargs="+", help="list of sample ids to ignore")
+    parser.add_argument("-samples", required=True, nargs="+", help="list of sample ids to ignore")
 
     args = parser.parse_args()
 
@@ -132,38 +143,43 @@ def main():
     out_dir = patient_info['Directory'].iloc[0]
     Samples = {}
 
-    ignore_samples = args.ignore_samples if args.ignore_samples is not None else []
-
     for index, row in patient_info.iterrows():
         sample = row['Sample']
-        if sample not in ignore_samples:
+        if sample in args.samples:
             Samples[sample] = {'bam': row['BAM'],'vcf': row['VCF'].split(', ')}
     
     all_regions = set()
     all_variants = dict()
 
+    parse_error = False
     for sample in Samples.keys():
         print(f"{sample}: Reading and parsing vcf file(s)...", end="")
         for vcf in Samples[sample]["vcf"]:
             vcf_file = os.path.join(out_dir, sample, vcf)
             regions = read_vcf(vcf_file, sample, all_variants)
-            all_regions.update(regions)
+            if regions == None:
+                parse_error = True
+                print("Error.")
+            else:
+                all_regions.update(regions)
+                print("Done.")
+    
+
+    if not parse_error:
+        regions_file = os.path.join(out_dir, f"{args.patient_id}_regions.txt")
+        print(f"Writing regions to {regions_file} ...", end="")
+        with open(regions_file, 'w') as f:
+            f.write("\n".join(all_regions))
         print("Done.")
-    
-    regions_file = os.path.join(out_dir, f"{args.patient_id}_regions.txt")
-    print(f"Writing regions to {regions_file} ...", end="")
-    with open(regions_file, 'w') as f:
-        f.write("\n".join(all_regions))
-    print("Done.")
-    
-    variants_file = os.path.join(out_dir, f"{args.patient_id}_variants.pkl")
-    print(f"Writing variant objects to {variants_file} ...", end="")
-    variants_list = []
-    for _, variant in all_variants.items():
-        variants_list.append(variant)
-    with open(variants_file, 'wb') as f:
-        pickle.dump(variants_list, f)
-    print("Done.")
+        
+        variants_file = os.path.join(out_dir, f"{args.patient_id}_variants.pkl")
+        print(f"Writing variant objects to {variants_file} ...", end="")
+        variants_list = []
+        for _, variant in all_variants.items():
+            variants_list.append(variant)
+        with open(variants_file, 'wb') as f:
+            pickle.dump(variants_list, f)
+        print("Done.")
 
 
 if __name__ == "__main__":
