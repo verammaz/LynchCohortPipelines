@@ -2,7 +2,7 @@
 
 ##############################################
 #specify file path for sites_of_variation.vcf 
-SITES_OF_VARIATION="ref_b37/dbsnp_138.b37.vcf"  #(this file compatible with grch37/b37 assembly)
+SITES_OF_VARIATION=
 ##############################################
 
 # Function to print progress with timestamp
