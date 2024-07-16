@@ -18,11 +18,12 @@ Optional post-processing:
 ## Reference File(s):
 
 Recommended directory structure for reference files:
-
-.Reference/
+```bash
+Reference/
     ├── genome.fasta
     ├── genome.fasta.{amb, ann, btw, fai, pac, sa}  #Output of bwa-index 
-    ├── sites_of_variation.vcf 
+    ├── sites_of_variation.vcf
+```
 
 
 ## Running on Minerva (HPC cluster):
@@ -52,7 +53,7 @@ Required arguments:
 -o          Output files prefix
 ```
 
-*Note:* current version assumes all reads in fastq files come from same sample and are run on same Illumina sequencing lane, and uses this to set the @RG tag in the BAM files. Read about the [@RG tag](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups). 
+*Note:* current version assumes all reads in fastq files come from same sample and are run on same Illumina sequencing lane, and uses this to set the @RG tag in the BAM files. Read about the @RG tag [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups). 
 
 Optional arguments:
 
