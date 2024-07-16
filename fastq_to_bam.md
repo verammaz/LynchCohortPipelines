@@ -15,6 +15,16 @@ Optional post-processing:
     - *Note:* vcf file with sites of variation required for this step. Specify path to this file in top of script in the 'SITES_OF_VARIATION' variable.
 4. [GATK ApplyBQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360037055712-ApplyBQSR)
 
+## Reference File(s):
+
+Recommended directory structure for reference files:
+
+.Reference/
+    ├── genome.fasta
+    ├── genome.fasta.{amb, ann, btw, fai, pac, sa}  #Output of bwa-index 
+    ├── sites_of_variation.vcf 
+
+
 ## Running on Minerva (HPC cluster):
 
 All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome, run
@@ -68,7 +78,8 @@ Submit to LSF job scheduler with the following header:
 #BSUB -n 8
 #BSUB -M 32000 
 #BSUB -R span[hosts=1]
-#BSUB -W HH:MM
+#BSUB -R rusage[mem=4000]
+#BSUB -W 07:00
 #BSUB -o fastq2bam_%J.out
 #BSUB -e fastq2bam_%J.err
 ```

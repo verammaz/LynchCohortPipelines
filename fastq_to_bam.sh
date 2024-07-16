@@ -11,7 +11,7 @@ print_progress() {
 }
 
 # Load required modules
-module purge
+module --force purge
 print_progress "Loading required modules..."
 module load samtools >/dev/null 2>&1
 module load bwa >/dev/null 2>&1
@@ -143,6 +143,7 @@ set -o pipefail
 
 if [ $INDEX -eq 1 ]; then
 # As indexing reference takes time and is only required once per reference, double check that indexing step is required:)
+    # Checking for index file in same directory as provided reference fasta file
     if [ ! -f "$REF_FASTA.amb" ] || \
            [ ! -f "$REF_FASTA.ann" ] || \
            [ ! -f "$REF_FASTA.bwt" ] || \
