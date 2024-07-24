@@ -46,7 +46,7 @@ Required modules:
 - [bwa](https://sourceforge.net/projects/bio-bwa/files/)
 - [samtools](https://github.com/samtools/samtools)
 - java (version 1.8)
-- [picard](https://broadinstitute.github.io/picard/)
+- [picard v2.2.4](https://broadinstitute.github.io/picard/)
 - [gatk v3.6](https://gatk.broadinstitute.org/hc/en-us)
 
 *Note:* required modules are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
@@ -92,5 +92,36 @@ Submit to LSF job scheduler with the following header:
 ```
 *Note:* Can reduce computational time (alignment is main bottleneck) by increasing number of cores and calling the script with `--threads n`, where `n` matches the number of cores requested for the job. All cores must be on the same compute node. 
 
+### Submitting jobs in bulk per patient
+
+There is a script to automatically submit fastq->bam jobs, executing the fastq_to_bam.sh script discussed earlier, in bulk per patient. This is useful when a single patient has more than one sample and you don't want to retype the bsub options and command. The sample processing will be run in parallel. 
+
+First, change the project name, and script path in the very top of `submit_fast2bam_for_patient.sh`. To run, use the following command:
+
+```bash
+submit_fast2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
+```
+
+#### Usage 
+
+Required arguments:
+```
+-p         Patient identifier.
+-s         CSV file with raw input data files configuration.
+```
+
+`samplesheet.csv` needs to have the columns patient, sample, fastq1, fastq2, status. This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted.
+
+
+
+
+Optional arguments:
+
+| Parameter                 | Description   |	
+| :----------------------------------------: | :------: |
+| `-v` | Enable verbose mode. |
+| `-h` | Display usage message. |
+| `--data_dir` |  Directory with Sample/ and Normal/ subdirectories that will have the .bam and .bai output files. By default, the script will take the parent directory of the samplesheet.csv file. 
+| `--patient_id` | Patient identifier, whose samples to process. By defualt, the script assumes that all samples in the samplesheet.csv file come from the same patient. 
 
 

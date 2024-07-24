@@ -15,15 +15,15 @@ set -e
 # Function to print usage
 usage() {
     cat << EOF
-Usage: $0 [OPTIONS] -p <patient_id> -s <samplesheet.csv>
+Usage: $0 [OPTIONS] -s <samplesheet.csv>
 
 Required Arguments:
-    -p <patient_id>                 Patient id
     -s <samplesheet.csv>            Configured input file
 
 Options:
     -h                              Display this message
     -v                              Enable verbode mode
+    --patient_id                    Patient id
     --data_dir                      Directory with patient raw data; Sample/ and Normal/ subdirectories with .bam files
 }
 
@@ -65,7 +65,7 @@ echo "patient,sample,fastq1,fastq2,bam,bai,status" >> "$TEMP_SAMPLESHEET"
 
 while IFS=$',' read -r patient sample fastq1 fastq2 status; do
     
-    if [[ $patient == $PATIENT ]]; then
+    if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
 
         job_name="fastq_to_bam_$sample"
         mkdir -p $RAW_DIR/$sample
@@ -81,7 +81,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
                 -q premium \
                 -oo ${output_prefix}.out \
                 -eo ${output_prefix}.err \
-                ${script} -v -r ${fastq1},${fastq2} -o ${output_prefix} -p ${PATIENT} --threads ${cores} --post_process --step 3
+                ${script} -v -r ${fastq1},${fastq2} -o ${output_prefix} -p ${patient} --threads ${cores} --post_process --step 3
 
         # Overwrite bam and bai with new paths
         bam="${output_prefix}.bam"
