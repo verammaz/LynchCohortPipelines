@@ -2,21 +2,21 @@
 
 ######################### Change the following ! #############################
 # specify file path for reference fasta file
-REF_FASTA="/sc/arion/projects/FLAI/vera/References/ref_b37/human_g1k_v37_decoy.fasta"
+REF_FASTA="/path/to/human_g1k_v37_decoy.fasta"
 
 # specify file path for sites_of_variation.vcf 
-SITES_OF_VARIATION="/sc/arion/projects/FLAI/vera/References/dbsnp_138.b37.vcf"
+SITES_OF_VARIATION="/path/to/dbsnp_138.b37.vcf"
 
 # specify file paths for reference files for indel realignment
-INDELS_1="/sc/arion/projects/FLAI/vera/References/1000G_phase1.indels.b37.vcf"
-INDELS_2="/sc/arion/projects/FLAI/vera/References/Mills_and_1000G_gold_standard.indels.b37.vcf"
+INDELS_1="/path/to/1000G_phase1.indels.b37.vcf"
+INDELS_2="/path/to/Mills_and_1000G_gold_standard.indels.b37.vcf"
 
 # specify path to exome target intervals file
-EXOME_INTERVALS="/sc/arion/projects/FLAI/vera/References/Broad.human.exome.b37.interval_list"
+EXOME_INTERVALS="/path/to/Broad.human.exome.b37.interval_list"
 
 # specify temporary directory, and make sure it has enough disk space 
 # recommendation: use /sc/arion/scratch 
-TEMP_DIR="/sc/arion/scratch/mazeev01/temp"
+TEMP_DIR="/sc/arion/scratch/<username>/temp"
 
 ##############################################################################
 
@@ -37,11 +37,11 @@ Usage: $0 [options] -f <reference.fa> -r <read1.fastq,read2.fastq> -o <output_pr
 Required Arguments:
   -r <read1.fastq,read2.fastq>     Comma-separated list of two FASTQ files.
   -o <output_prefix>               Prefix for output files.
-  -p <patient_id>
 
 Options:
   -h                               Display this message.
   -v                               Enable verbose mode.
+  --patient                        Patient id.
   --index_ref                      Run bwa_index step.
   --keep_intermediate              Keep intermediate files.
   --post_process                   Carry out post processing of BAM file after alignment.
@@ -74,9 +74,9 @@ while [[ "$#" -gt 0 ]]; do
         --index_ref) INDEX=1 ;;
         --threads) THREADS="$2"; shift ;;
         --step) STEP="$2"; shift ;;
+        --patient) PATIENT="$2"; shift ;;
         -r) READS="$2"; shift ;;
         -o) OUTPUT_PREFIX="$2"; shift ;;
-        -p) PATIENT="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
@@ -238,10 +238,14 @@ if [ $STEP -eq 0 ]; then
     id=$(construct_read_group_id "$READS_1")
     # Construct read group sample name 
     sample=$(basename "$READS_1" | cut -d'_' -f1)
+    RG="@RG\tID:${id}\tSM:${PATIENT}_${sample}\tPL:ILLUMINA"
+    if [[ -z $PATIENT ]]; then  
+    RG="@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA"
+    fi
 
     print_progress "Aligning (bwa-mem) and sorting (samtools sort)"
     bwa mem -M -t $THREADS $REF_FASTA $READS_1 $READS_2 \
-            -R "@RG\tID:${id}\tSM:${PATIENT}_${sample}\tPL:ILLUMINA" $(get_verbosity_flag bwa) | samtools sort -T $TEMP_DIR "-@${THREADS}" - -o $RAW_BAM
+            -R $RG $(get_verbosity_flag bwa) | samtools sort -T $TEMP_DIR "-@${THREADS}" - -o $RAW_BAM
     wait
     STEP=1
 fi
@@ -273,17 +277,32 @@ if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
     if [ $STEP -eq 2 ]; then
         #Step 3a: GATK RealignerTargetCreator
         print_progress "Creating realigned targets (GATK RealignerTargetCreator)..."
-        java -jar $GATK_JAR \
-            -T RealignerTargetCreator \
-            -R $REF_FASTA \
-            -known $INDELS_1 \
-            -known $INDELS_2 \
-            -I $MARKDUP_BAM \
-            -o "${OUTPUT_PREFIX}.intervals"
-        
-        wait 
+
+        if [ -f "$EXOME_INTERVALS" ]; then
+
+            java -jar $GATK_JAR \
+                -T RealignerTargetCreator \
+                -R $REF_FASTA \
+                -L $EXOME_INTERVALS \
+                -ip 100 \
+                -known $INDELS_1 \
+                -known $INDELS_2 \
+                -I $MARKDUP_BAM \
+                -o "${OUTPUT_PREFIX}.intervals"
+            
+        else
+            java -jar $GATK_JAR \
+                -T RealignerTargetCreator \
+                -R $REF_FASTA \
+                -known $INDELS_1 \
+                -known $INDELS_2 \
+                -I $MARKDUP_BAM \
+                -o "${OUTPUT_PREFIX}.intervals"
+
+        fi
 
         #Step 3b: GATK IndelRealigner
+        print_progress "Performing local realignment around indels (GATK IndelRealigner)..."
         java -jar $GATK_JAR \
             -T IndelRealigner \
             -R $REF_FASTA \
@@ -305,27 +324,53 @@ if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
     if [ $STEP -eq 3 ]; then
         #Step 4a: GATK BaseRecalibrator
         print_progress "Recalibrating bases (GATK BaseRecalibrator)..."
-        java -jar $GATK_JAR \
-             -T BaseRecalibrator \
-             -L $EXOME_INTERVALS \
-             -ip 100 \
-             -I $REALIGNED_BAM \
-             -R $REF_FASTA \
-             -knownSites $SITES_OF_VARIATION \
-             -o $RECAL
-         wait  
 
-        # Step 4b: GATK PrintReads
-        print_progress "Applying base recalibaration (GATK PrintReads)..."
-        java -jar $GATK_JAR \
-             -T PrintReads \
-             -I $REALIGNED_BAM \
-             -L $EXOME_INTERVALS \
-             -ip 100 \
-             -BQSR $RECAL \
-             -R $REF_FASTA \
-             -o $FINAL_BAM
+        if [ -f "$EXOME_INTERVALS" ]; then
+            java -jar $GATK_JAR \
+                -T BaseRecalibrator \
+                -L $EXOME_INTERVALS \
+                -ip 100 \
+                -I $REALIGNED_BAM \
+                -R $REF_FASTA \
+                -knownSites $SITES_OF_VARIATION \
+                -o $RECAL
+            wait  
+
+            # Step 4b: GATK PrintReads
+            print_progress "Applying base recalibaration (GATK PrintReads)..."
+            java -jar $GATK_JAR \
+                -T PrintReads \
+                -I $REALIGNED_BAM \
+                -L $EXOME_INTERVALS \
+                -ip 100 \
+                -BQSR $RECAL \
+                -R $REF_FASTA \
+                -o $FINAL_BAM
+        
+        else
+            java -jar $GATK_JAR \
+                -T BaseRecalibrator \
+                -L $EXOME_INTERVALS \
+                -ip 100 \
+                -I $REALIGNED_BAM \
+                -R $REF_FASTA \
+                -knownSites $SITES_OF_VARIATION \
+                -o $RECAL
+            wait  
+
+            # Step 4b: GATK PrintReads
+            print_progress "Applying base recalibaration (GATK PrintReads)..."
+            java -jar $GATK_JAR \
+                -T PrintReads \
+                -I $REALIGNED_BAM \
+                -L $EXOME_INTERVALS \
+                -ip 100 \
+                -BQSR $RECAL \
+                -R $REF_FASTA \
+                -o $FINAL_BAM
+        fi
     fi
+
         
 else
     FINAL_BAM=$MARKDUP_BAM
