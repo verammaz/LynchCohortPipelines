@@ -3,15 +3,14 @@ This script runs a FASTQ --> BAM pipeline by calling a sequence mapper / aligner
 
 ## Pipeline Overview:
 
-[Burrows-Wheeler Alignment tool](https://bio-bwa.sourceforge.net/bwa.shtml)
-
-0. Indexing the reference (bwa_index)
-1. Alignment (bwa_mem) and conversion to BAM format (samtools)
+0. [BWA Index](https://bio-bwa.sourceforge.net/bwa.shtml)
+1. [BWA MEM](https://bio-bwa.sourceforge.net/bwa.shtml) and conversion to BAM format with [samtools](https://www.htslib.org/)
 2. [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard)
 
 Optional post-processing:
 
 3. [GATK IndelRealigner](https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Perform_local_realignment_around_indels.md)
+    - Note: vcf files with known indel sites required for this step. Specify path to these files in top of script in the 'INDELS_1,2' variables.
     - *Note*: for WES data, can speed up this step by using a exome_targets.interval_list file
 4. [GATK BaseRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360036898312-BaseRecalibrator)
     - *Note:* vcf file with sites of variation required for this step. Specify path to this file in top of script in the 'SITES_OF_VARIATION' variable.
@@ -25,14 +24,16 @@ Reference/
     ├── genome.fasta
     ├── genome.fasta.{amb, ann, btw, fai, pac, sa}  #Output of bwa-index 
     ├── sites_of_variation.vcf
-    ├── known_indels.vcf
+    ├── known_indels1.vcf
+    ├── known_indels2.vcf
     ├── exome_targets.interval_list
 ```
 
 
-## Running on Minerva (HPC cluster):
+## Running on Minerva:
 
 First, specify file paths in the top of the script! 
+
 All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome, run
 
 ```bash
@@ -65,10 +66,10 @@ Optional arguments:
 | :----------------------------------------: | :------: |
 | `-v` | Enable verbose mode. |
 | `-h` | Display usage message. |
-| `--patient` |  Patient id for sample data, required for downstream compatability during nextflow varianrt calling. Defualt none.
+| `--patient` |  Patient id for sample data, required for downstream compatability during nextflow variant calling. Default none.
 | `--index_ref` | Flag for running the indexing step for reference.
 | `--keep_intermediate` | Flag to keep intermediate files produced during pipeline execution.
-| `--post_process` | Flag to carry out post processing of initial alignment bam file (mark duplicates, indel local realignment, base recalibration).
+| `--post_process` | Flag to carry out post processing of initial alignment bam file (indel local realignment, base recalibration).
 | `--threads` | Number of threads to use. Default 8. |
 | `--step` | Starting step for pipeline execution. Default 0. Options are 0=alignment, 1=markdup, 2=indelrealign, 3=baserecal. |
 
@@ -86,15 +87,15 @@ Submit to LSF job scheduler with the following header:
 #BSUB -M 32000 
 #BSUB -R span[hosts=1]
 #BSUB -R rusage[mem=4000]
-#BSUB -W 20:00
+#BSUB -W 30:00
 #BSUB -o fastq2bam_%J.out
 #BSUB -e fastq2bam_%J.err
 ```
-*Note:* Can reduce computational time (alignment is main bottleneck) by increasing number of cores and calling the script with `--threads n`, where `n` matches the number of cores requested for the job. All cores must be on the same compute node. 
+*Note:* Can reduce computational time by speeding up alignment. To do this, increase number of cores and call the script with `--threads n`, where `n` matches the number of cores requested for the job. All cores must be on the same compute node. 
 
 ### Submitting jobs in bulk per patient
 
-There is a script to automatically submit fastq->bam jobs, executing the fastq_to_bam.sh script discussed earlier, in bulk per patient. This is useful when a single patient has more than one sample and you don't want to retype the bsub options and command. The sample processing will be run in parallel. 
+There is a script to automatically submit fastq->bam jobs, executing the fastq_to_bam.sh script discussed earlier, in bulk *per patient.* This is useful when a single patient has more than one sample and you don't want to retype the bsub options and command. The sample processing will be run in parallel. 
 
 First, change the project name, and script path in the very top of `submit_fast2bam_for_patient.sh`. To run, use the following command:
 
@@ -110,7 +111,13 @@ Required arguments:
 -s         CSV file with raw input data files configuration.
 ```
 
-`samplesheet.csv` needs to have the columns patient, sample, fastq1, fastq2, status. This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted.
+`samplesheet.csv` needs to have the columns patient, sample, fastq1, fastq2, status (0=Normal, 1=Tumor). This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted. Note, that downstream analysis scripts assume normal sample is named 'Normal', so ensure this is the case for your data. Example:
+
+```csv
+patient,sample,fastq1,fastq2,status
+Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0
+Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1
+```
 
 
 
@@ -122,6 +129,6 @@ Optional arguments:
 | `-v` | Enable verbose mode. |
 | `-h` | Display usage message. |
 | `--data_dir` |  Directory with Sample/ and Normal/ subdirectories that will have the .bam and .bai output files. By default, the script will take the parent directory of the samplesheet.csv file. 
-| `--patient_id` | Patient identifier, whose samples to process. By defualt, the script assumes that all samples in the samplesheet.csv file come from the same patient. 
+| `--patient_id` | Patient identifier, whose samples to process. By defualt, the script assumes that all samples in the samplesheet.csv file come from the *same patient*. 
 
 
