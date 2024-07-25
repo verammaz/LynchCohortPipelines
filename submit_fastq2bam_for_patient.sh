@@ -3,9 +3,11 @@
 ####################### Change the following ! #########################
 #specify project
 project='acc_FLAI'
+#specify queue
+queue=premium
 #specify cores
 cores=24
-#specify path to main fastq_to_bam script
+#specify path to main fastq_to_bam.sh script
 script='/hpc/users/mazeev01/matt_lynch/scripts/fastq_to_bam.sh'
 ########################################################################
 
@@ -77,11 +79,11 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
                 -M 32000 \
                 -R span[hosts=1] \
                 -R "rusage[mem=4000]" \
-                -W 12:00 \
-                -q premium \
+                -W 30:00 \
+                -q ${queue} \
                 -oo ${output_prefix}.out \
                 -eo ${output_prefix}.err \
-                ${script} -v -r ${fastq1},${fastq2} -o ${output_prefix} -p ${patient} --threads ${cores} --post_process --step 3
+                ${script} -v -r ${fastq1},${fastq2} -o ${output_prefix} -p ${patient} --threads ${cores} --post_process
 
         # Overwrite bam and bai with new paths
         bam="${output_prefix}.bam"

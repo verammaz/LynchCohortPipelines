@@ -191,9 +191,6 @@ if [ $POST_PROCESS -eq 1 ]; then
 fi
 
 
-# TODO: add more error checking before pipeline start (maybe make a separate script for that)
-
-
 # Function to get verbosity flag for a given tool
 get_verbosity_flag() {
     local tool_name=$1
@@ -202,6 +199,7 @@ get_verbosity_flag() {
             bwa) echo "-v 0" ;;
             markdup) echo "VERBOSITY=ERROR" ;;
             baserecal) echo "--verbosity ERROR" ;;
+            gatk) echo "--logging_level ERROR" ;;
             *) echo "" ;;
         esac
     else
@@ -246,7 +244,7 @@ if [ $STEP -eq 0 ]; then
     print_progress "Aligning (bwa-mem) and sorting (samtools sort)"
     bwa mem -M -t $THREADS $REF_FASTA $READS_1 $READS_2 \
             -R $RG $(get_verbosity_flag bwa) | samtools sort -T $TEMP_DIR "-@${THREADS}" - -o $RAW_BAM
-    wait
+
     STEP=1
 fi
 
@@ -263,44 +261,37 @@ if [ $STEP -eq 1 ]; then
             M=$MARKDUP_TXT \
             CREATE_INDEX=true \
             $(get_verbosity_flag markdup)
-        wait
+
         STEP=2
 fi
 
 if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
+
+    POST_PROCESS=1
+
+    if [ -f "$EXOME_INTERVALS" ]; then
+        INTERVALS_OPTION="-L $EXOME_INTERVALS -ip 100"
+    else
+        INTERVALS_OPTION=""
+    fi
 
     if [ $STEP -eq 2 ] && [ ! -f $MARKDUP_BAM ]; then
         echo "Error: Indel realignment step requires marked dup bam file. ${MARKDUP_BAM} not found."
         exit 1
     fi
 
-    if [ $STEP -eq 2 ]; then
         #Step 3a: GATK RealignerTargetCreator
         print_progress "Creating realigned targets (GATK RealignerTargetCreator)..."
-
-        if [ -f "$EXOME_INTERVALS" ]; then
-
-            java -jar $GATK_JAR \
-                -T RealignerTargetCreator \
-                -R $REF_FASTA \
-                -L $EXOME_INTERVALS \
-                -ip 100 \
-                -known $INDELS_1 \
-                -known $INDELS_2 \
-                -I $MARKDUP_BAM \
-                -o "${OUTPUT_PREFIX}.intervals"
+        java -jar $GATK_JAR \
+            -T RealignerTargetCreator \
+            -R $REF_FASTA $INTERVALS_OPTION \
+            -known $INDELS_1 \
+            -known $INDELS_2 \
+            -I $MARKDUP_BAM \
+            -o "${OUTPUT_PREFIX}.intervals" \
+            $(get_verbosity_flag gatk)
             
-        else
-            java -jar $GATK_JAR \
-                -T RealignerTargetCreator \
-                -R $REF_FASTA \
-                -known $INDELS_1 \
-                -known $INDELS_2 \
-                -I $MARKDUP_BAM \
-                -o "${OUTPUT_PREFIX}.intervals"
-
-        fi
-
+       
         #Step 3b: GATK IndelRealigner
         print_progress "Performing local realignment around indels (GATK IndelRealigner)..."
         java -jar $GATK_JAR \
@@ -310,7 +301,8 @@ if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
             -known $INDELS_1 \
             -known $INDELS_2 \
             -targetIntervals "${OUTPUT_PREFIX}.intervals" \
-            -o $REALIGNED_BAM
+            -o $REALIGNED_BAM \
+            $(get_verbosity_flag gatk)
 
         STEP=3
     fi
@@ -322,53 +314,26 @@ if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
     fi
 
     if [ $STEP -eq 3 ]; then
+
         #Step 4a: GATK BaseRecalibrator
         print_progress "Recalibrating bases (GATK BaseRecalibrator)..."
+        java -jar $GATK_JAR \
+             -T BaseRecalibrator $INTERVALS_OPTION \
+             -I $REALIGNED_BAM \
+             -R $REF_FASTA \
+             -knownSites $SITES_OF_VARIATION \
+             -o $RECAL \
+             $(get_verbosity_flag gatk)
 
-        if [ -f "$EXOME_INTERVALS" ]; then
-            java -jar $GATK_JAR \
-                -T BaseRecalibrator \
-                -L $EXOME_INTERVALS \
-                -ip 100 \
-                -I $REALIGNED_BAM \
-                -R $REF_FASTA \
-                -knownSites $SITES_OF_VARIATION \
-                -o $RECAL
-            wait  
-
-            # Step 4b: GATK PrintReads
-            print_progress "Applying base recalibaration (GATK PrintReads)..."
-            java -jar $GATK_JAR \
-                -T PrintReads \
-                -I $REALIGNED_BAM \
-                -L $EXOME_INTERVALS \
-                -ip 100 \
-                -BQSR $RECAL \
-                -R $REF_FASTA \
-                -o $FINAL_BAM
-        
-        else
-            java -jar $GATK_JAR \
-                -T BaseRecalibrator \
-                -L $EXOME_INTERVALS \
-                -ip 100 \
-                -I $REALIGNED_BAM \
-                -R $REF_FASTA \
-                -knownSites $SITES_OF_VARIATION \
-                -o $RECAL
-            wait  
-
-            # Step 4b: GATK PrintReads
-            print_progress "Applying base recalibaration (GATK PrintReads)..."
-            java -jar $GATK_JAR \
-                -T PrintReads \
-                -I $REALIGNED_BAM \
-                -L $EXOME_INTERVALS \
-                -ip 100 \
-                -BQSR $RECAL \
-                -R $REF_FASTA \
-                -o $FINAL_BAM
-        fi
+        # Step 4b: GATK PrintReads
+        print_progress "Applying base recalibaration (GATK PrintReads)..."
+        java -jar $GATK_JAR \
+             -T PrintReads $INTERVALS_OPTION \
+             -I $REALIGNED_BAM \
+             -BQSR $RECAL \
+             -R $REF_FASTA \
+             -o $FINAL_BAM \
+             $(get_verbosity_flag gatk)
     fi
 
         
@@ -387,8 +352,12 @@ if [ $KEEP_INTERMEDIATE -eq 0 ]; then
     print_progress "Removing intermediate files..."
     rm -f $RAW_BAM
     if [ $POST_PROCESS -eq 1 ]; then
-        rm -f $MARKDUP_BAM "${MARKDUP_BAM}.bai" "${MARKDUP_BAM}.sbi" "${MARKDUP_BAM%.*}.bai" "${OUTPUT_PREFIX}.intervals" "${REALIGNED_BAM}" "${RECAL}"
-    fi
+        rm -f $MARKDUP_BAM 
+        rm -f "${MARKDUP_BAM%.*}.bai" 
+        rm -f "${OUTPUT_PREFIX}.intervals" 
+        rm -f "${REALIGNED_BAM}" 
+        rm -f "${REALIGNED_BAM%.*}.bai" 
+        rm -f "${RECAL}"
 fi
 
 exit 0
