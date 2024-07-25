@@ -62,7 +62,7 @@ chmod +x $script
 # Create a temporary file to store the modified sample sheet
 TEMP_SAMPLESHEET=$(mktemp)
 
-echo "patient,sample,fastq1,fastq2,bam,bai,status" >> "$TEMP_SAMPLESHEET"
+echo "patient,sample,fastq1,fastq2,status,bam,bai" >> "$TEMP_SAMPLESHEET"
 
 
 while IFS=$',' read -r patient sample fastq1 fastq2 status; do
@@ -90,7 +90,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
         bai="${output_prefix}.bai"
 
         # Write the updated line to the temporary file
-        echo "$patient,$sample,$fastq1,$fastq2,$bam,$bai,$status" >> "$TEMP_SAMPLESHEET"
+        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai" >> "$TEMP_SAMPLESHEET"
     
     fi
 
