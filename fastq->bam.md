@@ -1,5 +1,5 @@
-# fastq_to_bam.sh
-This script runs a FASTQ --> BAM pipeline by calling a sequence mapper / aligner and then carrying out optional post processing.
+# FASTQ to BAM
+> This pipeline calls a sequence mapper / aligner and then carries out optional post processing.
 
 ## Pipeline Overview:
 
@@ -18,8 +18,6 @@ Optional post-processing:
 
 
 ## Running on Minerva:
-
-### Reference Index
 
 ### Singularity Container 
 
@@ -51,19 +49,21 @@ cd LynchCohortPipelines
 source ./config.sh
 singularity exec $CONTAINER_FASTQ2BAM fastq_to_bam.sh -r <fastq1,fastq2> -o <output_prefix> --index_ref
 ```
-On subsequent execution using the same reference, run without the `--index_ref` option. *IMPORTANT:* Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
+On subsequent execution using the same reference, run without the `--index_ref` option. 
 
-Need at least the following set in the [config](config.sh): REF_FASTA, SITES_OF_VARIATION (optional), INDELS_{1,2} (optional), EXOME_INTERVALS (optional) 
+> *Important*: Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
 
-Required arguments:
+> Need at least the following set in the [config](config.sh): `REF_FASTA`, `SITES_OF_VARIATION` (optional), `INDELS_{1,2}` (optional), `EXOME_INTERVALS` (optional) 
+
+#### Required arguments:
 ```
 -r          Two read fastq files, separated by a comma (no space)
 -o          Output files prefix
 ```
 
-*Note:* current version assumes all reads in fastq files come from same sample and are run on same Illumina sequencing lane, and uses this to set the @RG tag in the BAM files. Read about the @RG tag [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups). 
+> *Note:* current version assumes all reads in fastq files come from same sample and are run on same Illumina sequencing lane, and uses this to set the @RG tag in the BAM files. Read about the @RG tag [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups). 
 
-Optional arguments:
+#### Optional arguments:
 
 | Parameter                 | Description   |	
 | :----------------------------------------: | :------: |
@@ -100,12 +100,13 @@ Submit to LSF job scheduler with the following header:
 
 There is a script to automatically submit fastq->bam jobs, executing the `fastq_to_bam.sh` script, in bulk *per patient.* This is useful when a single patient has more than one sample and you don't want to retype the bsub options and command. The sample processing will be run in parallel. 
 
-Before running, make sure you have all reference index files (i.e. `genome.fasta.{amb,ann,bwt,fai,pac,sai}`).
-If you don't, run the following:
+#### Usage 
+
+Before running, make sure you have all reference index files (i.e. `genome.fasta.{amb,ann,bwt,fai,pac,sai}`). Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent! If you don't have reference index files, run the following:
 
 ```bash
 module load bwa/0.7.15
-cd path/to/LynchCohortPipelines
+cd LynchCohortPipelines
 source ./config.sh
 bwa index -a bwtsw $REF_FASTA
 ```
@@ -113,20 +114,18 @@ bwa index -a bwtsw $REF_FASTA
 Now, you can run:
 
 ```bash
-submit_fast2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
+submit_fastq2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
 ```
 
 Make sure HOME_DIR is set in the [config](config.sh) file. The script will create `$HOME_DIR/Raw/Patient` directory if it doesn't exist, and place all output .bam and .bai files in 
 Sample/ and Normal/ subdirectories.
 
-#### Usage 
-
-Required arguments:
+#### Required arguments:
 ```
 -p         Patient identifier.
 -s         CSV file with raw input data files configuration.
 ```
-
+#### Input .csv file
 `samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor). This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted. Note, that downstream analysis scripts assume normal sample is named 'Normal', so ensure this is the case for your data. Example:
 
 ```csv
@@ -134,6 +133,6 @@ patient,sample,fastq_1,fastq_2,status
 Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0
 Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1
 ```
-*Important*: Current version assumes all samples are run on single lane!
+> *Important*: Current version assumes all samples are run on single lane!
 
 
