@@ -114,7 +114,8 @@ bwa index -a bwtsw $REF_FASTA
 Now, you can run:
 
 ```bash
-submit_fastq2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
+cd LynchCohortPipelines
+./submit_fastq2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
 ```
 
 Make sure HOME_DIR is set in the [config](config.sh) file. The script will create `$HOME_DIR/Raw/Patient` directory if it doesn't exist, and place all output .bam and .bai files in 
