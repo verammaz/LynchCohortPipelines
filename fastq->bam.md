@@ -21,13 +21,6 @@ Optional post-processing:
 
 ### Reference Index
 
-All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome or if you don't have `genome.fasta.{amb, ann, btw, fai, pac, sa}` files, run
-
-```bash
-path/to/file/fastq_to_bam.sh -r <fastq1,fastq2> -o <output_prefix> --index_ref
-```
-On subsequent execution using the same reference, run without the `--index_ref` option. *IMPORTANT:* Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
-
 ### Singularity Container 
 
 Modules:
@@ -45,9 +38,20 @@ singularity pull --arch amd64 library://verammaz/bioinformatics/fastq2bam:0.3
 ```
 Set the path to this image file in the `CONTAINER_FASTQ2BAM` variable in the [config](config.sh) file.
 
+
 ### Single sample pipeline
 
 #### Usage
+
+All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome or if you don't have `genome.fasta.{amb, ann, btw, fai, pac, sa}` files, run
+
+```bash
+module singularity/3.6.4
+cd LynchCohortPipelines
+source ./config.sh
+singularity exec $CONTAINER_FASTQ2BAM fastq_to_bam.sh -r <fastq1,fastq2> -o <output_prefix> --index_ref
+```
+On subsequent execution using the same reference, run without the `--index_ref` option. *IMPORTANT:* Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
 
 Need at least the following set in the [config](config.sh): REF_FASTA, SITES_OF_VARIATION (optional), INDELS_{1,2} (optional), EXOME_INTERVALS (optional) 
 
