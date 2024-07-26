@@ -4,7 +4,7 @@ Specify paths and global variables in the [config](config.sh) file!
 
 # Home Directory Structure
 
-   hdir/
+    .
     ├── ...
     ├── Raw/                                  # Directory with patient raw data subdirectories
     │   ├── Patient/                          # Patient directory with sample subdirectories
@@ -30,7 +30,7 @@ Specify paths and global variables in the [config](config.sh) file!
     │   │    └── ...
     │   └── ... 
     ├── PairTrees/                             # Directory for pairtree outputs                 
-    │   ├── Patient/  
+    │   ├── Patient/                          
     │   │    ├── <Patient>.ssm   
     │   │    ├── <Patient>.params.json
     │   │    ├── <Patient>.plottree
