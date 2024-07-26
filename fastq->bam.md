@@ -10,34 +10,46 @@ This script runs a FASTQ --> BAM pipeline by calling a sequence mapper / aligner
 Optional post-processing:
 
 3. [GATK IndelRealigner](https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Perform_local_realignment_around_indels.md)
-    - Note: vcf files with known indel sites required for this step. Specify path to these files in top of script in the `INDELS_{1,2}` variables.
-    - *Note*: for WES data, can speed up this step by using a exome_targets.interval_list file (can specify path to file in top of script in `EXOME_INTERVALS` variable).
+    - Note: vcf files with known indel sites required for this step.
+    - *Note*: for WES data, can speed up this step by using a exome_targets.interval_list file.
 4. [GATK BaseRecalibrator](https://gatk.broadinstitute.org/hc/en-us/articles/360036898312-BaseRecalibrator)
-    - *Note:* vcf file with sites of variation required for this step. Specify path to this file in top of script in the `SITES_OF_VARIATION` variable.
+    - *Note:* vcf file with sites of variation required for this step.
     - *Note*: for WES data, can speed up this step by using a exome_targets.interval_list file.
 
 
 ## Running on Minerva:
 
-First, specify file paths in the top of the script! Also, specify a temporary directory with sufficient storage.
+### Reference Index
 
-All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome or if you don't have ` genome.fasta.{amb, ann, btw, fai, pac, sa}` files, run
+All NGS aligners need the reference sequences to be indexed. On the very first use of the pipeline with a reference genome or if you don't have `genome.fasta.{amb, ann, btw, fai, pac, sa}` files, run
 
 ```bash
 path/to/file/fastq_to_bam.sh -r <fastq1,fastq2> -o <output_prefix> --index_ref
 ```
-On  subsequent execution using the same reference, run without the `--index_ref` option. *IMPORTANT:* Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
+On subsequent execution using the same reference, run without the `--index_ref` option. *IMPORTANT:* Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
 
-### Usage 
+### Singularity Container 
 
-Required modules:
-- bwa
-- samtools
+Modules:
+- bwa v0.7.15
+- samtools v1.17
 - java v1.8
 - picard v2.2.4
-- gatk v3.6
+- gatk v3.8
 
-*Note:* required modules are already available on Minerva. This script loads them in, so no need to load any software modules before running:)
+```bash
+module load singularity/3.6.4
+module load proxies 
+cd ~/
+singularity pull --arch amd64 library://verammaz/bioinformatics/fastq2bam:0.3
+```
+Set the path to this image file in the `CONTAINER_FASTQ2BAM` variable in the [config](config.sh) file.
+
+### Single sample pipeline
+
+#### Usage
+
+Need at least the following set in the [config](config.sh): REF_FASTA, SITES_OF_VARIATION (optional), INDELS_{1,2} (optional), EXOME_INTERVALS (optional) 
 
 Required arguments:
 ```
@@ -60,7 +72,7 @@ Optional arguments:
 | `--threads` | Number of threads to use. Default 8. |
 | `--step` | Starting step for pipeline execution. Default 0. Options are 0=alignment, 1=markdup, 2=indelrealign, 3=baserecal. |
 
-### Submitting a Job (bsub)
+#### Submitting a Job (bsub)
 
 Submit to LSF job scheduler with the following header:
 
@@ -80,15 +92,28 @@ Submit to LSF job scheduler with the following header:
 ```
 *Note:* Can reduce computational time by speeding up alignment. To do this, increase number of cores and call the script with `--threads n`, where `n` matches the number of cores requested for the job. All cores must be on the same compute node. 
 
-### Submitting jobs in bulk per patient
+### Patient Bulk Pipeline
 
-There is a script to automatically submit fastq->bam jobs, executing the `fastq_to_bam.sh` script discussed earlier, in bulk *per patient.* This is useful when a single patient has more than one sample and you don't want to retype the bsub options and command. The sample processing will be run in parallel. 
+There is a script to automatically submit fastq->bam jobs, executing the `fastq_to_bam.sh` script, in bulk *per patient.* This is useful when a single patient has more than one sample and you don't want to retype the bsub options and command. The sample processing will be run in parallel. 
 
-First, change the project name, and script path in the very top of [submit_fastq2bam_for_patient.sh](submit_fastq2bam_for_patient.sh). To run, use the following command:
+Before running, make sure you have all reference index files (i.e. `genome.fasta.{amb,ann,bwt,fai,pac,sai}`).
+If you don't, run the following:
+
+```bash
+module load bwa/0.7.15
+cd path/to/LynchCohortPipelines
+source ./config.sh
+bwa index -a bwtsw $REF_FASTA
+```
+
+Now, you can run:
 
 ```bash
 submit_fast2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
 ```
+
+Make sure HOME_DIR is set in the [config](config.sh) file. The script will create `$HOME_DIR/Raw/Patient` directory if it doesn't exist, and place all output .bam and .bai files in 
+Sample/ and Normal/ subdirectories.
 
 #### Usage 
 
@@ -98,20 +123,13 @@ Required arguments:
 -s         CSV file with raw input data files configuration.
 ```
 
-`samplesheet.csv` needs to have the columns patient, sample, fastq1, fastq2, status (0=Normal, 1=Tumor). This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted. Note, that downstream analysis scripts assume normal sample is named 'Normal', so ensure this is the case for your data. Example:
+`samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor). This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted. Note, that downstream analysis scripts assume normal sample is named 'Normal', so ensure this is the case for your data. Example:
 
 ```csv
-patient,sample,fastq1,fastq2,status
+patient,sample,fastq_1,fastq_2,status
 Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0
 Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1
 ```
-
-Optional arguments:
-
-| Parameter                 | Description   |	
-| :----------------------------------------: | :------: |
-| `-v` | Enable verbose mode. |
-| `-h` | Display usage message. |
-| `--data_dir` |  Directory with Sample/ and Normal/ subdirectories that will have the .bam and .bai output files. By default, the script will take the parent directory of the samplesheet.csv file. 
+*Important*: Current version assumes all samples are run on single lane!
 
 

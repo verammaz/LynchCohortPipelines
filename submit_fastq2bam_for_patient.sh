@@ -1,15 +1,7 @@
 #!/bin/bash
 
-####################### Change the following ! #########################
-#specify project
-project='acc_FLAI'
-#specify queue
-queue=premium
-#specify cores
-cores=24
-#specify path to main fastq_to_bam.sh script
-script='/hpc/users/mazeev01/matt_lynch/scripts/fastq_to_bam.sh'
-########################################################################
+# Get access to global variables
+source $LYNCH/config.sh
 
 # Exit immediately if command exits with non-zero status
 set -e
@@ -21,12 +13,12 @@ Usage: $0 [OPTIONS] -s <samplesheet.csv>
 
 Required Arguments:
     -s <samplesheet.csv>            Configured input file
+    -p <patient_id>                 Patient identifier
 
 Options:
     -h                              Display this message
     -v                              Enable verbode mode
-    --patient_id                    Patient id
-    --data_dir                      Directory with patient raw data; Sample/ and Normal/ subdirectories with .bam files
+    --data_dir                      Directory for patient raw data; Sample/ and Normal/ subdirectories with .bam files
 }
 
 EOF
@@ -35,7 +27,6 @@ EOF
 
 
 PATIENT=
-RAW_DIR=
 REFERENCE=
 SAMPLESHEET=
 VERBOSE=0
@@ -47,31 +38,32 @@ while [[ "$#" -gt 0 ]]; do
         -v) VERBOSE=1 ;;
         -p) PATIENT="$2"; shift ;;
         -s) SAMPLESHEET="$2"; shift ;;
-        --data_dir) RAW_DIR="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
 done
 
-if [ -z "$RAW_DIR" ]; then
-   RAW_DIR=$(dirname "$(realpath "$SAMPLESHEET")") # assume samplesheet in Raw/Patient directory
-fi
+RAW_DIR="$HOME_DIR/Raw/$PATIENT"
 
+script="$LYNCH/fastq_to_bam.sh"
 chmod +x $script
 
 # Create a temporary file to store the modified sample sheet
 TEMP_SAMPLESHEET=$(mktemp)
 
-echo "patient,sample,fastq1,fastq2,status,bam,bai" >> "$TEMP_SAMPLESHEET"
+echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$TEMP_SAMPLESHEET"
 
+
+module purge
+module load singularity/3.6.4
 
 while IFS=$',' read -r patient sample fastq1 fastq2 status; do
     
     if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
 
         job_name="fastq_to_bam_$sample"
-        mkdir -p $RAW_DIR/$sample
-        output_prefix=$RAW_DIR/$sample/$sample
+        create_directory "$RAW_DIR/$sample"
+        output_prefix="$RAW_DIR/$sample/$sample"
 
         bsub -J ${job_name} \
                 -P ${project} \
@@ -79,11 +71,12 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
                 -M 32000 \
                 -R span[hosts=1] \
                 -R "rusage[mem=4000]" \
-                -W 30:00 \
+                -W 40:00 \
                 -q ${queue} \
-                -oo ${output_prefix}.out \
-                -eo ${output_prefix}.err \
-                ${script} -v -r ${fastq1},${fastq2} -o ${output_prefix} -p ${patient} --threads ${cores} --post_process
+                -oo "${LOG_DIR}/${job_name}.out" \
+                -eo "${LOG_DIR}/${job_name}.err"r \
+                singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} -p ${PATIENT} --threads ${cores} --post_process
+
 
         # Overwrite bam and bai with new paths
         bam="${output_prefix}.bam"

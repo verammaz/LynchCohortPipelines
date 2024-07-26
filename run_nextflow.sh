@@ -5,8 +5,10 @@
 NEXTFLOW='/hpc/users/mazeev01/nextflow'
 # pon file for mutect variant filtering
 PON='/sc/arion/projects/FLAI/vera/References/Mutect2-exome-panel.vcf.gz'
+# specify reference genome
+GENOME="GATK.GRCh37"
 # output directory
-OUT_DIR='/sc/arion/work/mazeev01/variant_call'
+OUT_DIR='/sc/arion/scratch/mazeev01/variant_call'
 ######################################################################################
 
 # Function to print progress with timestamp
@@ -45,12 +47,12 @@ else
     echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$SAMPLE_SAMPLESHEET"
 fi
 
-while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status; do
+while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
     
     if [[[ $patient == $PATIENT ]] && [[ $sample == $SAMPLE ]]] ||  [[[ $patient == $PATIENT ]] && [[ "$sample" == "Normal" ]]]; then
 
         if [[ $STEP -eq 0 ]]; then
-             echo "$patient,$sample,$fastq1,$fastq2,$status" >> "$SAMPLE_SAMPLESHEET"
+            echo "$patient,$sample,$fastq1,$fastq2,$status" >> "$SAMPLE_SAMPLESHEET"
         else
             echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai" >> "$SAMPLE_SAMPLESHEET"
         fi
@@ -85,7 +87,7 @@ $NEXTFLOW run nf-core/sarek \
             --tools strelka,mutect2 \
             --pon $PON \
             --only_paired_variant_calling \
-            --genome GATK.GRCh37 \
+            --genome $GENOME \
             --max_cpus 48 \
 
 print_progress "Variant calilng complete."
@@ -93,7 +95,7 @@ print_progress "Variant calilng complete."
 # Create a temporary file to store the modified sample sheet
 TEMP_SAMPLESHEET=$(mktemp)
 
-echo "patient,sample,fastq1,fastq2,status,bam,bai,vcf" >> "$TEMP_SAMPLESHEET"
+echo "patient,sample,fastq_1,fastq_2,status,bam,bai,vcf" >> "$TEMP_SAMPLESHEET"
 
 strelka_dir="${OUT_DIR}/variant_calling/strelka"
 mutect_dir="${OUT_DIR}/variant_calling/mutect2"

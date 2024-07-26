@@ -1,30 +1,7 @@
 #!/bin/bash
 
-######################### Change the following ! #############################
-# specify file path for reference fasta file
-REF_FASTA="/path/to/human_g1k_v37_decoy.fasta"
-
-# specify file path for sites_of_variation.vcf 
-SITES_OF_VARIATION="/path/to/dbsnp_138.b37.vcf"
-
-# specify file paths for reference files for indel realignment
-INDELS_1="/path/to/1000G_phase1.indels.b37.vcf"
-INDELS_2="/path/to/Mills_and_1000G_gold_standard.indels.b37.vcf"
-
-# specify path to exome target intervals file
-EXOME_INTERVALS="/path/to/Broad.human.exome.b37.interval_list"
-
-# specify temporary directory, and make sure it has enough disk space 
-# recommendation: use /sc/arion/scratch 
-TEMP_DIR="/sc/arion/scratch/<username>/temp"
-
-##############################################################################
-
-
-# Function to print progress with timestamp
-print_progress() {
-    echo "[`date +%Y-%m-%dT%H:%M:%S`] $1"
-}
+# Get access to global variables
+source $LYNCH/config.sh
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -139,15 +116,6 @@ fi
 #############################################################################################
 #Run fastq-->bam pipeline
 
-# Load required modules
-module purge
-print_progress "Loading required modules..."
-module load samtools
-module load bwa 
-module load gatk/3.6-0
-module load java
-module load picard/2.2.4
-
 # File Names
 RAW_BAM="${OUTPUT_PREFIX}_raw.bam"
 MARKDUP_BAM="${OUTPUT_PREFIX}_md.bam"
@@ -157,7 +125,7 @@ RECAL="${OUTPUT_PREFIX}_recal_data.table"
 FINAL_BAM="${OUTPUT_PREFIX}.bam"
 
 # Make temporary directory if doesn't exist
-[ -d "$TEMP_DIR" ] || mkdir -p "$TEMP_DIR"
+create_directory "$TEMP_DIR"
 
 echo "---------------------------------------------"
 print_progress "Starting the pipeline..."
@@ -227,7 +195,7 @@ construct_read_group_id() {
 
 # Double check that index files are present
 if [ $STEP -eq 0 ] && [ ! -f "$REF_FASTA.amb" ] || [ ! -f "$REF_FASTA.ann" ] || [ ! -f "$REF_FASTA.bwt" ] || [ ! -f "$REF_FASTA.pac" ] || [ ! -f "$REF_FASTA.sa" ]; then
-    echo "Error: bwa index files not found. Run with the --index_ref flag."
+    echo "Error: bwa index files not found."
     exit 1
 fi
 

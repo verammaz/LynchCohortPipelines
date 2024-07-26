@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# This is a wrapper script to submit jobs to execute the nextflow 
+# nf-core/sarek pipeline
+
 ###########################################################
 #specify project
 project='acc_FLAI'
 #specify cores
 cores=24
-#specify path to auxilary script
+#specify path to run_nextflow.sh script
 script='/hpc/users/mazeev01/matt_lynch/run_nextflow.sh'
 ############################################################
 
