@@ -95,7 +95,7 @@ echo "${SAMPLE_ARRAY[@]}"
 print_progress "Runing preprocessing python script." 
 echo ""
 
-python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR} -samples ${SAMPLE_ARRAY} \
+python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR} -samples ${SAMPLE_ARRAY[@]} \
                                         --additional_filter ${FILTER_VARIANTS} \
                                         --strelka_mutect_snv_intersect ${SNV_INTERSECT} \
                                         --strelka_mutect_indel_intersect ${INDEL_INTERSECT}
