@@ -12,11 +12,11 @@ set -e
 # Function to print usage
 usage() {
     cat << EOF
-Usage: $0 [OPTIONS] --patient <patient_id> --samplesheet <samplesheet.csv>
+Usage: $0 [OPTIONS] -p <patient_id> -s <samplesheet.csv>
 
 Required Arguments:
-    --patient <patient_id>           Patient id
-    --samplesheet <samplesheet.csv>  File with all sample raw data configured
+    -p <patient_id>                 Patient id
+    -s <samplesheet.csv>            File with all sample raw data configured
 
 Options:
     -h                              Display this message
