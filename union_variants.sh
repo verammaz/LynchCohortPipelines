@@ -44,7 +44,7 @@ SNV_INTERSECT=0
 INDEL_INTERSECT=0
 SINGLE_FILE=0
 ZERO_COVERAGE=0
-STEP=1
+STEP=0
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -87,10 +87,7 @@ module load python
 module load bam-readcount >/dev/null 2>&1
 
 
-
-COLUMN_INDEX=$(head -1 "$SAMPLESHEET" | awk -v col="sample" -F, '{for(i=1;i<=NF;i++) if($i==col) print i}')
-
-mapfile -t SAMPLE_ARRAY < <(awk -v col="$COLUMN_INDEX" -F, 'NR>1 {print $col}' "$SAMPLESHEET")
+SAMPLE_ARRAY=$(awk -F',' 'NR>1 {print $2}' "$SAMPLESHEET")
 
 if [[ "$STEP" -eq 0  ]]; then
     print_progress "Runing preprocessing python script." 
@@ -102,6 +99,8 @@ if [[ "$STEP" -eq 0  ]]; then
                                             --strelka_mutect_indel_intersect ${INDEL_INTERSECT}
     STEP=1
 fi
+
+exit 1
 
 if [[ "$STEP" -eq 1 ]]; then
     regions="${RAW_DIR}/${PATIENT}_regions.txt"

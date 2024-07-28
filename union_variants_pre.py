@@ -78,8 +78,8 @@ def parse_mutect_vcf_line(line):
         print("Warning: mutect format not recognized.")
         print(format)
         return "", "", "", ""
-    tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] == '0/1' else line_fields[9].split(":")
-    normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] == '0/0' else line_fields[10].split(":")
+    tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] in ['0/1', '0|1'] else line_fields[9].split(":")
+    normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] in ['0/0', '0|0'] else line_fields[10].split(":")
     tumor_alt = tumor_counts[1].split(',')[1]
     tumor_total = tumor_counts[3]
     normal_alt = normal_counts[1].split(',')[1]
@@ -159,7 +159,8 @@ def read_vcf(file, sample_name, variants_dict, pass_filter):
             variants_dict[variant_id] = Variant(chrom, pos, ref, alt, sample_name, tumor_alt.strip(), tumor_total.strip(), caller)
         
         if len(ref) > len(alt): # need to handle deletion region
-            pos = str(int(pos)+len(alt))
+            assert(len(alt) == 1 or print(variant_id)) 
+            pos = str(int(pos)+1)
 
         regions.append(f"{chrom}\t{pos}\t{pos}")
         

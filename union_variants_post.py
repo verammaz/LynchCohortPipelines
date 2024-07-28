@@ -95,7 +95,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
                         if (strelka_vcf_alt_count, strelka_vcf_depth) == ("", ""):
                             if ((mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)):
                                 continue
-                        outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_alt_count.strip()}:{mutect_vcf_depth.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
+                        outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_depth.strip()}:{mutect_vcf_alt_count.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
     
     #if zero_coverage_ok:
         #impute_readcounts(bamcounts, variants_dict)
