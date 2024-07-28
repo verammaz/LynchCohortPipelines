@@ -39,7 +39,7 @@ def impute_readcounts(bamcounts_dict, variants_dict):
 def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_coverage_ok):
     bamcounts = dict()
     with open(bamcounts_file, 'r') as infile, open(report_file, 'a') as outfile:
-        for line in infile:
+        for line in infile.readlines():
             fields = line.split('\t')
             chrom, pos = fields[0], fields[1]
 
