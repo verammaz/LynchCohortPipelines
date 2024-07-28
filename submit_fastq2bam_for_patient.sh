@@ -9,7 +9,7 @@ set -e
 # Function to print usage
 usage() {
     cat << EOF
-Usage: $0 [OPTIONS] -s <samplesheet.csv>
+Usage: $0 [OPTIONS] -s <samplesheet.csv> -p <patient_id>
 
 Required Arguments:
     -s <samplesheet.csv>            Configured input file
