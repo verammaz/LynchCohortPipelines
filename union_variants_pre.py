@@ -175,6 +175,8 @@ def main():
 
     args = parser.parse_args()
     
+    print(args.samples)
+    
     sample_to_vcfs = dict()
 
     for sample in args.samples:

@@ -90,7 +90,7 @@ COLUMN_INDEX=$(head -1 "$SAMPLESHEET" | awk -v col="sample" -F, '{for(i=1;i<=NF;
 
 mapfile -t SAMPLE_ARRAY < <(awk -v col="$COLUMN_INDEX" -F, 'NR>1 {print $col}' "$SAMPLESHEET")
 
-#echo "${SAMPLE_ARRAY[@]}"
+echo "${SAMPLE_ARRAY[@]}"
 
 print_progress "Runing preprocessing python script." 
 echo ""
