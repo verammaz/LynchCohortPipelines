@@ -2,6 +2,12 @@
 
 Specify paths and global variables in the [config](config.sh) file!
 
+Run the following:
+```bash
+cd LynchCohortPipelines
+git update-index --assume-unchanged config.sh
+```
+
 # Home Directory Structure
 
     .
