@@ -162,7 +162,7 @@ def read_vcf(file, sample_name, variants_dict, pass_filter):
             assert(len(alt) == 1 or print(variant_id)) 
             pos = str(int(pos)+1)
 
-        regions.append(f"{chrom}\t{pos}\t{pos}")
+        regions.append(f"{chrom}\t{pos}\t{pos}\t{sample_name}")
         
 
     return set(regions)
