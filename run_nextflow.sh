@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Get access to global variables
+source ./config.sh
+
 set -e
 
 PATIENT=
