@@ -100,6 +100,7 @@ python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR
 
 regions="${RAW_DIR}/${PATIENT}_regions.txt"
 
+exit 1
 
 while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status; do
    
