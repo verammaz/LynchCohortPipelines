@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 set -e
 
 PATIENT=
@@ -136,7 +135,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
 
         echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$vcf_files" >> "$TEMP_SAMPLESHEET"    
 
-    else
+    else if [[ $sample == "Normal" ]]; then
         echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,na" >> "$TEMP_SAMPLESHEET"    
     fi
 
