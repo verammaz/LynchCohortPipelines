@@ -69,7 +69,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
              -W 30:00 \
              -q premium \
              -oo "${LOG_DIR}/${job_name}.out" \
-             -eo "${LOG_DIR}/${job_name}.err"r \
+             -eo "${LOG_DIR}/${job_name}.err" \
              ${script} --patient ${PATIENT} --samplesheet ${SAMPLESHEET} --sample ${sample} --step ${STEP}
     
     fi

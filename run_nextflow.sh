@@ -24,7 +24,9 @@ RAW_DIR="$HOME_DIR/Raw/$PATIENT"
 
 SAMPLE_SAMPLESHEET="${RAW_DIR}/samplesheet_${SAMPLE}.csv"
 
-> "$SAMPLE_SAMPLESHEET"
+if [[ -f $SAMPLE_SAMPLESHEET ]]; then
+    > "$SAMPLE_SAMPLESHEET"
+fi
 
 if [[ $STEP -eq 0 ]]; then
     echo "patient,sample,fastq_1,fastq_2,status" >> "$SAMPLE_SAMPLESHEET"

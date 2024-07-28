@@ -76,7 +76,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
                 -W 40:00 \
                 -q premium \
                 -oo "${LOG_DIR}/${job_name}.out" \
-                -eo "${LOG_DIR}/${job_name}.err"r \
+                -eo "${LOG_DIR}/${job_name}.err" \
                 singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} --patient ${PATIENT} --step ${STEP} --threads ${cores} --post_process
 
 
