@@ -72,7 +72,7 @@ def parse_mutect_vcf_line(line):
     line_fields = line.split('\t')
     format = line_fields[8]
     if format == "GT:AD:AF:DP:F1R2:F2R1:FAD:SB":
-        #print("Warning: mutect snv format not recognized.")
+        print("Warning: mutect snv format not recognized.")
         return "", "", "", ""
     tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] == '0/1' else line_fields[9].split(":")
     normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] == '0/0' else line_fields[10].split(":")
@@ -174,16 +174,13 @@ def main():
 
 
     args = parser.parse_args()
-    
-    print(args.samples)
-    
+
     sample_to_vcfs = dict()
 
     for sample in args.samples:
         if sample == 'Normal': continue
         samplesheet = pd.read_csv(os.path.join(args.data_dir, f"samplesheet_{sample}.csv"))
         file_info = samplesheet[samplesheet['sample'] == sample]['vcf'].values[0]
-        print(file_info)
         sample_to_vcfs[sample] = file_info.split('|')
     
     out_dir = args.data_dir
