@@ -192,6 +192,7 @@ def main():
     sample_to_variants = dict()
 
     for sample in args.samples:
+        if sample == 'Normal': continue
         print(f"{sample}: Reading bam-readcount output...")
         bamcounts_file = os.path.join(args.data_dir, sample, f'{sample}_bamcounts.txt')
         variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample, report_file, args.zero_coverage_ok)
