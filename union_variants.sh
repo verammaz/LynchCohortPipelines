@@ -58,15 +58,15 @@ while [[ "$#" -gt 0 ]]; do
         --strelka_mutect_indel_instersect) INDEL_INTERSECT=1 ;;
         --single_output_file) SINGLE_FILE=1 ;;
         --zero_coverage_ok) ZERO_COVERAGE=1 ;;
-        --patient) PATIENT="$2"; shift ;;
-        --samples) SAMPLES="$2"; shift ;;
+        -p) PATIENT="$2"; shift ;;
+        -s) SAMPLESHEET="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
 done
 
 # Check that mandatory arguments are provided
-if [ -z "$PATIENT" ] || [ -z "$SAMPLES" ]; then
+if [ -z "$PATIENT" ] || [ -z "$SAMPLESHEET" ]; then
     echo "Error: Not all required arguments provided."
     usage
 fi
