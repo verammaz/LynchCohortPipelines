@@ -37,9 +37,16 @@ else
     echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$SAMPLE_SAMPLESHEET"
 fi
 
-while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
+
+{
+read  # Skip the header line
+while IFS= read -r line || [[ -n "$line" ]]; do
     
-    echo $sample
+    # Skip empty lines
+    [[ -z "$line" ]] && continue
+
+    # Split the line into fields using awk to handle potential edge cases
+    IFS=',' read -r patient sample fastq1 fastq2 status bam bai <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
 
     if [[ "$patient" == "$PATIENT" && ("$sample" == "$SAMPLE" || "$sample" == "Normal") ]]; then
 
@@ -50,9 +57,10 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
         fi
     fi
 
-done < "$SAMPLESHEET"
+done 
+} < "$SAMPLESHEET"
 
-exit 1
+
 OUT_DIR="$NEXTFLOW_OUT/$SAMPLE"
 mkdir -p $OUT_DIR
 
@@ -95,7 +103,15 @@ echo "patient,sample,fastq_1,fastq_2,status,bam,bai,vcf" >> "$TEMP_SAMPLESHEET"
 strelka_dir="${OUT_DIR}/variant_calling/strelka"
 mutect_dir="${OUT_DIR}/variant_calling/mutect2"
 
-while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
+{
+read  # Skip the header line
+while IFS= read -r line || [[ -n "$line" ]]; do
+    
+    # Skip empty lines
+    [[ -z "$line" ]] && continue
+
+    # Split the line into fields using awk to handle potential edge cases
+    IFS=',' read -r patient sample fastq1 fastq2 status bam bai <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
 
     if [[ $STEP -eq 0 ]] || [[ -z "$bam" ]] || [[ -z "$bai" ]]; then
        
@@ -147,7 +163,8 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
         echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,na" >> "$TEMP_SAMPLESHEET"    
     fi
 
-done < $SAMPLE_SAMPLESHEET
+done 
+} < $SAMPLE_SAMPLESHEET
 
 
 # Replace the original sample sheet with the modified one

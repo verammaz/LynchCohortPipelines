@@ -54,7 +54,15 @@ chmod +x $script
 RAW_DIR=="${HOME_DIR}/Raw/${PATIENT}"
 
 
-while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
+{
+read  # Skip the header line
+while IFS= read -r line || [[ -n "$line" ]]; do
+    
+    # Skip empty lines
+    [[ -z "$line" ]] && continue
+
+    # Split the line into fields using awk to handle potential edge cases
+    IFS=',' read -r patient sample fastq1 fastq2 status bam bai <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
     
     if [[ $patient == $PATIENT ]] && [ $sample != "Normal" ]; then
 
@@ -74,4 +82,5 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
     
     fi
 
-done < "$SAMPLESHEET"
+done 
+} < "$SAMPLESHEET"
