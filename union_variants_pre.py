@@ -175,12 +175,12 @@ def main():
 
     args = parser.parse_args()
     
-    sample_to_vcfs = defaultdict(list)
+    sample_to_vcfs = dict()
 
     for sample in args.samples.split(','):
         if sample == 'Normal': continue
         samplesheet = pd.read_csv(os.path.join(args.data_dir, f"samplesheet_{sample}.csv"))
-        file_info = samplesheet[samplesheet['sample'] == sample]['vcf']
+        file_info = samplesheet[samplesheet['sample'] == sample]['vcf'].values[0]
         sample_to_vcfs[sample] = file_info.split('|')
     
     out_dir = args.data_dir
