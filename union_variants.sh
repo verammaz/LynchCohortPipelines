@@ -90,7 +90,7 @@ COLUMN_INDEX=$(head -1 "$SAMPLESHEET" | awk -v col="sample" -F, '{for(i=1;i<=NF;
 
 mapfile -t SAMPLE_ARRAY < <(awk -v col="$COLUMN_INDEX" -F, 'NR>1 {print $col}' "$SAMPLESHEET")
 
-echo "${SAMPLE_ARRAY[@]}"
+#echo "${SAMPLE_ARRAY[@]}"
 
 print_progress "Runing preprocessing python script." 
 echo ""
@@ -100,9 +100,7 @@ python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR
                                         --strelka_mutect_snv_intersect ${SNV_INTERSECT} \
                                         --strelka_mutect_indel_intersect ${INDEL_INTERSECT}
 
-regions = "${RAW_DIR}/${PATIENT}_regions.txt"
-
-exit 1
+regions="${RAW_DIR}/${PATIENT}_regions.txt"
 
 
 while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status; do

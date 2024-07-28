@@ -79,7 +79,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
                 bamcounts[variant.id] =f"{bam_depth}:{bam_alt_count}"
 
                 # TODO: option to report discrepancy between vcf and bamcounts 
-                """strelka_vcf_alt_count, strelka_vcf_depth = "", ""
+                strelka_vcf_alt_count, strelka_vcf_depth = "", ""
                 mutect_vcf_alt_count, mutect_vcf_depth = "", ""
 
                 if sample in variant.samples['strelka']:
@@ -95,10 +95,10 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
                         if (strelka_vcf_alt_count, strelka_vcf_depth) == ("", ""):
                             if ((mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)):
                                 continue
-                        outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_alt_count.strip()}:{mutect_vcf_depth.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")"""
+                        outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_alt_count.strip()}:{mutect_vcf_depth.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
     
-    if zero_coverage_ok:
-        impute_readcounts(bamcounts, variants_dict)
+    #if zero_coverage_ok:
+        #impute_readcounts(bamcounts, variants_dict)
 
     return bamcounts
 
@@ -128,7 +128,10 @@ def write_vcf_file(sample_to_variants, final_variants, out_dir, single_file=Fals
             with open(vcf_file, 'wt') as f:
                 f.write("\t".join(columns) + "\tTUMOR\n")
                 for variant in sorted_variants:
-                    sample_counts = variant_counts[variant]
+                    try:    
+                        sample_counts = variant_counts[variant]
+                    except KeyError:
+                        sample_counts = "0:0"
                     chrom, pos, ref, alt = variant.split("_")
                     f.write(f"{chrom}\t{pos}\t{variant}\t{ref}\t{alt}\t.\tPASS\tGENE_PLACEHOLDER\tDP:AP\t0:0\t{sample_counts}\n")
             f.close()
@@ -143,8 +146,15 @@ def write_vcf_file(sample_to_variants, final_variants, out_dir, single_file=Fals
             f.write("\t".join(columns))
             for variant in sorted_variants:
                 chrom, pos, ref, alt = variant.split("_")
-                counts = "\t".join([sample_to_variants[s][variant] for s in sample_names])
-                f.write(f"{chrom}\t{pos}\t{variant}\t{ref}\t{alt}\t.\tPASS\tGENE_PLACEHOLDER\tDP:AP\t0:0\t{counts}\n")
+                counts = []
+                for s in sample_names:
+                    try:    
+                        sample_counts = variant_counts[variant]
+                    except KeyError:
+                        sample_counts = "0:0"
+                    counts.append(sample_counts)
+                all_counts = "\t".join(counts)
+                f.write(f"{chrom}\t{pos}\t{variant}\t{ref}\t{alt}\t.\tPASS\tGENE_PLACEHOLDER\tDP:AP\t0:0\t{all_counts}\n")
             f.close()
     
     print("Done.")
