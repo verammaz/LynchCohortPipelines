@@ -100,7 +100,6 @@ if [[ "$STEP" -eq 0  ]]; then
     STEP=1
 fi
 
-exit 1
 
 if [[ "$STEP" -eq 1 ]]; then
     regions="${RAW_DIR}/${PATIENT}_regions.txt"
