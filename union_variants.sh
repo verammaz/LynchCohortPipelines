@@ -97,7 +97,8 @@ regions = "${RAW_DIR}/${PATIENT}_regions.txt"
 # Split the SAMPLES argument into an array
 IFS=',' read -r -a SAMPLES_ARRAY <<< "$SAMPLES"
 
-for sample_id in $SAMPLE_ARRAY; do
+exit 1
+for sample_id in "${SAMPLES_ARRAY[@]}"; do
 
     sample_samplesheet="${RAW_DIR}/samplesheet_${sample_id}.csv"
 
