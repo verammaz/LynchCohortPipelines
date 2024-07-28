@@ -18,7 +18,7 @@ Required Arguments:
 Options:
     -h                              Display this message
     -v                              Enable verbode mode
-    --data_dir                      Directory for patient raw data; Sample/ and Normal/ subdirectories with .bam files
+    --step                          Step to start from (0=alignment, 1=markdup, 2=indelrealign, 3=baserecal)
 }
 
 EOF
@@ -30,6 +30,7 @@ PATIENT=
 REFERENCE=
 SAMPLESHEET=
 VERBOSE=0
+STEP=0
 
 # parse command line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -38,6 +39,7 @@ while [[ "$#" -gt 0 ]]; do
         -v) VERBOSE=1 ;;
         -p) PATIENT="$2"; shift ;;
         -s) SAMPLESHEET="$2"; shift ;;
+        --step) STEP="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
@@ -75,7 +77,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
                 -q premium \
                 -oo "${LOG_DIR}/${job_name}.out" \
                 -eo "${LOG_DIR}/${job_name}.err"r \
-                singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} --patient ${PATIENT} --threads ${cores} --post_process
+                singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} --patient ${PATIENT} --step ${STEP} --threads ${cores} --post_process
 
 
         # Overwrite bam and bai with new paths
