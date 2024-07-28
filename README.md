@@ -1,6 +1,9 @@
 # Config File
 
-Specify paths and global variables in the [config](config.sh) file!
+```bash
+cp config.template.sh config.sh
+```
+Specify paths and global variables in the config.sh file!
 
 ## IMPORTANT! 
 Run the following:
