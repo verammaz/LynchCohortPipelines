@@ -59,7 +59,7 @@ echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$TEMP_SAMPLESHEET"
 module purge
 module load singularity/3.6.4
 
-while IFS=$',' read -r patient sample fastq1 fastq2 status <<< "$(echo "$line" | cut -d',' -f1-5)"; do
+while IFS=$',' read -r patient sample fastq1 fastq2 status; do
     
     if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
 
