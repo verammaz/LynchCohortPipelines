@@ -128,6 +128,10 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
         mv "$strelka_snv_tbi" "${DATA_DIR}/${sample}"
         mv "$mutect_tbi" "${DATA_DIR}/${sample}"
 
+        stelka_indel="${DATA_DIR}/${sample}/$(basename "$strelka_indel")"
+        strelka_snv="${DATA_DIR}/${sample}/$(basename "$strelka_snv")"
+        mutect="${DATA_DIR}/${sample}/$(basename "$mutect")"
+
         vcf_files="$strelka_indel|$strelka_snv|$mutect"
 
         echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$vcf_files" >> "$TEMP_SAMPLESHEET"    
