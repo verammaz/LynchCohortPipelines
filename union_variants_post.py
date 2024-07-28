@@ -165,7 +165,7 @@ def write_vcf_file(sample_to_variants, final_variants, out_dir, single_file=Fals
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
-    parser.add_argument("-samples", required=True)
+    parser.add_argument("-samples", nargs='+', required=True)
     parser.add_argument("-data_dir", required=True)
     parser.add_argument("--zero_coverage_ok", default=False, type=lambda x: (str(x).lower() == '1'))
     parser.add_argument("--single_combined_vcf", default=False, type=lambda x: (str(x).lower() == '1'))
@@ -191,8 +191,7 @@ def main():
 
     sample_to_variants = dict()
 
-    samples = args.samples.split(',')
-    for sample in samples:
+    for sample in args.samples:
         print(f"{sample}: Reading bam-readcount output...")
         bamcounts_file = os.path.join(args.data_dir, sample, f'{sample}_bamcounts.txt')
         variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample, report_file, args.zero_coverage_ok)
