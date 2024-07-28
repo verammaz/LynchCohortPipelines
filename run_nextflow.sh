@@ -37,7 +37,7 @@ else
     echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$SAMPLE_SAMPLESHEET"
 fi
 
-while IFS=',' read -r patient sample fastq1 fastq2 status bam bai; do
+while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
     
     echo $sample
 
