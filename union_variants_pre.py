@@ -76,6 +76,7 @@ def parse_mutect_vcf_line(line):
     format = line_fields[8]
     if format != "GT:AD:AF:DP:F1R2:F2R1:FAD:SB": 
         print("Warning: mutect format not recognized.")
+        print(format)
         return "", "", "", ""
     tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] == '0/1' else line_fields[9].split(":")
     normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] == '0/0' else line_fields[10].split(":")
