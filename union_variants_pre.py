@@ -59,12 +59,15 @@ def parse_strelka_vcf_line(line):
             tumor_total = tumor_counts[0]
             normal_alt = normal_counts[3].split(",")[1]
             normal_total = normal_counts[0]
+        else:
+            print("strelka indel format not recognized")
     else:
         if format == "DP:FDP:SDP:SUBDP:AU:CU:GU:TU":
             BASE_TO_FORMATID = {"A": 4, "C": 5, "G": 6, "T": 7}
             tumor_total, tumor_alt = tumor_counts[0], tumor_counts[BASE_TO_FORMATID[alt]].split(',')[1]
             normal_total, normal_alt = normal_counts[0], normal_counts[BASE_TO_FORMATID[alt]].split(',')[1]
-    
+        else:
+            print("strelka snv format not recognized")
     return tumor_total, tumor_alt, normal_total, normal_alt 
 
 
@@ -72,7 +75,7 @@ def parse_mutect_vcf_line(line):
     line_fields = line.split('\t')
     format = line_fields[8]
     if format != "GT:AD:AF:DP:F1R2:F2R1:FAD:SB": 
-        #print("Warning: mutect snv format not recognized.")
+        print("Warning: mutect format not recognized.")
         return "", "", "", ""
     tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] == '0/1' else line_fields[9].split(":")
     normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] == '0/0' else line_fields[10].split(":")
