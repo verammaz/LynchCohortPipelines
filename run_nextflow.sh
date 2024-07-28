@@ -39,7 +39,7 @@ fi
 
 while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
     
-    if [[[ $patient == $PATIENT ]] && [[ $sample == $SAMPLE ]]] ||  [[[ $patient == $PATIENT ]] && [[ "$sample" == "Normal" ]]]; then
+    if [[ "$patient" == "$PATIENT" && ("$sample" == "$SAMPLE" || "$sample" == "Normal") ]]; then
 
         if [[ $STEP -eq 0 ]]; then
             echo "$patient,$sample,$fastq1,$fastq2,$status" >> "$SAMPLE_SAMPLESHEET"
