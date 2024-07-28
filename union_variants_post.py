@@ -46,6 +46,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
             variants = variants_dict[f"{chrom}_{pos}"]  # insertion or SNV
             
             if not variants:
+                print(line)
                 variants = variants_dict[f"{chrom}_{int(pos)-1}"]  # deletion
             
             if not variants: continue
