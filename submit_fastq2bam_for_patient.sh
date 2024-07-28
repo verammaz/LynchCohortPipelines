@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get access to global variables
-source $LYNCH/config.sh
+source ./config.sh
 
 # Exit immediately if command exits with non-zero status
 set -e
@@ -72,10 +72,10 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
                 -R span[hosts=1] \
                 -R "rusage[mem=4000]" \
                 -W 40:00 \
-                -q ${queue} \
+                -q premium \
                 -oo "${LOG_DIR}/${job_name}.out" \
                 -eo "${LOG_DIR}/${job_name}.err"r \
-                singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} -p ${PATIENT} --threads ${cores} --post_process
+                singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} --patient ${PATIENT} --threads ${cores} --post_process
 
 
         # Overwrite bam and bai with new paths
