@@ -74,7 +74,7 @@ def parse_strelka_vcf_line(line):
 def parse_mutect_vcf_line(line):
     line_fields = line.split('\t')
     format = line_fields[8]
-    if format != "GT:AD:AF:DP:F1R2:F2R1:FAD:SB": 
+    if format != "GT:AD:AF:DP:F1R2:F2R1:FAD:PGT:PID:PS:SB":
         print("Warning: mutect format not recognized.")
         print(format)
         return "", "", "", ""
