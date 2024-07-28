@@ -166,7 +166,7 @@ def read_vcf(file, sample_name, variants_dict, pass_filter):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
-    parser.add_argument("-samples", required=True)
+    parser.add_argument("-samplesheet", required=True)
     parser.add_argument("-data_dir", required=True)
     parser.add_argument("--additional_filter", default=False, type=lambda x: (str(x).lower() == '1'))
     parser.add_argument("--strelka_mutect_snv_intersect", default=False, type=lambda x: (str(x).lower() == '1'))

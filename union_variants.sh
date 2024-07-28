@@ -8,11 +8,11 @@ set -e
 # Function to print usage
 usage() {
     cat << EOF
-Usage: $0 [OPTIONS] --patient <patient_id> --samplesheet <samplesheet.csv> --reference <reference.fasta>
+Usage: $0 [OPTIONS] -p <patient_id> -s <samplesheet.csv>
 
 Required Arguments:
-    --patient <patient_id>           Patient id
-    --samples <s1,s2,...>            List of sample ids
+    -p <patient_id>                 Patient id
+    -s <samplesheet.csv>            Sample info sheet
 
 Options:
     -h                              Display this message
@@ -84,48 +84,49 @@ module --force purge
 module load python
 module load bam-readcount >/dev/null 2>&1
 
+
+COLUMN_INDEX=$(head -1 "$SAMPLESHEET" | awk -v col="sample" -F, '{for(i=1;i<=NF;i++) if($i==col) print i}')
+SAMPLE_ARRAY=($(awk -v col="$COLUMN_INDEX" -F, 'NR>1 {print $col}' "$SAMPLESHEET"))
+
 print_progress "Runing preprocessing python script." 
 echo ""
 
-python ${scripts}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR} -samples ${SAMPLES} \
+echo "$SAMPLE_ARRAY"
+
+python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR} -samples ${SAMPLE_ARRAY} \
                                         --additional_filter ${FILTER_VARIANTS} \
                                         --strelka_mutect_snv_intersect ${SNV_INTERSECT} \
                                         --strelka_mutect_indel_intersect ${INDEL_INTERSECT}
 
 regions = "${RAW_DIR}/${PATIENT}_regions.txt"
 
-# Split the SAMPLES argument into an array
-IFS=',' read -r -a SAMPLES_ARRAY <<< "$SAMPLES"
-
 exit 1
-for sample_id in "${SAMPLES_ARRAY[@]}"; do
 
-    sample_samplesheet="${RAW_DIR}/samplesheet_${sample_id}.csv"
 
-    while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status vcf; do
+while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status; do
    
-        if [[ "${sample}" != "Normal" ]]; then
+    if [[ "${sample}" != "Normal" ]]; then
 
-            bamcounts="${RAW_DIR}/${sample}/${sample}_bamcounts.txt"
+        bamcounts="${RAW_DIR}/${sample}/${sample}_bamcounts.txt"
 
-            if [ $VERBOSE -eq 1 ]; then
-                echo "--------------------------"
-                echo "Sample: $sample"
-                echo "BAM file: $bam"
-                echo "BAM counts file: $bamcounts"
-                echo "Regions file: $regions"
-                echo "--------------------------"
-            fi
-
-            # Run the bam-readcounts job in the background
-            print_progress "Running bam-readcounts for ${sample}"
-            echo ""
-            bam-readcount -w1 -i -f $REF_FASTA $bam -l $regions > $bamcounts -b 15 &
-    
+        if [ $VERBOSE -eq 1 ]; then
+            echo "--------------------------"
+            echo "Sample: $sample"
+            echo "BAM file: $bam"
+            echo "BAM counts file: $bamcounts"
+            echo "Regions file: $regions"
+            echo "--------------------------"
         fi
-    done < "$sample_samplesheet"
 
-done
+        # Run the bam-readcounts job in the background
+        print_progress "Running bam-readcounts for ${sample}"
+        echo ""
+        bam-readcount -w1 -i -f $REF_FASTA $bam -l $regions > $bamcounts -b 15 &
+
+    fi
+
+done < "$SAMPLESHEET"
+
 
 
 # Wait for all jobs to complete
@@ -137,4 +138,4 @@ wait
 print_progress "All bam-readcounts jobs are complete. Running post-processing python script..."
 echo ""
 
-python ${scripts}/union_variants_post.py -patient_id ${PATIENT} -samples ${SAMPLES} -data_dir {$RAW_DIR} --zero_coverage_ok ${ZERO_COVERAGE} --single_combined_vcf ${SINGLE_FILE}
+python ${LYNCH}/union_variants_post.py -patient_id ${PATIENT} -samples ${SAMPLES} -data_dir {$RAW_DIR} --zero_coverage_ok ${ZERO_COVERAGE} --single_combined_vcf ${SINGLE_FILE}
