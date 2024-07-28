@@ -24,7 +24,6 @@ Options:
     --strelka_mutect_snv_intersect  Only consider snv variants at intersection of strelka mutect callers
     --single_output_file            Write single output vcf file
     --zero_coverage_ok              Include variants even if some sample data has zero coverage at that position
-    --reference <reference.fasta>   Refence genome 
 }
 
 EOF
@@ -101,7 +100,7 @@ python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR
 regions="${RAW_DIR}/${PATIENT}_regions.txt"
 
 
-while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status; do
+while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
    
     if [[ $patient == $PATIENT ]] && [[ "${sample}" != "Normal" ]]; then
 
