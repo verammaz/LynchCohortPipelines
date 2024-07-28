@@ -223,7 +223,7 @@ if [ $STEP -eq 1 ]; then
     fi
     # Step 2: Picard MarkDuplicates
         print_progress "Marking duplicates (Picard MarkDuplicates)..."
-        java -jar $PICARD MarkDuplicates \
+        java -jar $PICARD_JAR MarkDuplicates \
             I=$RAW_BAM \
             O=$MARKDUP_BAM \
             M=$MARKDUP_TXT \
