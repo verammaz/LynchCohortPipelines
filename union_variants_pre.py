@@ -80,9 +80,9 @@ def parse_mutect_vcf_line(line):
         return "", "", "", ""
     tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] == '0/1' else line_fields[9].split(":")
     normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] == '0/0' else line_fields[10].split(":")
-    tumor_alt = tumor_counts[1][1]
+    tumor_alt = tumor_counts[1].split(',')[1]
     tumor_total = tumor_counts[3]
-    normal_alt = normal_counts[1][1]
+    normal_alt = normal_counts[1].split(',')[1]
     normal_total = normal_counts[3]
     
     return tumor_total, tumor_alt, normal_total, normal_alt 
