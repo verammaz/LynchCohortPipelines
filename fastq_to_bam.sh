@@ -273,7 +273,6 @@ if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
             $(get_verbosity_flag gatk)
 
         STEP=3
-    fi
 
 
     if [ $STEP -eq 3 ] && [ ! -f $REALIGNED_BAM ]; then
