@@ -6,21 +6,53 @@ import pickle
 from collections import defaultdict
 from union_variants_pre import Variant
 
-def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
+
+def impute_readcounts(bamcounts_dict, variants_dict):
+
+    gene_regions = {"1": [(148602086,148688393)],                                                #ACVR2A
+                    "7": [(151832010, 152133090)],                                               #KMT2C
+                    "6": [(80713604, 80752244)],                                                 #TTK
+                    "3": [(50712672, 51421629), (53880607, 53899615), (114070533, 114863756)],   #DOCK3, IL17RB, and ZBTB20
+                    "4": [(83769979, 83821722)],                                                 #SEC31A
+                    "11": [(31811484, 31833725)],                                                #PAX6
+                    "X": [(47420516, 47431307), (105937024, 106040223)],                         #ARAF and RNF128
+                    "20": [(30780306, 30795594)],                                                #PLAGL2
+                    } 
+
+    for variant_id, variant in variants_dict.items():
+        if variant_id in bamcounts_dict.keys():
+            continue
+        if variant.chrom not in gene_regions.keys():
+            continue
+        variant_in_gene = False
+        for region in gene_regions[variant.chrom]:
+            if int(variant.pos) >= region[0] and int(variant.pos) <= region[1]:
+                variant_in_gene = True
+                break
+        if variant_in_gene:
+            print(f"Imputing bam readcounts for variant {variant.id}")
+            bamcounts_dict[variant_id] = "0:0"
+
+
+
+# TODO: handle strelka and mutect vcf counts
+def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_coverage_ok):
     bamcounts = dict()
     with open(bamcounts_file, 'r') as infile, open(report_file, 'a') as outfile:
         for line in infile:
             fields = line.split('\t')
             chrom, pos = fields[0], fields[1]
 
-            try: 
-                variants = variants_dict[f"{chrom}_{pos}"] # insertion or snv
-            except KeyError:
-                variants = variants_dict[f"{chrom}_{int(pos)-1}"] # deletion
+            variants = variants_dict[f"{chrom}_{pos}"]  # insertion or SNV
             
+            if not variants:
+                variants = variants_dict[f"{chrom}_{int(pos)-1}"]  # deletion
+            
+            if not variants: continue
+
             all_counts = fields[4:]
             base_counts = {counts.split(":")[0]: counts.split(":")[1] for counts in all_counts}
-            bam_depth = fields[3]
+            bam_depth = fields[3].strip()
 
             for variant in variants:
                 ref = variant.ref
@@ -38,24 +70,41 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
                     alt = "+"+alt[1:]
                 
                 try:
-                    bam_alt_count = base_counts[alt]
+                    bam_alt_count = base_counts[alt].strip()
                 except KeyError:
+                    print(f"Warning: {variant.id} variant alt allele {alt} not present in bam readcounts. Setting alt count to 0.")
                     bam_alt_count = "0" # how should i handle this case?
                 
 
                 bamcounts[variant.id] =f"{bam_depth}:{bam_alt_count}"
 
                 # TODO: option to report discrepancy between vcf and bamcounts 
-                if sample in variant.samples:
-                    vcf_alt_count, vcf_depth = variant.get_sample_counts(sample)
-                    #print(vcf_alt_count, vcf_depth)
-                    if not (vcf_alt_count == bam_alt_count and vcf_depth == bam_depth): 
-                        outfile.write(f"{variant.id}\t{sample}\t{vcf_depth}:{vcf_alt_count}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
+                """strelka_vcf_alt_count, strelka_vcf_depth = "", ""
+                mutect_vcf_alt_count, mutect_vcf_depth = "", ""
+
+                if sample in variant.samples['strelka']:
+                    strelka_vcf_alt_count, strelka_vcf_depth = variant.get_sample_counts('strelka', sample)
+               
+                if sample in variant.samples['mutect']:
+                    mutect_vcf_alt_count, mutect_vcf_depth = variant.get_sample_counts('mutect', sample)
+                    
+                if (not (strelka_vcf_alt_count == bam_alt_count and strelka_vcf_depth == bam_depth)) or (not (mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)): 
+                        if (mutect_vcf_alt_count, mutect_vcf_depth) == ("", ""):
+                            if ((strelka_vcf_alt_count == bam_alt_count and strelka_vcf_depth == bam_depth)):
+                                continue
+                        if (strelka_vcf_alt_count, strelka_vcf_depth) == ("", ""):
+                            if ((mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)):
+                                continue
+                        outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_alt_count.strip()}:{mutect_vcf_depth.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")"""
     
+    if zero_coverage_ok:
+        impute_readcounts(bamcounts, variants_dict)
+
     return bamcounts
 
 
-def write_vcf_file(file, variant_to_counts):
+def write_vcf_file(sample_to_variants, final_variants, out_dir, single_file=False):
+    print("Writing output vcf file(s)...", end="")
     def sort_key(key):
         prefix, suffix = key.split('_', 1)
         if prefix.isdigit():
@@ -66,44 +115,55 @@ def write_vcf_file(file, variant_to_counts):
             return (2, float('inf'), int(suffix.split('_')[0]))  # 'Y' after 'X'
         return (3, float('inf'), float('inf'))  # Any other non-numeric values
     
-    sorted_variants = sorted(list(variant_to_counts.keys()), key=sort_key)
+    sorted_variants = sorted(list(final_variants), key=sort_key)
 
-    columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'NORMAL', 'TUMOR']
+    columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'NORMAL']
     
-    # reporting format as DR:RD:AP <==> total depth : reference depth : alternate depth
+    # reporting format as DR:AP <==> total depth : alternate depth
     
-    with open(file, 'wt') as f:
-        f.write("\t".join(columns) + "\n")
-        for variant in sorted_variants:
-            sample_counts = variant_to_counts[variant]
-            chrom, pos, ref, alt = variant.split("_")
-            f.write(f"{chrom}\t{pos}\t{variant}\t{ref}\t{alt}\t.\tPASS\tGENE_PLACEHOLDER\tDP:AP\t0:0\t{sample_counts}\n")
-    f.close()
+    if not single_file:
+        for sample, variant_counts in sample_to_variants.items():
+            print(f"{sample}...", end="")
+            vcf_file = os.path.join(out_dir, f"{sample}.vcf")
+            with open(vcf_file, 'wt') as f:
+                f.write("\t".join(columns) + "\tTUMOR\n")
+                for variant in sorted_variants:
+                    sample_counts = variant_counts[variant]
+                    chrom, pos, ref, alt = variant.split("_")
+                    f.write(f"{chrom}\t{pos}\t{variant}\t{ref}\t{alt}\t.\tPASS\tGENE_PLACEHOLDER\tDP:AP\t0:0\t{sample_counts}\n")
+            f.close()
+    
+    else:
+        print("all samples in single file...", end="")
+        sample_names =[s for s in sample_to_variants.keys()]
+        sample_ids = [s.replace("Sample", "") for s in sample_names]
+        columns += sample_ids
+        vcf_file = os.path.join(out_dir, "_".join(sample_ids)+".vcf")
+        with open(vcf_file, 'wt') as f:
+            f.write("\t".join(columns))
+            for variant in sorted_variants:
+                chrom, pos, ref, alt = variant.split("_")
+                counts = "\t".join([sample_to_variants[s][variant] for s in sample_names])
+                f.write(f"{chrom}\t{pos}\t{variant}\t{ref}\t{alt}\t.\tPASS\tGENE_PLACEHOLDER\tDP:AP\t0:0\t{counts}\n")
+            f.close()
+    
+    print("Done.")
+
 
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
-    parser.add_argument("-file_info", required=True)
-    parser.add_argument("-samples", required=True, nargs="+")
-    parser.add_argument("--single_file", action="store_true")
-
+    parser.add_argument("-samples", required=True)
+    parser.add_argument("-data_dir", required=True)
+    parser.add_argument("--zero_coverage_ok", default=False, type=lambda x: (str(x).lower() == '1'))
+    parser.add_argument("--single_combined_vcf", default=False, type=lambda x: (str(x).lower() == '1'))
+    #parser.add_argument("--use_vcf_counts", default=False, type=lambda x: (str(x).lower() == '1'))
+    
     args = parser.parse_args()
 
-    file_info = pd.read_csv(args.file_info, sep='\t')
-    
-    patient_info = file_info.loc[file_info['Patient'] == args.patient_id]
-
-    out_dir = patient_info['Directory'].iloc[0]
-    Samples = {}
-
-    for index, row in patient_info.iterrows():
-        sample = row['Sample']
-        if sample in args.samples:
-            Samples[sample] = {'bam': row['BAM'],'vcf': row['VCF'].split(', '), 'bamcounts': row['BAM_COUNTS']}
-    
-    variants_pkl = os.path.join(out_dir, patient_info['VARIANTS'][0])
+    variants_pkl = os.path.join(args.data_dir, f"{args.patient_id}_variants.pkl")
 
     all_variants = defaultdict(list)
     with open(variants_pkl, 'rb') as f:
@@ -112,22 +172,36 @@ def main():
     for variant in loaded_variants:
         all_variants[f"{variant.chrom}_{variant.pos}"].append(variant)
     
-    # TODO: add case for writing to single vcf file with all sample columns
-    # TODO: handle 'NORMAL' column data (currently just setting DP:AP = 0:0)
 
-    report_file = os.path.join(out_dir, "vcf_bamcounts_report.txt")
-
+    report_file = os.path.join(args.data_dir, "vcf_bamcounts_report.txt")
     with open(report_file, 'w') as f:
-        f.write("variant_id\tsample_origin\tvcf_counts\tbam_counts\n")
+        f.write("variant_id\tsample_origin\tstrelka_vcf_counts\tmutect_vcf_counts\tbam_counts\n")
     
-    for sample in Samples.keys():
-        print(f"{sample}: Reading bam-readcount output and writing counts to vcf file...", end="")
-        bamcounts_file = os.path.join(out_dir, sample, Samples[sample]['bamcounts'])
-        variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample, report_file)
-        vcf_outfile = os.path.join(out_dir, sample, f"{sample}_union.vcf")
-        write_vcf_file(vcf_outfile, variant_to_counts)
-        print("Done.")
+    # TODO: consider incorporating 'NORMAL' column data from original vcf file (currently just setting 'NORMAL' with DP:AP = 0:0 in output vcf)
 
+    sample_to_variants = dict()
+
+    samples = args.samples.split(',')
+    for sample in samples:
+        print(f"{sample}: Reading bam-readcount output...")
+        bamcounts_file = os.path.join(args.data_dir, sample, f'{sample}_bamcounts.txt')
+        variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample, report_file, args.zero_coverage_ok)
+        sample_to_variants[sample] = variant_to_counts
+        print("Done.\n")
+
+    final_variants = set.union(*(set(sample_to_variants[s].keys()) for s in samples))
+    
+    out_dir = os.path.join(args.data_dir, "..", "..","VCF", args.patient_id)
+
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    
+    print(f"Output Directory: {out_dir}\n")
+
+    # TODO: implement option to use vcf counts instead of bamcounts for original sample variants 
+    # same with vcf and bam count average?
+
+    write_vcf_file(sample_to_variants, final_variants, out_dir, args.single_combined_vcf)
 
 
 if __name__ == "__main__":

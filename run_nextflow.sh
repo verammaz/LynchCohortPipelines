@@ -1,20 +1,5 @@
 #!/bin/bash
 
-######################### Specify some paths ########################################
-# nextflow executable
-NEXTFLOW='/hpc/users/mazeev01/nextflow'
-# pon file for mutect variant filtering
-PON='/sc/arion/projects/FLAI/vera/References/Mutect2-exome-panel.vcf.gz'
-# specify reference genome
-GENOME="GATK.GRCh37"
-# output directory
-OUT_DIR='/sc/arion/scratch/mazeev01/variant_call'
-######################################################################################
-
-# Function to print progress with timestamp
-print_progress() {
-    echo "[`date +%Y-%m-%dT%H:%M:%S`] $1"
-}
 
 set -e
 
@@ -35,9 +20,10 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-DATA_DIR=$(dirname "$(realpath "$SAMPLESHEET")")
 
-SAMPLE_SAMPLESHEET="${DATA_DIR}/samplesheet_${SAMPLE}.csv"
+RAW_DIR="$HOME_DIR/Raw/$PATIENT"
+
+SAMPLE_SAMPLESHEET="${RAW_DIR}/samplesheet_${SAMPLE}.csv"
 
 > "$SAMPLE_SAMPLESHEET"
 
@@ -60,10 +46,12 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
 
 done < "$SAMPLESHEET"
 
-OUT_DIR="$OUT_DIR/$SAMPLE"
+OUT_DIR="$NEXTFLOW_OUT/$SAMPLE"
 mkdir -p $OUT_DIR
 
 print_progress "Launching nextflow to perform variant calling..."
+
+cd $NEXTFLOW_WORK
 
 module load java/11.0.2
 module load singularity/3.2.1
@@ -153,3 +141,6 @@ done < $SAMPLE_SAMPLESHEET
 
 # Replace the original sample sheet with the modified one
 mv "$TEMP_SAMPLESHEET" "$SAMPLE_SAMPLESHEET"
+
+# Remove nextflow output dir
+#rm -r $OUT_DIR

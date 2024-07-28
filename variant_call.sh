@@ -3,14 +3,10 @@
 # This is a wrapper script to submit jobs to execute the nextflow 
 # nf-core/sarek pipeline
 
-###########################################################
-#specify project
-project='acc_FLAI'
-#specify cores
-cores=24
-#specify path to run_nextflow.sh script
-script='/hpc/users/mazeev01/matt_lynch/run_nextflow.sh'
-############################################################
+source ./config.sh
+
+# Exit immediately if command exits with non-zero status
+set -e
 
 
 # Function to print usage
@@ -52,7 +48,11 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+script="$LYNCH/run_nextflow.sh"
 chmod +x $script
+
+RAW_DIR=="${HOME_DIR}/Raw/${PATIENT}"
+
 
 while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
     
@@ -68,8 +68,8 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
              -R "rusage[mem=4000]" \
              -W 30:00 \
              -q premium \
-             -oo ${sample}_variantcall.out \
-             -eo ${sample}_variantcall.err \
+             -oo "${LOG_DIR}/${job_name}.out" \
+             -eo "${LOG_DIR}/${job_name}.err"r \
              ${script} --patient ${PATIENT} --samplesheet ${SAMPLESHEET} --sample ${sample} --step ${STEP}
     
     fi
