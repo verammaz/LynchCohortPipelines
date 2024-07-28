@@ -71,8 +71,8 @@ def parse_strelka_vcf_line(line):
 def parse_mutect_vcf_line(line):
     line_fields = line.split('\t')
     format = line_fields[8]
-    if format == "GT:AD:AF:DP:F1R2:F2R1:FAD:SB":
-        print("Warning: mutect snv format not recognized.")
+    if format != "GT:AD:AF:DP:F1R2:F2R1:FAD:SB": 
+        #print("Warning: mutect snv format not recognized.")
         return "", "", "", ""
     tumor_counts = line_fields[10].split(":") if line_fields[10].split(":")[0] == '0/1' else line_fields[9].split(":")
     normal_counts = line_fields[9].split(":") if line_fields[9].split(":")[0] == '0/0' else line_fields[10].split(":")
