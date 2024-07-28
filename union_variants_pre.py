@@ -181,6 +181,7 @@ def main():
         if sample == 'Normal': continue
         samplesheet = pd.read_csv(os.path.join(args.data_dir, f"samplesheet_{sample}.csv"))
         file_info = samplesheet[samplesheet['sample'] == sample]['vcf'].values[0]
+        print(file_info)
         sample_to_vcfs[sample] = file_info.split('|')
     
     out_dir = args.data_dir

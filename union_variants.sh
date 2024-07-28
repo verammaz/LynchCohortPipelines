@@ -105,7 +105,7 @@ regions="${RAW_DIR}/${PATIENT}_regions.txt"
 
 while IFS=$',' read -r patient sample fastq1 fastq2 bam bai status; do
    
-    if [[ "${sample}" != "Normal" ]]; then
+    if [[ $patient == $PATIENT ]] && [[ "${sample}" != "Normal" ]]; then
 
         bamcounts="${RAW_DIR}/${sample}/${sample}_bamcounts.txt"
 
