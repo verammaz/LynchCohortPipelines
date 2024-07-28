@@ -118,7 +118,7 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
         # Run the bam-readcounts job in the background
         print_progress "Running bam-readcounts for ${sample}"
         echo ""
-        bam-readcount -w1 -i -f $REF_FASTA $bam -l $regions > $bamcounts -b 15 &
+        bam-readcount -w1 -i -f $REF_FASTA $bam -l $regions -b 15 > $bamcounts &
 
     fi
 

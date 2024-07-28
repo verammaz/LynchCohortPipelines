@@ -145,7 +145,7 @@ def read_vcf(file, sample_name, variants_dict, pass_filter):
             continue
         
         if pass_filter and not pass_variant_filter(tumor_total, tumor_alt, normal_total, normal_alt):
-            print(f"Variant {chrom}_{pos}_{ref}_{alt} did not pass filtering")
+            #print(f"Variant {chrom}_{pos}_{ref}_{alt} did not pass filtering")
             # TODO: check if variant in shared antigen gene, and keep anyway
             continue
 
