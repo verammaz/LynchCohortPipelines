@@ -178,7 +178,7 @@ def main():
     sample_to_vcfs = defaultdict(list)
 
     for sample in args.samples.split(','):
-        samplesheet = os.path.join(args.data_dir, f"samplesheet_{sample}.csv")
+        samplesheet = pd.read_csv(os.path.join(args.data_dir, f"samplesheet_{sample}.csv"))
         file_info = samplesheet[samplesheet['sample'] == sample]['vcf']
         sample_to_vcfs[sample] = file_info.split('|')
     
