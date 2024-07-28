@@ -59,7 +59,14 @@ echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$TEMP_SAMPLESHEET"
 module purge
 module load singularity/3.6.4
 
-while IFS=$',' read -r patient sample fastq1 fastq2 status; do
+{
+read  # Skip the header line
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # Skip empty lines
+    [[ -z "$line" ]] && continue
+
+    # Split the line into fields using awk to handle potential edge cases
+    IFS=',' read -r patient sample fastq1 fastq2 status <<< "$(awk -F',' '{print $1,$2,$3,$4,$5}' OFS=',' <<< "$line")"
     
     echo $sample
     if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
@@ -90,7 +97,8 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
     
     fi
 
-done < "$SAMPLESHEET"
+done 
+} < "$SAMPLESHEET"
 
 # Replace the original sample sheet with the modified one
 #mv "$TEMP_SAMPLESHEET" "$SAMPLESHEET"
