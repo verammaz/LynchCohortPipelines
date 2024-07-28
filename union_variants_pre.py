@@ -179,7 +179,7 @@ def main():
 
     for sample in args.samples.split(','):
         samplesheet = os.path.join(args.data_dir, f"samplesheet_{sample}.csv")
-        file_info = samplesheet[samplesheet['sample'] == sample and samplesheet]['vcf']
+        file_info = samplesheet[samplesheet['sample'] == sample]['vcf']
         sample_to_vcfs[sample] = file_info.split('|')
     
     out_dir = args.data_dir
