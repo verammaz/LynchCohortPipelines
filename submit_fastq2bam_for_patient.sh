@@ -61,6 +61,7 @@ module load singularity/3.6.4
 
 while IFS=$',' read -r patient sample fastq1 fastq2 status; do
     
+    echo $sample
     if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
 
         job_name="fastq_to_bam_$sample"
@@ -85,11 +86,11 @@ while IFS=$',' read -r patient sample fastq1 fastq2 status; do
         bai="${output_prefix}.bai"
 
         # Write the updated line to the temporary file
-        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai" >> "$TEMP_SAMPLESHEET"
+        #echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai" >> "$TEMP_SAMPLESHEET"
     
     fi
 
 done < "$SAMPLESHEET"
 
 # Replace the original sample sheet with the modified one
-mv "$TEMP_SAMPLESHEET" "$SAMPLESHEET"
+#mv "$TEMP_SAMPLESHEET" "$SAMPLESHEET"
