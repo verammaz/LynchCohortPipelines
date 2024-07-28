@@ -146,7 +146,7 @@ fi
 
 
 if [[ "$STEP" -eq 2 ]]; then
-    python ${LYNCH}/union_variants_post.py -patient_id ${PATIENT} -samples ${SAMPLE_ARRAY[@]} -data_dir {$RAW_DIR} \
+    python ${LYNCH}/union_variants_post.py -patient_id ${PATIENT} -samples ${SAMPLE_ARRAY[@]} -data_dir ${RAW_DIR} \
                                            --zero_coverage_ok ${ZERO_COVERAGE} \
                                            --single_combined_vcf ${SINGLE_FILE}
 fi
