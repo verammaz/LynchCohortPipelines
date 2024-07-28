@@ -85,13 +85,18 @@ module load python
 module load bam-readcount >/dev/null 2>&1
 
 
+
 COLUMN_INDEX=$(head -1 "$SAMPLESHEET" | awk -v col="sample" -F, '{for(i=1;i<=NF;i++) if($i==col) print i}')
-SAMPLE_ARRAY=($(awk -v col="$COLUMN_INDEX" -F, 'NR>1 {print $col}' "$SAMPLESHEET"))
+
+SAMPLE_ARRAY=()
+while IFS=, read -r -a line; do
+    SAMPLE_ARRAY+=("${line[$((COLUMN_INDEX-1))]}")
+done < <(tail -n +2 "$SAMPLESHEET")
+
+echo "$SAMPLE_ARRAY"
 
 print_progress "Runing preprocessing python script." 
 echo ""
-
-echo "$SAMPLE_ARRAY"
 
 python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR} -samples ${SAMPLE_ARRAY} \
                                         --additional_filter ${FILTER_VARIANTS} \
