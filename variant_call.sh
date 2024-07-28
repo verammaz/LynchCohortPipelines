@@ -40,8 +40,8 @@ while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -h) usage ;;
         -v) VERBOSE=1 ;;
-        --patient) PATIENT="$2"; shift ;;
-        --samplesheet) SAMPLESHEET="$2"; shift ;;
+        -p) PATIENT="$2"; shift ;;
+        -s) SAMPLESHEET="$2"; shift ;;
         --variant_call_step) STEP="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
