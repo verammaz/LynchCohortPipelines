@@ -86,6 +86,7 @@ def main():
             with open(vcf, 'r') as infile, open(ssm_file, 'w') as outfile:
                 outfile.write("id\tname\tvar_reads\ttotal_reads\tvar_read_prob\n")
                 for line in infile.readlines():
+                    if line.startswith('#'): continue
                     variant = line.split('\t')[2].strip()
                     var_reads = line.split('\t')[10].split(':')[1].strip()
                     total_reads = line.split('\t')[10].split(':')[0].strip()
