@@ -24,6 +24,7 @@ Options:
   --post_process                   Carry out post processing of BAM file after alignment.
   --threads                        Number of threads to use for bwa-mem step.
   --step                           Specify starting step.
+  --sample                         Sample id
 
 
 EOF
@@ -40,6 +41,7 @@ POST_PROCESS=0
 KEEP_INTERMEDIATE=0
 THREADS=8
 STEP=0
+SAMPLE=
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -52,6 +54,7 @@ while [[ "$#" -gt 0 ]]; do
         --threads) THREADS="$2"; shift ;;
         --step) STEP="$2"; shift ;;
         --patient) PATIENT="$2"; shift ;;
+        --sample) SAMPLE="$2"; shift ;;
         -r) READS="$2"; shift ;;
         -o) OUTPUT_PREFIX="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
@@ -202,12 +205,26 @@ fi
 if [ $STEP -eq 0 ]; then
     # Construct the read group ID
     id=$(construct_read_group_id "$READS_1")
+    
     # Construct read group sample name 
-    sample=$(basename "$READS_1" | cut -d'_' -f1)
-    RG="@RG\tID:${id}\tSM:${PATIENT}_${sample}\tPL:ILLUMINA"
-    if [[ -z $PATIENT ]]; then  
-    RG="@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA"
+    RG=
+    if [ -z "$SAMPLE"]; then 
+        sample=$(basename "$READS_1" | cut -d'_' -f1)
+        if [[ -z $PATIENT ]]; then  
+            RG="@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA"
+        else
+            RG="@RG\tID:${id}\tSM:${PATIENT}_${sample}\tPL:ILLUMINA"
+        fi
+        
+    else
+        RG="@RG\tID:${id}\tSM:${PATIENT}_${SAMPLE}\tPL:ILLUMINA"
+        if [[ -z $PATIENT ]]; then  
+            RG="@RG\tID:${id}\tSM:${SAMPLE}\tPL:ILLUMINA"
+        else
+            RG="@RG\tID:${id}\tSM:${PATIENT}_${SAMPLE}\tPL:ILLUMINA"
+        fi
     fi
+
 
     print_progress "Aligning (bwa-mem) and sorting (samtools sort)"
     bwa mem -M -t $THREADS $REF_FASTA $READS_1 $READS_2 \
