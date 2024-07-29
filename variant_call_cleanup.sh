@@ -38,5 +38,7 @@ for s in "${sample_array[@]}"; do
 
     done
     } < "$sample_samplesheet"
+
+    rm $sample_samplesheet
 done
 

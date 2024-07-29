@@ -105,5 +105,6 @@ sample_names_str=$(IFS=','; echo "${sample_names[*]}")
 bsub -w "$wait_condition" \
      -q express \
      -P ${project} \
+     -W 00:20 \
      ${script2} ${PATIENT} ${SAMPLESHEET} ${sample_names[@]}
 
