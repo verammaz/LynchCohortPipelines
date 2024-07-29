@@ -208,7 +208,7 @@ if [ $STEP -eq 0 ]; then
     
     # Construct read group sample name 
     RG=
-    if [ -z "$SAMPLE"]; then 
+    if [[ -z "$SAMPLE" ]]; then 
         sample=$(basename "$READS_1" | cut -d'_' -f1)
         if [[ -z $PATIENT ]]; then  
             RG="@RG\tID:${id}\tSM:${sample}\tPL:ILLUMINA"
