@@ -87,9 +87,6 @@ function create_directory() {
     if [ ! -d "$dir" ]; then
         mkdir -p "$dir"
         echo "Directory created: $dir"
-    else
-        echo "Directory already exists: $dir"
-    fi
 }
 
 

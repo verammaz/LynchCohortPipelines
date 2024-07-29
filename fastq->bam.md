@@ -34,7 +34,7 @@ module load proxies
 cd ~/
 singularity pull --arch amd64 library://verammaz/bioinformatics/fastq2bam:0.3
 ```
-Set the path to this image file in the `CONTAINER_FASTQ2BAM` variable in the [config](config.sh) file.
+Set the path to this image file in the `CONTAINER_FASTQ2BAM` variable in your [config](config.sh) file.
 
 
 ### Single sample pipeline
@@ -53,7 +53,7 @@ On subsequent execution using the same reference, run without the `--index_ref` 
 
 > *Important*: Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
 
-> Need at least the following set in the [config](config.sh): `REF_FASTA`, `SITES_OF_VARIATION` (optional), `INDELS_{1,2}` (optional), `EXOME_INTERVALS` (optional) 
+> Need at least the following set in your [config](config.sh): `REF_FASTA`, `SITES_OF_VARIATION` (optional), `INDELS_{1,2}` (optional), `EXOME_INTERVALS` (optional) 
 
 #### Required arguments:
 ```
@@ -118,7 +118,7 @@ cd LynchCohortPipelines
 ./submit_fastq2bam_for_patient.sh -p <patient_id>  -s <samplesheet.csv>
 ```
 
-Make sure HOME_DIR is set in the [config](config.sh) file. The script will create `$HOME_DIR/Raw/Patient` directory if it doesn't exist, and place all output .bam and .bai files in 
+Make sure HOME_DIR is set in your [config](config.sh) file. The script will create `$HOME_DIR/Raw/Patient` directory if it doesn't exist, and place all output .bam and .bai files in 
 Sample/ and Normal/ subdirectories.
 
 #### Required arguments:

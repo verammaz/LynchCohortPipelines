@@ -1,16 +1,13 @@
 # Config File
 
 ```bash
+cd LynchCohortPipelines
 cp config.template.sh config.sh
+vi config.sh
 ```
 Specify paths and global variables in the config.sh file!
 
-## IMPORTANT! 
-Run the following:
-```bash
-cd LynchCohortPipelines
-./setup-hooks.sh
-```
+
 
 # Home Directory Structure
 

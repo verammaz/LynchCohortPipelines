@@ -55,17 +55,17 @@ def parse_strelka_vcf_line(line):
 
     if len(alt) != len(ref):
         if format == "DP:DP2:TAR:TIR:TOR:DP50:FDP50:SUBDP50:BCN50":
-            tumor_alt = tumor_counts[3].split(",")[1] # use TIR tier2
+            tumor_alt = tumor_counts[3].split(",")[0] # use TIR tier1
             tumor_total = tumor_counts[0]
-            normal_alt = normal_counts[3].split(",")[1]
+            normal_alt = normal_counts[3].split(",")[0]
             normal_total = normal_counts[0]
         else:
             print("strelka indel format not recognized")
     else:
         if format == "DP:FDP:SDP:SUBDP:AU:CU:GU:TU":
             BASE_TO_FORMATID = {"A": 4, "C": 5, "G": 6, "T": 7}
-            tumor_total, tumor_alt = tumor_counts[0], tumor_counts[BASE_TO_FORMATID[alt]].split(',')[1]
-            normal_total, normal_alt = normal_counts[0], normal_counts[BASE_TO_FORMATID[alt]].split(',')[1]
+            tumor_total, tumor_alt = tumor_counts[0], tumor_counts[BASE_TO_FORMATID[alt]].split(',')[0] #use tier1
+            normal_total, normal_alt = normal_counts[0], normal_counts[BASE_TO_FORMATID[alt]].split(',')[0] #use tier1
         else:
             print("strelka snv format not recognized")
     return tumor_total, tumor_alt, normal_total, normal_alt 
@@ -171,7 +171,7 @@ def read_vcf(file, sample_name, variants_dict, pass_filter):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
-    parser.add_argument("-samples", nargs='+', required=True)
+    parser.add_argument("-samplesheet", required=True)
     parser.add_argument("-data_dir", required=True)
     parser.add_argument("--additional_filter", default=False, type=lambda x: (str(x).lower() == '1'))
     parser.add_argument("--strelka_mutect_snv_intersect", default=False, type=lambda x: (str(x).lower() == '1'))
@@ -180,17 +180,19 @@ def main():
 
     args = parser.parse_args()
 
-    sample_to_vcfs = dict()
+    samplesheet = pd.read_csv(args.samplesheet)
+    samplesheet = samplesheet.loc[samplesheet['patient'] == args.patient_id]
 
-    for sample in args.samples:
+    sample_to_vcfs= dict()
+
+    for index, row in samplesheet.iterrows():
+        sample = row['sample']
         if sample == 'Normal': continue
-        samplesheet = pd.read_csv(os.path.join(args.data_dir, f"samplesheet_{sample}.csv"))
-        file_info = samplesheet[samplesheet['sample'] == sample]['vcf'].values[0]
-        sample_to_vcfs[sample] = file_info.split('|')
+        sample_to_vcfs[sample] = row['vcf'].split('|')
+
     
     out_dir = args.data_dir
 
-    
     all_regions = set()
     all_variants = dict()
 

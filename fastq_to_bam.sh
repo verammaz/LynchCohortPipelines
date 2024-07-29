@@ -217,7 +217,6 @@ if [ $STEP -eq 0 ]; then
         fi
         
     else
-        RG="@RG\tID:${id}\tSM:${PATIENT}_${SAMPLE}\tPL:ILLUMINA"
         if [[ -z $PATIENT ]]; then  
             RG="@RG\tID:${id}\tSM:${SAMPLE}\tPL:ILLUMINA"
         else

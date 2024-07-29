@@ -11,20 +11,19 @@ usage() {
 Usage: $0 [OPTIONS] -p <patient_id> -s <samplesheet.csv>
 
 Required Arguments:
-    -p <patient_id>                 Patient id
-    -s <samplesheet.csv>            Sample info sheet
+    -p <patient_id>                     Patient id
+    -s <samplesheet.csv>                Sample info sheet
 
 Options:
-    -h                              Display this message
-    -v                              Enable verbode mode
-    --use_vcf                       Use VCF counts for called sample variants
-    --report                        Report vcf / bam count discrepancies
-    --keep_intermediate             Keep intermediate files
-    --filter_variants               Apply additional filters to variants (other than 'PASS')
-    --strelka_mutect_snv_intersect  Only consider snv variants at intersection of strelka mutect callers
-    --single_output_file            Write single output vcf file
-    --zero_coverage_ok              Include variants even if some sample data has zero coverage at that position
-    --step                          Step to start (0=pre, 1=bam-readcount, 2=post)
+    -h                                  Display this message
+    -v                                  Enable verbode mode
+    --keep_intermediate                 Keep intermediate files
+    --filter_variants                   Apply additional filters to variants (other than 'PASS')
+    --strelka_mutect_snv_intersect      Only consider snv variants at intersection of strelka mutect callers
+    --strelka_mutect_indel_intersect    Only consider snv variants at intersection of strelka mutect callers
+    --single_output_file                Write single output vcf file
+    --zero_coverage_ok                  Include variants even if some sample data has zero coverage at that position
+    --step                              Step to start (0=pre, 1=bam-readcount, 2=post)
 }
 
 EOF
@@ -37,7 +36,6 @@ PATIENT=
 SAMPLES=
 VERBOSE=0
 VCF=0
-REPORT=0
 KEEP_INTERMEDIATE=0
 FILTER_VARIANTS=0
 SNV_INTERSECT=0
@@ -49,7 +47,6 @@ STEP=0
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
     case "$1" in 
-        -h) usage ;;
         -v) VERBOSE=1 ;;
         --keep_intermediate) KEEP_INTERMEDIATE=1 ;;
         --report) REPORT=1 ;;
@@ -87,13 +84,11 @@ module load python
 module load bam-readcount >/dev/null 2>&1
 
 
-SAMPLE_ARRAY=$(awk -F',' 'NR>1 {print $2}' "$SAMPLESHEET")
-
 if [[ "$STEP" -eq 0  ]]; then
     print_progress "Runing preprocessing python script." 
     echo ""
 
-    python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -data_dir ${RAW_DIR} -samples ${SAMPLE_ARRAY[@]} \
+    python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -samplesheet ${SAMPLESHEET} -data_dir ${RAW_DIR} \
                                             --additional_filter ${FILTER_VARIANTS} \
                                             --strelka_mutect_snv_intersect ${SNV_INTERSECT} \
                                             --strelka_mutect_indel_intersect ${INDEL_INTERSECT}
@@ -101,13 +96,25 @@ if [[ "$STEP" -eq 0  ]]; then
 fi
 
 
+SAMPLE_ARRAY=()
+
 if [[ "$STEP" -eq 1 ]]; then
     regions="${RAW_DIR}/${PATIENT}_regions.txt"
 
 
-    while IFS=$',' read -r patient sample fastq1 fastq2 status bam bai; do
-    
+    {
+    read  # Skip the header line
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        
+        # Skip empty lines
+        [[ -z "$line" ]] && continue
+
+    # Split the line into fields using awk to handle potential edge cases
+    IFS=',' read -r patient sample fastq1 fastq2 status bam bai <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
+
         if [[ $patient == $PATIENT ]] && [[ "${sample}" != "Normal" ]]; then
+            
+            SAMPLE_ARRAY+=($sample)
 
             bamcounts="${RAW_DIR}/${sample}/${sample}_bamcounts.txt"
 
@@ -127,7 +134,8 @@ if [[ "$STEP" -eq 1 ]]; then
 
         fi
 
-    done < "$SAMPLESHEET"
+    done
+    } < "$SAMPLESHEET"
 
 
 

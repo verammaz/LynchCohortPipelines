@@ -36,7 +36,7 @@ def impute_readcounts(bamcounts_dict, variants_dict):
 
 
 # TODO: handle strelka and mutect vcf counts
-def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_coverage_ok):
+def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
     bamcounts = dict()
     with open(bamcounts_file, 'r') as infile, open(report_file, 'a') as outfile:
         for line in infile.readlines():
@@ -107,9 +107,6 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
                             if ((mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)):
                                 continue
                         outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_depth.strip()}:{mutect_vcf_alt_count.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
-    
-    #if zero_coverage_ok:
-        #impute_readcounts(bamcounts, variants_dict)
 
     return bamcounts
 
@@ -210,7 +207,9 @@ def main():
         sample_to_variants[sample] = variant_to_counts
         print("Done.\n")
 
-    final_variants = set.union(*(set(sample_to_variants[s].keys()) for s in args.samples if s != 'Normal'))
+
+    variant_sets = (set(sample_to_variants[s].keys()) for s in args.samples if s != 'Normal')
+    final_variants = set.union(*variant_sets) if args.zero_coverage_ok else set.intersection(*variant_sets)
     
     out_dir = os.path.join(args.data_dir, "..", "..","VCF", args.patient_id)
 
