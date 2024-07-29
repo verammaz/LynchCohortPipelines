@@ -26,13 +26,13 @@ def main():
         os.makedirs(tree_dir)
     
     vcf_files = []
-    sample_names = [os.path.splitext(os.path.basename(vcf))[0]]
+    sample_names = []
 
     for file_name in os.listdir(args.vcf_dir):
         if file_name.endswith('.vcf'):
             file_path = os.path.join(args.vcf_dir, file_name)
             vcf_files.append(file_path)
-            sample_names.append()
+            sample_names.append(os.path.splitext(os.path.basename(file_path))[0])
 
     ssm_file = os.path.join(tree_dir, f"{args.patient_id}.ssm")
     params_file = os.path.join(tree_dir, f"{args.patient_id}.params.json")
