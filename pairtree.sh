@@ -52,10 +52,10 @@ if [[ -z "$VCF_DIR" ]]; then
     VCF_DIR="${HOME_DIR}/VCF/${PATIENT}"
 fi
 
-python pairtree_prep.py -patient_id $PATIENT \
-                        -vcf_dir $VCF_DIR \
-                        -single_sample_trees $SINGLE_TREES \
-                        ${SEX_FILE:+-patient_sex_info_file $SEX_FILE}
+python "$LYNCH/pairtree_prep.py" -patient_id $PATIENT \
+                                 -vcf_dir $VCF_DIR \
+                                 -single_sample_trees $SINGLE_TREES \
+                                 ${SEX_FILE:+-patient_sex_info_file $SEX_FILE}
 
 script="$LYNCH/pairtree_run.sh"
 chmod +x $script
@@ -66,7 +66,7 @@ print_progress "Submitting pairtree job(s)..."
 
 bsub -J ${job_name} \
      -P ${project} \
-     -q ${queue} \
+     -q premium \
      -n 8 \
      -W 05:00 \
      -oo "${LOG_DIR}/${job_name}.out" \
@@ -82,7 +82,7 @@ if [[ $SINGLE_TREES -eq 1 ]]; then
 
         bsub -J ${job_name} \
             -P ${project} \
-            -q ${queue} \
+            -q premium \
             -n 8 \
             -W 05:00 \
             -oo "${LOG_DIR}/${job_name}.out" \
