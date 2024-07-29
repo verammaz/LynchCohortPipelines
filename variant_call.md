@@ -1,10 +1,9 @@
-# nf-core/sarek 
-
-Visit the official site [here](https://nf-co.re/sarek/3.4.2/) for full details about the nextflow nf-core/sarek pipeline
-
 ## Getting nextflow
 
-1. Navigate to the directory where you want your nextflow executable to be located. Specify the path to this executable in the `NEXTFLOW` variable in your [config](config.sh) file.
+### nf-core/sarek 
+Visit the official site [here](https://nf-co.re/sarek/3.4.2/) for full details about the nextflow nf-core/sarek pipeline.
+
+1. Navigate to the directory where you want your nextflow executable to be located. Specify the path to this executable in the `NEXTFLOW` variable in your `config.sh` file.
 2. Run the following:
 ```bash
 wget -qO- https://get.nextflow.io | bash
@@ -13,7 +12,7 @@ wget -qO- https://get.nextflow.io | bash
 ```bash
 /path/to/nextflow -v
 ```
-4. Edit the file ~/.nextflow/assets/nf-core/sarek/nextflow.config by adding the following chunk:
+4. Edit the file `~/.nextflow/assets/nf-core/sarek/nextflow.config` by adding the following chunk:
 ```bash
 executor {
     name   = 'local'
@@ -21,6 +20,7 @@ executor {
     memory = '64GB'
 }
 ```
+>Note that the number of cpus here should be at least the number of cores requested for the nextflow job. This is specified in the `cores` variable in your `config.sh` file.
 
 # Variant Calling Wrapper Script
 
