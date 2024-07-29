@@ -38,4 +38,5 @@ for s in "${samples[@]}"; do
 
     done 
     } < "$sample_samplesheet"
+done
 
