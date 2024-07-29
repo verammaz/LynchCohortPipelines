@@ -43,6 +43,11 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
             fields = line.split('\t')
             chrom, pos = fields[0], fields[1]
 
+            try:
+                int(pos)
+            except (ValueError, TypeError):
+                continue
+    
             variants = variants_dict[f"{chrom}_{pos}"]  # insertion or SNV
             
             if not variants:
@@ -51,8 +56,13 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
             if not variants: continue
 
             all_counts = fields[4:]
-            print(line)
-            base_counts = {counts.split(":")[0]: counts.split(":")[1] for counts in all_counts}
+            base_counts = dict()
+
+            try:
+                base_counts = {counts.split(":")[0]: counts.split(":")[1] for counts in all_counts}
+            except IndexError:
+                continue
+
             bam_depth = fields[3].strip()
 
             for variant in variants:
