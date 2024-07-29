@@ -51,6 +51,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file, zero_cove
             if not variants: continue
 
             all_counts = fields[4:]
+            print(line)
             base_counts = {counts.split(":")[0]: counts.split(":")[1] for counts in all_counts}
             bam_depth = fields[3].strip()
 
