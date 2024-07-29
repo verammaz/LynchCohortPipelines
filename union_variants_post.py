@@ -210,7 +210,7 @@ def main():
         sample_to_variants[sample] = variant_to_counts
         print("Done.\n")
 
-    final_variants = set.union(*(set(sample_to_variants[s].keys()) for s in samples))
+    final_variants = set.union(*(set(sample_to_variants[s].keys()) for s in args.samples))
     
     out_dir = os.path.join(args.data_dir, "..", "..","VCF", args.patient_id)
 
