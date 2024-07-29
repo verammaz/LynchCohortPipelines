@@ -6,6 +6,8 @@ patient=$1
 samplesheet=$2
 samples=$3
 
+IFS=',' read -r -a sample_array <<< "$samples"
+
 RAW_DIR="$HOME_DIR/Raw/$PATIENT"
 
 > "$samplesheet"

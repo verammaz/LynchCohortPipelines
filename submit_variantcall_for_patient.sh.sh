@@ -100,6 +100,8 @@ wait_condition=${wait_condition%" && "}  # Remove the trailing ' && '
 script2="$LYNCH/variant_call_cleanup.sh"
 chmod +x $script2
 
+sample_names_str=$(IFS=','; echo "${sample_names[*]}")
+
 bsub -w "$wait_condition" \
      -q express \
      -P ${project} \
