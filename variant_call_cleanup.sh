@@ -32,11 +32,11 @@ for s in "${samples[@]}"; do
             echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,na" >> "$samplesheet"
             wrote_normal=1
         
-        else if [[ "$sample" == "$s" ]]; then
+        elif [[ "$sample" == "$s" ]]; then
             echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$vcf" >> "$samplesheet"
         fi
 
-    done 
+    done
     } < "$sample_samplesheet"
 done
 
