@@ -341,6 +341,7 @@ if [ $KEEP_INTERMEDIATE -eq 0 ]; then
         rm -f "${REALIGNED_BAM}" 
         rm -f "${REALIGNED_BAM%.*}.bai" 
         rm -f "${RECAL}"
+    fi
 fi
 
 exit 0
