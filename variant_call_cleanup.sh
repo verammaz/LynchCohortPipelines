@@ -16,7 +16,7 @@ echo "patient,sample,fastq_1,fastq_2,status,bam,bai,vcf" >> "$samplesheet"
 
 wrote_normal=0
 
-for s in "${samples[@]}"; do
+for s in "${sample_array[@]}"; do
 
     sample_samplesheet="${RAW_DIR}/samplesheet_${s}.csv"
 
