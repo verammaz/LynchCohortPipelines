@@ -67,7 +67,7 @@ def main():
         for file in file_handles:
             file.close()
 
-    D = {"clusters" : [], "garbage": [], "samples": [s for s in args.samples]}
+    D = {"clusters" : [], "garbage": [], "samples": [s for s in sample_names]}
 
     with open(params_file, 'w') as f:
         json.dump(D, f)
