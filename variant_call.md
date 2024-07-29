@@ -28,6 +28,11 @@ The script `variant_call.sh` submits nextflow jobs, executing the nf-core/sarek 
 
 ## Usage
 
+```bash
+cd LynchCohortPipelines
+./submit_variantcall_for_patient.sh -p <patient_id> -s <samplesheet.csv>
+```
+
 #### Arguments:
 ```
 -p         Patient identifier. Required.
