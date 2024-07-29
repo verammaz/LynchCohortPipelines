@@ -84,7 +84,7 @@ def main():
             params_file = os.path.join(sample_tree_dir, f"{sample}.params.json")
 
             with open(vcf, 'r') as infile, open(ssm_file, 'w') as outfile:
-                ssm.write("id\tname\tvar_reads\ttotal_reads\tvar_read_prob\n")
+                outfile.write("id\tname\tvar_reads\ttotal_reads\tvar_read_prob\n")
                 for line in infile.readlines():
                     variant = line.split('\t')[2].strip()
                     var_reads = line.split('\t')[10].split(':')[1].strip()
@@ -98,6 +98,8 @@ def main():
             with open(params_file, 'w') as f:
                 json.dump(D, f)
 
+            infile.close()
+            outfile.close()
 
 if __name__ == "__main__":
     main()
