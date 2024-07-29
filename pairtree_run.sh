@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# pairtree path
+scripts_path="/hpc/users/mazeev01/pairtree"
+
+########################################################################################################################
+# input:
+#   patient id 
+#   data_dir
+#
+# output:
+#    $dir/${patient}.ssm
+#    $dir/${patient}.params.json
+#    $dir/${patient}_results.npz
+#    $dir/${patient}_plottree.html
+#    $dir/${patient}_summposterior.html
+########################################################################################################################
+
+# patient id
+ID=$1
+
+# folder path for outputs 
+OUT_DIR=$2
+
+#######################################################################
+# --------------------- Constants: file names ----------------------- #
+#######################################################################
+
+FN_SSM=$ID".ssm"
+
+FN_PARAMS=$ID".params.json"
+
+FN_RESULTS_NPZ=$ID"_results.npz"
+
+FN_HTML_PLOTTREE=$ID"_plottree.html"
+
+FN_HTML_SUMMPOSTERIOR=$ID"_summposterior.html"
+
+#######################################################################
+# --------------------- Start of pipeline  -------------------------- #
+#######################################################################
+
+
+# ------------- Print out welcome message :) -------------- #
+echo ""
+echo "------------------------------------------------------"
+echo "Running pairtree pipeline script for $ID"
+echo "------------------------------------------------------"
+
+
+# -------------------- Create output directory ---------------#
+if [ ! -d "$OUT_DIR" ]; then
+    # Directory does not exist, so create it
+    mkdir -p "$OUT_DIR"
+    echo && echo "Creating output directory"
+else
+    echo && echo "Output directory already exists"
+fi
+
+
+# -------------------- Run clustervars ---------------------- #
+echo && echo "Running bin/clustervars"
+python3 $scripts_path/bin/clustervars $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_PARAMS
+                         
+# -------------------- Run pairtree -------------------- #
+echo && echo "Running bin/pairtree"
+python3 $scripts_path/bin/pairtree --params $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_SSM $OUT_DIR/$FN_RESULTS_NPZ --seed 5555
+                         
+# -------------------- Run plottree -------------------- #
+echo && echo "Running bin/plottree"
+python3 $scripts_path/bin/plottree --runid $PATIENT $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_PLOTTREE
+
+# -------------------- Run summposterior ---------------- #
+echo && echo "Running bin/summposterior"
+python3 $scripts_path/bin/summposterior --runid $ID $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_SUMMPOSTERIOR
+
+# ----------------------- Completion message ------------------------ #
+echo && echo "Completed."
