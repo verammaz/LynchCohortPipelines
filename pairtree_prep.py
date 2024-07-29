@@ -29,7 +29,7 @@ def main():
     sample_names = []
 
     for file_name in os.listdir(args.vcf_dir):
-        print(file_name)
+        if file_name.startswith('.'): continue
         if file_name.endswith('.vcf'):
             file_path = os.path.join(args.vcf_dir, file_name)
             vcf_files.append(file_path)
