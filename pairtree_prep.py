@@ -90,7 +90,7 @@ def main():
                     variant = line.split('\t')[2].strip()
                     var_reads = line.split('\t')[10].split(':')[1].strip()
                     total_reads = line.split('\t')[10].split(':')[0].strip()
-                    var_prob = '0.001' if variants[0].split('_')[0] in ['X', 'Y'] and sex=='male' else '0.499'
+                    var_prob = '0.001' if variant.split('_')[0] in ['X', 'Y'] and sex=='male' else '0.499'
                     outfile.write(f"s{i}\t{variant}\t{var_reads}\t{total_reads}\t{var_prob}\n")
                     i += 1
                 
