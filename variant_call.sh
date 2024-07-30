@@ -123,11 +123,11 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         bam_file="${recal_dir}/${sample}.recal.bam"
         bai_file="${recal_dir}/${sample}.recal.bam.bai"
 
-        mv "$bam_file" "${DATA_DIR}/${sample}"
-        mv "$bai_file" "${DATA_DIR}/${sample}"
+        mv "$bam_file" "${RAW_DIR}/${sample}"
+        mv "$bai_file" "${RAW_DIR}/${sample}"
 
-        bam="${DATA_DIR}/${sample}/$(basename "$bam_file")"
-        bai="${DATA_DIR}/${sample}/$(basename "$bai_file")"
+        bam="${RAW_DIR}/${sample}/$(basename "$bam_file")"
+        bai="${RAW_DIR}/${sample}/$(basename "$bai_file")"
     fi
 
     
@@ -143,17 +143,17 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         strelka_snv_tbi="${strelka_dir}/${sample}_vs_Normal/${sample}_vs_Normal.strelka.somatic_snvs.vcf.gz.tbi"
         mutect_tbi="${mutect_dir}/${sample}_vs_Normal/${sample}_vs_Normal.mutect2.filtered.vcf.gz.tbi"
         
-        mv "$strelka_indel" "${DATA_DIR}/${sample}"
-        mv "$strelka_snv" "${DATA_DIR}/${sample}"
-        mv "$mutect" "${DATA_DIR}/${sample}"
+        mv "$strelka_indel" "${RAW_DIR}/${sample}"
+        mv "$strelka_snv" "${RAW_DIR}/${sample}"
+        mv "$mutect" "${RAW_DIR}/${sample}"
 
-        mv "$strelka_indel_tbi" "${DATA_DIR}/${sample}"
-        mv "$strelka_snv_tbi" "${DATA_DIR}/${sample}"
-        mv "$mutect_tbi" "${DATA_DIR}/${sample}"
+        mv "$strelka_indel_tbi" "${RAW_DIR}/${sample}"
+        mv "$strelka_snv_tbi" "${RAW_DIR}/${sample}"
+        mv "$mutect_tbi" "${RAW_DIR}/${sample}"
 
-        stelka_indel="${DATA_DIR}/${sample}/$(basename "$strelka_indel")"
-        strelka_snv="${DATA_DIR}/${sample}/$(basename "$strelka_snv")"
-        mutect="${DATA_DIR}/${sample}/$(basename "$mutect")"
+        stelka_indel="${RAW_DIR}/${sample}/$(basename "$strelka_indel")"
+        strelka_snv="${RAW_DIR}/${sample}/$(basename "$strelka_snv")"
+        mutect="${RAW_DIR}/${sample}/$(basename "$mutect")"
 
         vcf_files="$strelka_indel|$strelka_snv|$mutect"
 
