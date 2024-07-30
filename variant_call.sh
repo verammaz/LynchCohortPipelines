@@ -163,8 +163,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,na" >> "$TEMP_SAMPLESHEET"    
     fi
 
-done
-} < $SAMPLE_SAMPLESHEET
+done } < $SAMPLE_SAMPLESHEET
 
 
 # Replace the original sample sheet with the modified one
