@@ -42,7 +42,7 @@ def main():
 
     if args.patient_sex_info_file is not None:
         df = pd.read_csv(args.patient_sex_info_file, sep='\t')
-        sex = df[df['patient'] == args.patient_id].loc['sex']
+        sex = df.loc[df['patient'] == args.patient_id, 'sex'].values[0]
     
     # Create combined tree input files
     with open(ssm_file, 'w') as ssm:
