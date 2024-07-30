@@ -73,7 +73,7 @@ bsub -J ${job_name} \
      -R "rusage[mem=4000]" \
      -oo "${LOG_DIR}/${job_name}.out" \
      -eo "${LOG_DIR}/${job_name}.err" \
-     ${script} ${PATIENT} "${HOME_DIR}/Pairtree/${PATIENT}"
+     ${script} ${PAIRTREE} ${PATIENT} "${HOME_DIR}/Pairtree/${PATIENT}"
 
 
 if [[ $SINGLE_TREES -eq 1 ]]; then

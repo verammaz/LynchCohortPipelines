@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# pairtree path
-scripts_path="/hpc/users/mazeev01/pairtree"
+scripts_path=$1
 
 ########################################################################################################################
 # input:
@@ -17,10 +16,10 @@ scripts_path="/hpc/users/mazeev01/pairtree"
 ########################################################################################################################
 
 # patient id
-ID=$1
+ID=$2
 
 # folder path for outputs 
-OUT_DIR=$2
+OUT_DIR=$3
 
 #######################################################################
 # --------------------- Constants: file names ----------------------- #
@@ -68,7 +67,7 @@ python3 $scripts_path/bin/pairtree --params $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_SSM
                          
 # -------------------- Run plottree -------------------- #
 echo && echo "Running bin/plottree"
-python3 $scripts_path/bin/plottree --runid $PATIENT $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_PLOTTREE
+python3 $scripts_path/bin/plottree --runid $ID $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_PLOTTREE
 
 # -------------------- Run summposterior ---------------- #
 echo && echo "Running bin/summposterior"
