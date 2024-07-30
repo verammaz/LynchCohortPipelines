@@ -41,7 +41,7 @@ def main():
     sex = ''
 
     if args.patient_sex_info_file is not None:
-        df = pd.read_csv(args.file_info, sep='\t')
+        df = pd.read_csv(args.patient_sex_info_file, sep='\t')
         sex = df[df['patient'] == args.patient_id].loc['sex']
     
     # Create combined tree input files
