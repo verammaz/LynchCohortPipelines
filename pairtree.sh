@@ -8,16 +8,16 @@ set -e
 # Function to print usage
 usage() {
     cat << EOF
-Usage: $0 [OPTIONS] --patient <patient_id> --data <data_dir>
+Usage: $0 [OPTIONS] -p <patient_id>
 
 Required Arguments:
-    --patient <patient_id>                  Patient id
+    -p <patient_id>                         Patient id
 Options:
     -h                                      Display this message
     -v                                      Enable verbode mode
-    -vcf_dir </path/to/VCF/Paytient>        Directory with all sample VCF files for patient
-    --single_sample_trees                   Create single sample trees
+    -vcf_dir </path/to/VCF/Patient>         Directory with all sample VCF files for patient
     -patient_sex_file <patient_sex.txt>     File with patient sex info
+    --single_sample_trees                   Create single sample trees
 }
 
 EOF
