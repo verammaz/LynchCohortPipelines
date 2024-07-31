@@ -151,11 +151,11 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         mv "$strelka_snv_tbi" "${RAW_DIR}/${sample}"
         mv "$mutect_tbi" "${RAW_DIR}/${sample}"
 
-        stelka_indel="${RAW_DIR}/${sample}/$(basename "$strelka_indel")"
-        strelka_snv="${RAW_DIR}/${sample}/$(basename "$strelka_snv")"
-        mutect="${RAW_DIR}/${sample}/$(basename "$mutect")"
+        stelka_indel_file="${RAW_DIR}/${sample}/$(basename "$strelka_indel")"
+        strelka_snv_file="${RAW_DIR}/${sample}/$(basename "$strelka_snv")"
+        mutect_file="${RAW_DIR}/${sample}/$(basename "$mutect")"
 
-        vcf_files="$strelka_indel|$strelka_snv|$mutect"
+        vcf_files="$strelka_indel_file|$strelka_snv_file|$mutect_file"
 
         echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$vcf_files" >> "$TEMP_SAMPLESHEET"    
 
