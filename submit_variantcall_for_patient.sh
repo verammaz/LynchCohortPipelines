@@ -103,7 +103,7 @@ chmod +x $script2
 sample_names_str=$(IFS=','; echo "${sample_names[*]}")
 
 bsub -w "$wait_condition" \
-     -q express \
+     -q long \
      -n 1 \
      -P ${project} \
      -W 00:20 \

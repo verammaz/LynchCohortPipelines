@@ -78,20 +78,20 @@ if [[ $STEP -eq 0 ]]; then
     step="mapping"
 fi
 
-#$NEXTFLOW run nf-core/sarek \
-#            -profile singularity \
-#            --wes \
-#            --input $SAMPLE_SAMPLESHEET \
-#            --outdir $OUT_DIR  \
-#            --step $step \
-#            --skip_tools baserecalibrator_report,markduplicates_report \
-#            --save_mapped \
-#            --save_output_as_bam \
-#            --tools strelka,mutect2 \
-#            --pon $PON \
-#            --only_paired_variant_calling \
-#            --genome $GENOME \
-#            --max_cpus 48 \
+$NEXTFLOW run nf-core/sarek \
+            -profile singularity \
+            --wes \
+            --input $SAMPLE_SAMPLESHEET \
+            --outdir $OUT_DIR  \
+            --step $step \
+            --skip_tools baserecalibrator_report,markduplicates_report \
+            --save_mapped \
+            --save_output_as_bam \
+            --tools strelka,mutect2 \
+            --pon $PON \
+            --only_paired_variant_calling \
+            --genome $GENOME \
+            --max_cpus 48 \
 
 print_progress "Variant calilng complete."
 
