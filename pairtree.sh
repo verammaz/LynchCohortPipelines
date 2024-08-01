@@ -91,7 +91,7 @@ if [[ $SINGLE_TREES -eq 1 ]]; then
             -R "rusage[mem=4000]" \
             -oo "${LOG_DIR}/${job_name}.out" \
             -eo "${LOG_DIR}/${job_name}.err" \
-            ${script} ${sample} "${HOME_DIR}/Pairtree/${sample}"
+            ${script} ${PAIRTREE} ${sample} "${HOME_DIR}/Pairtree/${sample}"
 
     done
 fi
