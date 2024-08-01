@@ -46,6 +46,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
             try:
                 int(pos)
             except (ValueError, TypeError):
+                print(f"Warning: unable to parse bamcounts line:\n {line}.\n Continuing.")
                 continue
     
             variants = variants_dict[f"{chrom}_{pos}"]  # insertion or SNV
@@ -61,6 +62,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
             try:
                 base_counts = {counts.split(":")[0]: counts.split(":")[1] for counts in all_counts}
             except IndexError:
+                print(f"Warning: unable to parse bamcounts line:\n {line}.\n Continuing.")
                 continue
 
             bam_depth = fields[3].strip()

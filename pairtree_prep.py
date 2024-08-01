@@ -78,7 +78,7 @@ def main():
 
         for vcf, sample in zip(vcf_files, sample_names):
 
-            sample_tree_dir = os.path.join(tree_dir, sample)
+            sample_tree_dir = os.path.join(tree_dir, '..', sample)
             if not os.path.exists(sample_tree_dir): os.mkdir(sample_tree_dir)
             ssm_file = os.path.join(sample_tree_dir, f"{sample}.ssm")
             params_file = os.path.join(sample_tree_dir, f"{sample}.params.json")

@@ -7,14 +7,14 @@ project='acc_FLAI'
 # specify cores
 cores=24
 
-# specify path to the fastq_to_bam singularity image file
-CONTAINER_FASTQ2BAM='~/fastq2bam_0.3.sif'
-
 #################################################################################
 
 
 ####################################### Reference ###############################
-# specify reference genome
+##### Ensure that reference files are compatible! 
+#################################################################################
+
+# specify reference genome (GATK.GRCh38, GATK.GRCh37, Ensembl.GRCh37, NCBI.GRCh38)
 GENOME="GATK.GRCh37"
 
 # specify file path for reference fasta file
@@ -52,7 +52,20 @@ PAIRTREE='/hpc/users/mazeev01/pairtree'
 #specify path to LynchCohortPipelines folder
 LYNCH='/hpc/users/mazeev01/LynchCohortPipelines'
 
+# specify path to the fastq_to_bam singularity image file
+CONTAINER_FASTQ2BAM='~/fastq2bam_0.3.sif'
+
+# specify path to snpeff
+SNPEFF='~/snpEff.v4.3t/'
+
+# specify path to netmhc
+NETMHC='~/netMHCpan-4.1/'
+
+# specify path to OpiType config.ini file
+OPTITYE_CONFIG='/sc/arion/projects/MSIH-seq/data/MattBrown/Whole_Exome_Sequencing/MattBrownWESAug2023/optitypeResults/config.ini'
+
 #################################################################################
+
 
 ######### Directories ( make sure these have enough disk space ! ) ###############
 
@@ -87,6 +100,7 @@ function create_directory() {
     if [ ! -d "$dir" ]; then
         mkdir -p "$dir"
         echo "Directory created: $dir"
+    fi
 }
 
 

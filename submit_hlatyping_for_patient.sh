@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# Get access to global variables
 source ./config.sh
-
-# Exit immediately if command exits with non-zero status
-set -e
 
 # Function to print usage
 usage() {
@@ -29,7 +25,6 @@ EOF
 PATIENT=
 SAMPLESHEET=
 VERBOSE=0
-STEP=0
 
 # parse command line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -38,25 +33,14 @@ while [[ "$#" -gt 0 ]]; do
         -v) VERBOSE=1 ;;
         -p) PATIENT="$2"; shift ;;
         -s) SAMPLESHEET="$2"; shift ;;
-        --step) STEP="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
 done
 
-RAW_DIR="$HOME_DIR/Raw/$PATIENT"
+script=$LYNCH/run_opitype.sh
 
-script="$LYNCH/fastq_to_bam.sh"
 chmod +x $script
-
-# Create a temporary file to store the modified sample sheet
-TEMP_SAMPLESHEET=$(mktemp)
-
-echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$TEMP_SAMPLESHEET"
-
-
-module purge
-module load singularity/3.6.4
 
 {
 read  # Skip the header line
@@ -70,9 +54,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     echo $sample
     if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
 
-        job_name="fastq_to_bam_$sample"
-        create_directory "$RAW_DIR/$sample"
-        output_prefix="$RAW_DIR/$sample/$sample"
+        job_name="optitype_$patient"
 
         bsub -J ${job_name} \
                 -P ${project} \
@@ -84,20 +66,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
                 -q premium \
                 -oo "${LOG_DIR}/${job_name}.out" \
                 -eo "${LOG_DIR}/${job_name}.err" \
-                singularity exec ${CONTAINER_FASTQ2BAM} ${script} -r ${fastq1},${fastq2} -o ${output_prefix} --patient ${PATIENT} --sample ${sample} --step ${STEP} --threads ${cores} --post_process
-
-
-        # Overwrite bam and bai with new paths
-        bam="${output_prefix}.bam"
-        bai="${output_prefix}.bai"
-
-        # Write the updated line to the temporary file
-        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai" >> "$TEMP_SAMPLESHEET"
-    
+                ${script} -r1 ${fastq1} -r2 ${fastq2} $patient $TEMP_DIR
     fi
 
 done
 } < "$SAMPLESHEET"
-
-# Replace the original sample sheet with the modified one
-mv "$TEMP_SAMPLESHEET" "$SAMPLESHEET"

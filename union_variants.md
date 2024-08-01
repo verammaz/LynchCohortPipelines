@@ -19,13 +19,13 @@ Run the following in the terminal:
 
 ```bash
 cd LynchCohortPipeline
-source ./config
+source ./config.sh
 patient_id= #specify patient id
 samplesheet= #specify path to samplesheet
 job_name="union_variants_${patient_id}"
 bsub -J ${job_name} \
      -P ${project} \
-     -q ${queue} \
+     -q premium \
      -W 20:00 \
      -n 8 \
      -oo ${LOG_DIR}/{$job_name}.out \

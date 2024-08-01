@@ -48,10 +48,14 @@ Specify paths and global variables in the config.sh file!
     │   ├── neoantigens_<Patient>.txt
     │   ├── neoantigens_other_<Patient>.txt 
     │   └── ... 
+    ├── HLA/  
+    │   ├── HLA_calls.txt                      # Tab-separated file with patient HLA calls   
     ├── Plots/                                 # Directory for visuals
     │   ├── TreePlots/                         # Directory for patient tree plots
     │   ├── VariantPlot/                       # Directory for patient variant plots
     │
+    ├── sample_info.txt                        # Tab-separated file with sample information
+    ├── patient_sex.txt                        # [Optional] file with lines ('patient' \t 'sex')    
     ├── cfit_config.json                       # Config file for CFIT
     ├── cfit_mapping.json                      # Mapping file for CFIT
     └── ... 
@@ -69,3 +73,16 @@ Note that you should run the pipelines *per patient*.
 
 ### 3: Get union of variants across samples
 [union variants readme](union_variants.md)
+
+### 4: Phylogenetic reconstruction (pairtree)
+
+### 5: Neoantigen pipeline and bioinformatic preparation of datasets for fitness modeling (NeoPipe)
+
+### 6: Cancer fitness modeling (CFIT)
+
+
+# Additional scripts
+
+### Variant annotation with Varcode
+
+### Variant plotting

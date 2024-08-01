@@ -44,5 +44,5 @@ cd LynchCohortPipelines
 ```
 
 #### Options:
-`-patient_sex_file` Tab-deliminated file with 'patient' and 'sex' columns (multiple patients can be in same file). If this file is not provided, sex will be inferred based on whether there are any Y chromosome variants.
-`--single_sample_trees` Flag to produce single sample trees.
+`-patient_sex_file`: Tab-deliminated file with 'patient' and 'sex' columns (multiple patients can be in same file). If this file is not provided, sex will be inferred based on whether there are any Y chromosome variants.
+`--single_sample_trees`: Flag to produce single sample trees.
