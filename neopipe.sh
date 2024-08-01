@@ -2,8 +2,8 @@
 
 source ./config.sh
 
-export PATH=$PATH:$HOME/snpEff.v4.3t/
-export PATH=$PATH:$HOME/netMHCpan-4.1/
+export PATH=$PATH:$SNPEFF
+export PATH=$PATH:$NETMHC
 export R_HOME=/opt/hpc/packages/minerva-centos7/modulefiles/R/4.0.2
 module load R/4.0.2
 module load python/3.7.3
