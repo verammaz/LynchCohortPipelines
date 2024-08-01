@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ~/LynchCohortPipelines/config.sh
+source ./config.sh
 
 export PATH=$PATH:$HOME/snpEff.v4.3t/
 export PATH=$PATH:$HOME/netMHCpan-4.1/
@@ -72,7 +72,7 @@ else
 fi
 
 
-python ~/NeoPipe/bin/run_SnpEff_per_patient.py -patient $PATIENT \
+python $NEOPIPE/bin/run_SnpEff_per_patient.py -patient $PATIENT \
                                                -genome $genome \
                                                -dir $HOME_DIR \
                                                -ns $NS -force
@@ -85,7 +85,7 @@ if [[ ! -f $HLA ]]; then
     exit 1
 fi
 
-python ~/NeoPipe/bin/compute_neoantigens_per_patient.py -patient $PATIENT \
+python $NEOPIPE/bin/compute_neoantigens_per_patient.py -patient $PATIENT \
                                                        -hla $HLA \
                                                        -dir $HOME_DIR \
                                                        -kd_thr 50000 \
@@ -94,7 +94,7 @@ python ~/NeoPipe/bin/compute_neoantigens_per_patient.py -patient $PATIENT \
 
 ### Prep CFIT config and mapping files
 
-python ~/matt_lynch/prep_cfit_configs.py -patient_id $PATIENT \
+python $LYNCH/prep_cfit_configs.py -patient_id $PATIENT \
                                    -sample_info $SAMPLE_INFO \
                                    -hdir $HOME_DIR \
                                    -single_sample_trees $SINGLE_TREES \
