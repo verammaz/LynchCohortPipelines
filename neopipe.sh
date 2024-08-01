@@ -19,12 +19,12 @@ Usage: $0 [OPTIONS] -p <patient_id> -sample_info <sample_info.txt>
 
 Required Arguments:
     -p <patient_id>                         Patient id
+    -sample_info <sample_info.txt>          File with sample info
 Options:
     -h                                      Display this message
     -v                                      Enable verbode mode
     -ns <i-j>                               Range of neoantigen peptide lengths
     -kd <i>                                 Kd threshold for neoantigen computation.
-    -genome <genome>                        Reference genome
     -hla <hla.txt>                          File with patient hla calls
     --single_sample_trees       
 
@@ -36,7 +36,6 @@ VERBOSE=0
 PATIENT=
 NS=9
 HLA=$HOME_DIR/HLA/HLA_calls.txt
-REF=$GENOME
 KD=50000
 SAMPLE_INFO=
 SINGLE_TREES=0
@@ -62,9 +61,9 @@ done
 ### Run snpeff ####################
 
 genome=
-if [[ "$REF" == *"37"* ]]; then
+if [[ "$GENOME" == *"37"* ]]; then
     genome="GRCh37.75"
-elif [[ "$REF" == *"38"* ]]; then
+elif [[ "$GENOME" == *"38"* ]]; then
     genome="GRCh38.86"
 else 
     echo "Error: Unkown genome $GENOME. Available options are grch37 and grch38."
