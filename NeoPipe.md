@@ -1,16 +1,10 @@
 
 ## netMHCpan-4.1 Installation
 
-Follow the instructions to get the download here: https://services.healthtech.dtu.dk/services/NetMHCpan-4.1/
-
-You want version 4.1b Linux. 
+Follow the instructions to get the download here: https://services.healthtech.dtu.dk/services/NetMHCpan-4.1/.
 
 
-1. Once netMHCpan-4.1 is downloaded locally, you can `scp` the .tar folder to your Minerva home directory. Then, run:
-```bash
-cat netMHCpan-4.1.<unix>.tar.gz | uncompress | tar xvf -
-```
-This will produce a directory 'netMHCpan-4.1'.
+1. Once netMHCpan-4.1 is downloaded locally, you can `scp` the .tar folder to your Minerva home directory and untar it. This will produce a directory 'netMHCpan-4.1'.
 
 2. Now, run: 
 ```bash
@@ -39,7 +33,7 @@ Run the following:
 
 ```bash
 wget https://sourceforge.net/projects/snpeff/files/snpEff_v4_3t_core.zip
-unzip snpEff_v4_3t_core.zip snpEff.v4.3t
+unzip snpEff_v4_3t_core.zip
 rm snpEff_v4_3t_core.zip
 ```
 
