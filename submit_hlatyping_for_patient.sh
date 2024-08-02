@@ -14,7 +14,7 @@ Required Arguments:
 Options:
     -h                              Display this message
     -v                              Enable verbode mode
-    --step                          Step to start from (0=alignment, 1=markdup, 2=indelrealign, 3=baserecal)
+    --normal_only                   Run hla typing only on the noraml fastq
 }
 
 EOF
@@ -25,6 +25,7 @@ EOF
 PATIENT=
 SAMPLESHEET=
 VERBOSE=0
+NORMAL_ONLY=0
 
 # parse command line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -33,6 +34,7 @@ while [[ "$#" -gt 0 ]]; do
         -v) VERBOSE=1 ;;
         -p) PATIENT="$2"; shift ;;
         -s) SAMPLESHEET="$2"; shift ;;
+        --normal_only) NORMAL_ONLY=1 ;; 
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
@@ -52,21 +54,25 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     IFS=',' read -r patient sample fastq1 fastq2 status <<< "$(awk -F',' '{print $1,$2,$3,$4,$5}' OFS=',' <<< "$line")"
     
     echo $sample
-    if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
+    if [[ $patient == $PATIENT ]]; then
 
-        job_name="optitype_$patient"
+        if [[ "$sample" == 'Normal' ]] || [[ $NORMAL_ONLY -eq 0 ]]; then
+            
+            job_name="optitype_${patient}_${sample}"
 
-        bsub -J ${job_name} \
-                -P ${project} \
-                -n ${cores} \
-                -M 32000 \
-                -R span[hosts=1] \
-                -R "rusage[mem=4000]" \
-                -W 40:00 \
-                -q premium \
-                -oo "${LOG_DIR}/${job_name}.out" \
-                -eo "${LOG_DIR}/${job_name}.err" \
-                ${script} -r1 ${fastq1} -r2 ${fastq2} $patient $TEMP_DIR
+            bsub -J ${job_name} \
+                    -P ${project} \
+                    -n ${cores} \
+                    -M 32000 \
+                    -R span[hosts=1] \
+                    -R "rusage[mem=4000]" \
+                    -W 40:00 \
+                    -q premium \
+                    -oo "${LOG_DIR}/${job_name}.out" \
+                    -eo "${LOG_DIR}/${job_name}.err" \
+                    ${script} -r1 ${fastq1} -r2 ${fastq2} $patient "${patient}_${sample}"
+       
+       fi
     fi
 
 done

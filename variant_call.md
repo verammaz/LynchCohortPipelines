@@ -52,3 +52,13 @@ Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,fu
 ```
 
 > Note that you don't need the bam and bai columns if running from the mapping step (step=0).
+
+### Cleanup (important for next step!)
+
+If `${HOME_DIR}/Raw/Patient` has separate `samplesheet_<sample>.csv` files and the `samplesheet.csv` isn't updated to include a vcf column (and bam, bai if applicable), run the following:
+```bash
+cd LynchCohortPipelines
+./variantcall_cleanup.sh <patient_id> <path/to/samplesheet.csv> <s1,s2,...>
+```
+
+Note that the arguments are positional and the last argument is a list of (non-normal) sample ids, separated by a comma without a spaces.

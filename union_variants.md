@@ -3,7 +3,7 @@ This script takes a union of variants reported in VCF file(s),across multiple sa
 
 ## Pipeline Overview:
 
-0. Pre-Process: Extract all variants from all sample vcf files and construct a `regions.txt` file with lines "chrom start end".
+0. Pre-Process: Extract all variants from all sample vcf files and construct a `regions.txt` file with lines "chrom start end". Additional filtering of variants is done here.
 1. Bam-readcount: Run the bam-readcount software on each sample bam file, passing in `regions.txt` file as input.
 2. Post-Process: Extract bam-readcount outputs and write final VCF file(s).
 
