@@ -48,7 +48,7 @@ cd LynchCohortPipelines
 ```csv
 patient,sample,fastq_1,fastq_2,status,bam,bai
 Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0,full/path/to/Normal.bam,full/path/to/Normal.bai
-Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,full/path/to/S1.bam,full/path/to/S1.bai,
+Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,full/path/to/S1.bam,full/path/to/S1.bai
 ```
 
 > Note that you don't need the bam and bai columns if running from the mapping step (step=0).
