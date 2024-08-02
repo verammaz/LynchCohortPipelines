@@ -48,11 +48,13 @@ Add the path to this snpeff folder in your config.sh file in the variable `SNPEF
 
 After cloning the git repository, run:
 ```bash
+module load python/3.7.3
 cd NeoPipe
 pip install . --user
 ```
 To update, run:
 ```bash
+module load python/3.7.3
 cd NeoPipe
 git pull
 pip install . --user

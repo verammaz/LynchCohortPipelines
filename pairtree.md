@@ -14,19 +14,15 @@ For more details and full information about pairtree, visit:
 
 ## Installation on Minerva
 
-1. Clone the repository:
 ```bash
 cd ~/
-git clone https://github.com/jwintersinger/pairtree  
-```
-
-2. Download and build the C code:
-```bash
+git clone https://github.com/jwintersinger/pairtree
 cd pairtree/lib
 git clone https://github.com/ethanumn/projectppm
 cd projectppm
 bash make.sh
 ```
+
 
 ## Running pairtree
 
