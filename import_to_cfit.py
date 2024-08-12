@@ -3,7 +3,6 @@ import os
 import json
 
 from cfit.util.Analysis import Analysis
-from cfit.plot.PlotTree import PlotTree
 from cfit.plot.PlotTreeAll import PlotTreeAll
 
 if __name__ == '__main__':

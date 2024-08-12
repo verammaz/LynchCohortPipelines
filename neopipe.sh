@@ -7,6 +7,7 @@ export PATH=$PATH:$NETMHC
 export R_HOME=/opt/hpc/packages/minerva-centos7/modulefiles/R/4.0.2
 module load R/4.0.2
 module load python/3.7.3
+export PYTHONPATH=$HOME/.local/lib/python3.7/site-packages:$PYTHONPATH
 
 
 # Exit immediately if command exits with non-zero status

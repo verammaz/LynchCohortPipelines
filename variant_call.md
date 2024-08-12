@@ -61,4 +61,4 @@ cd LynchCohortPipelines
 ./variantcall_cleanup.sh <patient_id> <path/to/samplesheet.csv> <s1,s2,...>
 ```
 
-Note that the arguments are positional and the last argument is a list of (non-normal) sample ids, separated by a comma without a spaces.
+Note that the arguments are positional and the last argument is a list of (non-normal) sample ids, separated by a comma without any spaces.
