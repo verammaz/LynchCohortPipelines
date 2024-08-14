@@ -80,8 +80,6 @@ if __name__ == "__main__":
         
         hla_df = pd.read_csv(args.hla, sep="\t", header=None)
         hlas = hla_df[hla_df[0] == args.patient_id][1].to_list()[0]
-        print(hla_df)
-        print(hlas)
         for s in sample_info['Sample'].tolist():
             new_row = pd.DataFrame([[str(s), hlas]])
             hla_df = pd.concat([hla_df, new_row], ignore_index=True)

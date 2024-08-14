@@ -40,7 +40,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-script=$LYNCH/run_opitype.sh
+script=$LYNCH/opitype_run.sh
 
 chmod +x $script
 
