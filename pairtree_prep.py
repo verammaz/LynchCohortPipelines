@@ -56,6 +56,9 @@ def main():
             file_handles[0].seek(0)
             file_handles[0].readline()
         for lines in zip(*file_handles):
+            for line in lines:
+                if len(line.split('\t')) < 2: 
+                    print(line)
             variants = [line.split('\t')[2].strip() for line in lines]
             assert all(variant == variants[0] for variant in variants)
             var_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
