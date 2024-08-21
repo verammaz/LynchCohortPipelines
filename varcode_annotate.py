@@ -17,6 +17,7 @@ if __name__ == "__main__":
         print(root, dirs)
         for file in files:
             print(file)
+            if file.startswith('.'): continue
             if 'ann' not in file and 'template' not in file and file.endswith('.vcf'):
                 print(file)
                 #lesion = os.path.basename(file).split('.')[0]
