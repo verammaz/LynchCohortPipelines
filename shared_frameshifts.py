@@ -5,6 +5,9 @@ import itertools
 import pandas as pd
 import gzip
 from tqdm import tqdm 
+import logging
+import math
+
 
 """
 1) Script to input a list of lesions and then compare shared frameshift variant at loci across either VCF or neopipe (4_4636272626_GA_G)
@@ -33,6 +36,9 @@ def check_raw(lesion, patient, hdir, variant):
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-hdir', required=True, help="path to home directory with /VCF folder")
     parser.add_argument('-lesions', required=True, help="comma-separated list of lesion ids")
@@ -57,10 +63,17 @@ def main():
     variant_to_nmd = dict()
 
     for lesion, patient in zip(lesions, patients):
+        logging.info(f'Lesion {lesion}')
+
         fs_variants = defaultdict(list)
+        
         with open(os.path.join(args.hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
-            for snpeff_line, varcode_line in tqdm(zip(snpeff_file.readlines(), varcode_file.readlines()),
-                                          total=min(len(snpeff_file.readlines()), len(varcode_file.readlines())), desc="Reading vcf files"):
+            snpeff_lines = snpeff_file.readlines()
+            varcode_lines = varcode_file.readlines()
+            total_lines = min(len(snpeff_lines), len(varcode_lines))
+
+            for snpeff_line, varcode_line in tqdm(zip(snpeff_lines, varcode_lines), total=total_lines, desc="Processing vcf lines", unit="line"):
+            
                 assert(snpeff_line.split('\t')[i] == varcode_line.split('\t')[i] for i in range(len(snpeff_line.split('\t'))) if i != 7)
                 if snpeff_line.startswith('#'): continue
                 variant = snpeff_line.split('\t')[2]
@@ -71,6 +84,9 @@ def main():
                 elif args.check_raw and not check_raw(lesion, patient, args.hdir, variant):
                     print(f"Warning: variant {variant} not present in raw (strelka/mutect) vcf file for {lesion}")
                     continue
+
+                variant_to_nmd[('_').join(variant.split('_')[0:2])] = 1 if 'nonsense_mediated_decay' in snpeff_line.split('\t')[7] else 0
+
                 if args.fs_annotation:
                     snpeff_ann, varcode_ann = snpeff_line.split('\t')[7], varcode_line.split('\t')[7]
                     if 'frameshift' in snpeff_ann or 'FrameShift' in varcode_ann:
@@ -92,12 +108,13 @@ def main():
 
         for n in range(2, len(lesions) + 1):
             combinations = itertools.combinations(lesions, n)
-            for subset in tqdm(combinations, total=len(combinations), desc=f"Processing combinations for n={n}"):
+            for subset in tqdm(combinations, total=math.comb(len(lesions), n), desc=f"Processing combinations for n={n}"):
                 variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
                 shared_variants = list(set.intersection(*variant_sets))
                 df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
                 for s in subset:
                     df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
+                df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
                 df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
    
 
