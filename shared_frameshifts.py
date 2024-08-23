@@ -125,31 +125,31 @@ def main():
                     df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
                 df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
                 df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
- 
+    writer.close()
 
 
-        if args.shared_fs_xl is not None:
-            df = pd.read_excel(args.shared_fs_xl)
-            chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
-            coords = list(df['COORD_HG19'])
-            genes = list(df['GENE'])
-            out_df = pd.DataFrame()
-            with pd.ExcelFile(out_file, engine='openpyxl') as xl:
-                if '46 varaints' in xl.sheet_names:
-                    out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
-                else:
-                    out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
-                    out_df['gene_id'] = genes
-                for lesion in lesions:
-                    if f'lesion_{lesion}' in out_df.columns: continue
-                    fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
-                    out_df[f'lesion_{lesion}'] = fs_presence
-                
-                plus_df = df.applymap(lambda x: 1 if x == '+' else 0)
-                out_df.loc['total_variants'] = plus_df.sum(axis=0)
-                out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
+    if args.shared_fs_xl is not None:
+        df = pd.read_excel(args.shared_fs_xl)
+        chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
+        coords = list(df['COORD_HG19'])
+        genes = list(df['GENE'])
+        out_df = pd.DataFrame()
+        with pd.ExcelFile(out_file, engine='openpyxl') as xl:
+            if '46 varaints' in xl.sheet_names:
+                out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
+            else:
+                out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
+                out_df['gene_id'] = genes
+            for lesion in lesions:
+                if f'lesion_{lesion}' in out_df.columns: continue
+                fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
+                out_df[f'lesion_{lesion}'] = fs_presence
+            
+            plus_df = df.applymap(lambda x: 1 if x == '+' else 0)
+            out_df.loc['total_variants'] = plus_df.sum(axis=0)
+            out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
 
-            out_df.to_excel(xl, index=True, sheet_name='46 variants')
+        out_df.to_excel(xl, index=True, sheet_name='46 variants')
 
 if __name__ == "__main__":
     main()
