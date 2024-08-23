@@ -13,6 +13,15 @@ import math
 1) Script to input a list of lesions and then compare shared frameshift variant at loci across either VCF or neopipe (4_4636272626_GA_G)
 2) Script to input a list of lesions and output which of the 46 variants are present in any lesion in that list (see excel sheet)
 """
+def comb(n, k):
+    """Calculate the number of combinations (n choose k)."""
+    if k > n:
+        return 0
+    if k == 0 or k == n:
+        return 1
+    numerator = math.factorial(n)
+    denominator = math.factorial(k) * math.factorial(n - k)
+    return numerator // denominator
 
 def check_raw(lesion, patient, hdir, variant):
     chrom, pos, ref, alt = variant.split('_')
@@ -108,7 +117,7 @@ def main():
 
         for n in range(2, len(lesions) + 1):
             combinations = itertools.combinations(lesions, n)
-            for subset in tqdm(combinations, total=math.comb(len(lesions), n), desc=f"Processing combinations for n={n}"):
+            for subset in tqdm(combinations, total=comb(len(lesions), n), desc=f"Processing combinations for n={n}"):
                 variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
                 shared_variants = list(set.intersection(*variant_sets))
                 df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
