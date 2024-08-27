@@ -36,7 +36,8 @@ def get_raw_variants_raw(lesion, patient, hdir):
         for line in f.readlines():
             if line.startswith('#'): continue
             if 'PASS' in line:
-                variant = f"{line.split('\t')[0]}_{line.split('\t')[1]}_{line.split('\t')[3]}_{line.split('\t')[4]}"
+                chrom, pos, ref, alt = line.split('\t')[0], line.split('\t')[1], line.split('\t')[3], line.split('\t')[4]
+                variant = f"{chrom}_{pos}_{ref}_{alt}"
                 variants.add(variant)
     return variants
 
