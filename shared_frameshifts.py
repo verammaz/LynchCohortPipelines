@@ -124,9 +124,9 @@ def main():
                 df = pd.DataFrame()
                 if len(shared_variants):
                     df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
-                for s in subset:
-                    df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
-                df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
+                    for s in subset:
+                        df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
+                    df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
                 df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
     writer.close()
 
