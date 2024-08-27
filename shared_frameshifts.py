@@ -134,16 +134,14 @@ def main():
 
 
     if args.shared_fs_xl is not None:
+        out_file = os.path.join(outdir, '46_variants.xlsx')
         df = pd.read_excel(args.shared_fs_xl)
         chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
         coords = list(df['COORD_HG19'])
         genes = list(df['GENE'])
         out_df = pd.DataFrame()
-        excel_workbook = load_workbook(out_file)
-        writer = pd.ExcelWriter(out_file, engine='openpyxl')
-        writer.book = excel_workbook
-        if '46 varaints' in [x.title for x in excel_workbook.worksheets]:
-                out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
+        if os.path.exists(out_file):
+            out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
         else:
             out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
             out_df['gene_id'] = genes
@@ -155,8 +153,10 @@ def main():
         plus_df = df.applymap(lambda x: 1 if x == '+' else 0)
         out_df.loc['total_variants'] = plus_df.sum(axis=0)
         out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
-
+        
+        writer = pd.ExcelWriter(out_file, engine='openpyxl')
         out_df.to_excel(writer, index=True, sheet_name='46 variants')
+        writer.close()
 
 if __name__ == "__main__":
     main()
