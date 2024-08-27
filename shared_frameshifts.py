@@ -23,7 +23,7 @@ def comb(n, k):
     denominator = math.factorial(k) * math.factorial(n - k)
     return numerator // denominator
 
-def get_raw_variants_raw(lesion, patient, hdir):
+def get_raw_variants(lesion, patient, hdir):
     variants = set()
     raw_vcf_files = [os.path.join(hdir, 'Raw', patient, lesion, f'{lesion}_vs_Normal.mutect2.filtered.vcf.gz'),
                      os.path.join(hdir, 'Raw', patient, lesion, f'{lesion}_vs_Normal.strelka.somatic_indels.vcf.gz'),
