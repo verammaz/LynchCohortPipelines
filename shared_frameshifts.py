@@ -121,7 +121,7 @@ def main():
             for subset in tqdm(combinations, total=comb(len(lesions), n), desc=f"Processing combinations for n={n}"):
                 variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
                 shared_variants = list(set.intersection(*variant_sets))
-                df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
+                df = pd.DataFrame(columns=shared_variants, index=[s for s in subset]) if len(shared_variants) else pd.DataFrame()
                 for s in subset:
                     df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
                 df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
