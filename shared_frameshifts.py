@@ -150,10 +150,10 @@ def main():
             fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
             out_df[f'lesion_{lesion}'] = fs_presence
         
-        plus_df = df.applymap(lambda x: 1 if x == '+' else 0)
+        plus_df = out_df.applymap(lambda x: 1 if x == '+' else 0)
         out_df.loc['total_variants'] = plus_df.sum(axis=0)
         out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
-        
+
         writer = pd.ExcelWriter(out_file, engine='openpyxl')
         out_df.to_excel(writer, index=True, sheet_name='46 variants')
         writer.close()
