@@ -23,25 +23,22 @@ def comb(n, k):
     denominator = math.factorial(k) * math.factorial(n - k)
     return numerator // denominator
 
-def check_raw(lesion, patient, hdir, variant):
-    chrom, pos, ref, alt = variant.split('_')
+def get_raw_variants_raw(lesion, patient, hdir):
+    variants = set()
     raw_vcf_files = [os.path.join(hdir, 'Raw', patient, lesion, f'{lesion}_vs_Normal.mutect2.filtered.vcf.gz'),
                      os.path.join(hdir, 'Raw', patient, lesion, f'{lesion}_vs_Normal.strelka.somatic_indels.vcf.gz'),
                      os.path.join(hdir, 'Raw', patient, lesion, f'{lesion}_vs_Normal.strelka.somatic_snvs.vcf.gz')]
 
-    #TODO: optimize this function
+    #TODO: cache set of raw variants to pkl file
 
     for file in raw_vcf_files:
         f = gzip.open(file, 'rt') if file.endswith('.gz') else open(file, 'r')
         for line in f.readlines():
             if line.startswith('#'): continue
-            if (line.split('\t')[0] == chrom and 
-                line.split('\t')[1] == pos and 
-                line.split('\t')[3] == ref and 
-                line.split('\t')[4] == alt and 
-                line.split('\t')[6] == 'PASS'): return True
+            if 'PASS' in line:
+                variants.add(f'{line.split('\t')[0]}_{line.split('\t')[1]}_{line.split('\t')[3]}_{line.split('\t')[4]}')
 
-    return False
+    return variants
 
 
 def main():
@@ -75,6 +72,8 @@ def main():
         logging.info(f'Lesion {lesion}')
 
         fs_variants = defaultdict(list)
+
+        raw_variants = get_raw_variants(lesion, patient, args.hdir) is args.check_raw else None
         
         with open(os.path.join(args.hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
             snpeff_lines = snpeff_file.readlines()
@@ -90,8 +89,8 @@ def main():
                 if not args.check_raw and (count == '0:0' or count.split(':')[-1].strip() == '0'):
                     print(f"Warning: variant {variant} has count {count} in {lesion}")
                     continue
-                elif args.check_raw and not check_raw(lesion, patient, args.hdir, variant):
-                    print(f"Warning: variant {variant} not present in raw (strelka/mutect) vcf file for {lesion}")
+                elif args.check_raw and not variant in raw_variants:
+                    print(f"Warning: variant {variant} not present with 'PASS' filter in raw (strelka/mutect) vcf file for {lesion}")
                     continue
 
                 variant_to_nmd[('_').join(variant.split('_')[0:2])] = 1 if 'nonsense_mediated_decay' in snpeff_line.split('\t')[7] else 0
@@ -114,6 +113,7 @@ def main():
 
     out_file = os.path.join(outdir, 'shared_frameshifts.xlsx')
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
+ 
 
         for n in range(2, len(lesions) + 1):
             combinations = itertools.combinations(lesions, n)
