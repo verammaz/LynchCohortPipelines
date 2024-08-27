@@ -73,7 +73,7 @@ def main():
 
         fs_variants = defaultdict(list)
 
-        raw_variants = get_raw_variants(lesion, patient, args.hdir) is args.check_raw else None
+        raw_variants = get_raw_variants(lesion, patient, args.hdir) if args.check_raw else None
         
         with open(os.path.join(args.hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
             snpeff_lines = snpeff_file.readlines()
