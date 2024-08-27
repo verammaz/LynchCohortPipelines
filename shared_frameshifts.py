@@ -7,6 +7,8 @@ import gzip
 from tqdm import tqdm 
 import logging
 import math
+from openpyxl import load_workbook
+
 
 
 """
@@ -137,22 +139,24 @@ def main():
         coords = list(df['COORD_HG19'])
         genes = list(df['GENE'])
         out_df = pd.DataFrame()
-        with pd.ExcelFile(out_file, engine='openpyxl') as xl:
-            if '46 varaints' in xl.sheet_names:
+        excel_workbook = load_workbook(out_file)
+        writer = pd.ExcelWriter(out_file, engine='openpyxl')
+        writer.book = excel_workbook
+        if '46 varaints' in excel_workbook.sheet_names:
                 out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
-            else:
-                out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
-                out_df['gene_id'] = genes
-            for lesion in lesions:
-                if f'lesion_{lesion}' in out_df.columns: continue
-                fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
-                out_df[f'lesion_{lesion}'] = fs_presence
-            
-            plus_df = df.applymap(lambda x: 1 if x == '+' else 0)
-            out_df.loc['total_variants'] = plus_df.sum(axis=0)
-            out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
+        else:
+            out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
+            out_df['gene_id'] = genes
+        for lesion in lesions:
+            if f'lesion_{lesion}' in out_df.columns: continue
+            fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
+            out_df[f'lesion_{lesion}'] = fs_presence
+        
+        plus_df = df.applymap(lambda x: 1 if x == '+' else 0)
+        out_df.loc['total_variants'] = plus_df.sum(axis=0)
+        out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
 
-        out_df.to_excel(xl, index=True, sheet_name='46 variants')
+        out_df.to_excel(writer, index=True, sheet_name='46 variants')
 
 if __name__ == "__main__":
     main()
