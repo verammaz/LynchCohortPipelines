@@ -142,7 +142,7 @@ def main():
         excel_workbook = load_workbook(out_file)
         writer = pd.ExcelWriter(out_file, engine='openpyxl')
         writer.book = excel_workbook
-        if '46 varaints' in excel_workbook.sheet_names:
+        if '46 varaints' in [x.title for x in excel_workbook.worksheets]:
                 out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
         else:
             out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
