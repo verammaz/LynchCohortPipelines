@@ -164,13 +164,15 @@ def main():
 
     
     for patient,lesion in zip(ptients,lesions):
+        effects = ['total', 'fs', 'nonsyn', 'indrame_indel', 'fs_trunc', 'pre_stop' ]
         neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
-        out_df.loc[lesion] = pd.Series({'total': f'{lesion_to_effectvariants[lesion]['total'][0]}, {neo_loads['total']}',
-                                    'frameshift': f'{lesion_to_effectvariants[lesion]['fs'][0]}, {neo_loads['fs']}', 
-                                    'nonsynonymous_substitution': f'{lesion_to_effectvariants[lesion]['nonsyn'][0]}, {neo_loads['nonsyn']}', 
-                                    'inframe_indel': f'{lesion_to_effectvariants[lesion]['inframe_indel'][0]}, {neo_loads['inframe_indel']}', 
-                                    'frameshift_truncation': f'{lesion_to_effectvariants[lesion]['fs_trunc'][0]}, {neo_loads['fs_trunc']}',
-                                    'premature_stop': f'{lesion_to_effectvariants[lesion]['pre_stop'][0]}, {neo_loads['pre_stop']}'})
+        data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {neo_loads[effect]}' for effect in effects]
+        out_df.loc[lesion] = pd.Series({'total': data[0],
+                                    'frameshift': data[1], 
+                                    'nonsynonymous_substitution': data[2], 
+                                    'inframe_indel': data[3], 
+                                    'frameshift_truncation': data[4],
+                                    'premature_stop': data[5]})
         
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
