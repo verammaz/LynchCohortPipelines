@@ -178,7 +178,7 @@ def main():
                                     'frameshift_truncation': data[4],
                                     'premature_stop': data[5]})
     
-    out_df = df[::-1]
+    out_df = out_df[::-1]
     out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
 
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
