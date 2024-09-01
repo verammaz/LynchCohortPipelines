@@ -79,7 +79,7 @@ def get_lesion_variants(lesions, patients, args):
     lesion_to_effectvariants = dict()
 
     for lesion, patient in zip(lesions, patients):
-        lesion_to_effectvariants[lesion] = {'total': (0,[]), 'fs':(0,[]), 'nonsyn':(0,[]), 'inframe_indel':(0,[]), 'fs_trunc':(0,[]), 'pre_stop':(0,[])}
+        lesion_to_effectvariants[lesion] = {'total':[0,[]], 'fs':[0,[]], 'nonsyn':[0,[]], 'inframe_indel':[0,[]], 'fs_trunc':[0,[]], 'pre_stop':[0,[]]}
         raw_variants = get_raw_variants(lesion, patient, args.hdir) if args.check_raw else None
         total, fs, nonsyn, inframe_indel, fs_trunc, pre_stop = 0, 0, 0, 0, 0, 0
         with open(os.path.join(args.hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
