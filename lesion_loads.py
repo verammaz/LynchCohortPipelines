@@ -65,9 +65,9 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     f = open(outfile, 'a')
     annotation_mapping = {'Substitution': 'missense_variant', 'FrameShiftTruncation': 'stop_gained', 'FrameShift': 'frameshift', 'PrematureStop': 'stop_gained'}
     snpeff = snpeff_ann.split(',')
-    varcode = varcode_ann.split('|')[2:].split('--')
+    varcode = varcode_ann.split('--')
     snpeff_effects = [ann.split('|')[1] for ann in snpeff if ann.split('|')[1] in annotation_mapping.keys()]
-    varcode_effects = [ann.split('(')[0] for ann in snpeff if ann.split('(')[1] in annotation_mapping.values()]
+    varcode_effects = [ann.split('(')[0] for ann in varcode[1:] if ann.split('(')[1] in annotation_mapping.values()]
     snpeff_effects_str = (', ').join(list(set(snpeff_effects)))
     varcode_effects_str = (', ').join(list(set(varcode_effects)))
     if (set([annotation_mapping[effect] for effect in varcode_effects]) != set(snpeff_effects) or
