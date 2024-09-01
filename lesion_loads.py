@@ -53,7 +53,7 @@ def get_neoantigens(patient, hdir, kd=500):
     return variant_to_neos
 
 
-def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos)
+def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos):
     result = dict('total': 0, 'fs': 0, 'nonsyn': 'inframe_indel': 'fs_trunc': 0, 'pre_stop': 0)
     for effect, variants in lesion_to_effectvariants.items():
         for var in variants:
