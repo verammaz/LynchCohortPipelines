@@ -56,8 +56,7 @@ def get_neoantigens(patient, hdir, kd=500):
 def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos):
     result = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     for effect, variants in lesion_to_effectvariants.items():
-        for var in variants:
-            print(var)
+        for var in variants[1]:
             if len(variant_to_neos[var]) >= 1:
                 result[effect] += 1
     return result
