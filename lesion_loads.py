@@ -75,7 +75,7 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
         f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}')
 
 
-def get_lesion_variants(lesions, patients, args):
+def get_lesion_variants(lesions, patients, args, outdir):
     lesion_to_effectvariants = dict()
 
     for lesion, patient in zip(lesions, patients):
@@ -161,7 +161,7 @@ def main():
     if os.path.exists(out_file):
         out_df = pd.read_excel(out_file) 
 
-    lesion_to_effectvariants = get_lesion_variants(lesions, patients, args)
+    lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
     
