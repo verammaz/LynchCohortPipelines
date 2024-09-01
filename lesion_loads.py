@@ -132,7 +132,7 @@ def get_lesion_variants(lesions, patients, args, outdir):
                     lesion_to_effectvariants[lesion]['pre_stop'][1].append(variant)
                     lesion_to_effectvariants[lesion]['pre_stop'][0] += 1
 
-        return lesion_to_effectvariants
+    return lesion_to_effectvariants
 
 def main():
     parser = argparse.ArgumentParser()
