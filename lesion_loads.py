@@ -113,8 +113,8 @@ def get_lesion_variants(lesions, patients, args, outdir):
                 else:
                     ref, alt = variant.split('_')[-2], variant.split('_')[-1]
                     if (len(ref) == 1 and len(alt) != 1) or (len(alt) == 1 and len(ref) != 1) :
-                        lesion_to_effectvariants[lesion]['fs'].append(variant)
-                        fs += 1
+                        lesion_to_effectvariants[lesion]['fs'][1].append(variant)
+                        lesion_to_effectvariants[lesion]['fs'][0] += 1
 
                 if 'missense_variant' in snpeff_ann or 'Substitution' in varcode_ann:
                     lesion_to_effectvariants[lesion]['nonsyn'][1].append(variant)
@@ -126,7 +126,7 @@ def get_lesion_variants(lesions, patients, args, outdir):
                 
                 if ('stop_gained' in snpeff_ann and len(ref) != len(alt)) or 'FrameShiftTruncation' in varcode_ann:
                     lesion_to_effectvariants[lesion]['fs_trunc'][1].append(variant)
-                    lesion_to_effectvariants[lesion]['fs_trunc'][1] += 1
+                    lesion_to_effectvariants[lesion]['fs_trunc'][0] += 1
 
                 if ('stop_gained' in snpeff_ann and len(ref) == len(alt)) or 'PrematureStop' in varcode_ann:
                     lesion_to_effectvariants[lesion]['pre_stop'][1].append(variant)
