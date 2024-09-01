@@ -70,7 +70,7 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     varcode_effects = [ann.split('(')[0] for ann in varcode[1:] if ann.split('(')[1] in annotation_mapping.keys()]
     snpeff_effects_str = (', ').join(list(set(snpeff_effects)))
     varcode_effects_str = (', ').join(list(set(varcode_effects)))
-    print(varcode_effects, snpeff_effects)
+    print(varcode, snpeff)
     if (set([annotation_mapping[effect] for effect in varcode_effects]) != set(snpeff_effects) or
         len(list(set(snpeff_effects))) > 1 or len(list(set(varcode_effects))) > 1):
         f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}')
