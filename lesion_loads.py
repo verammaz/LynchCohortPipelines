@@ -165,7 +165,7 @@ def main():
     patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
     
-    for patient,lesion in zip(ptients,lesions):
+    for patient,lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'indrame_indel', 'fs_trunc', 'pre_stop' ]
         neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
         data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {neo_loads[effect]}' for effect in effects]
