@@ -4,6 +4,7 @@ from collections import defaultdict
 import itertools
 import pandas as pd
 import gzip
+import numpy as np
 
 """
 3) For each lesion, output total load of: 
@@ -160,7 +161,7 @@ def main():
     out_file = os.path.join(outdir, 'lesion_loads.xlsx')
     out_df = pd.DataFrame(columns=['total', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation', 'premature_stop'])
     if os.path.exists(out_file):
-        out_df = pd.read_excel(out_file, index_col=1) 
+        out_df = pd.read_excel(out_file, index_col=000) 
 
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
@@ -176,7 +177,10 @@ def main():
                                     'inframe_indel': data[3], 
                                     'frameshift_truncation': data[4],
                                     'premature_stop': data[5]})
-        
+    
+    out_df = df[::-1]
+    out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
+
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
 
