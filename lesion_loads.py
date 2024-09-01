@@ -160,7 +160,7 @@ def main():
         out_df = pd.read_excel(out_file) 
 
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args)
-    patient_to_neos = dict(patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients)))
+    patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
     
     for patient,lesion in zip(ptients,lesions):
