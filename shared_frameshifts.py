@@ -15,15 +15,7 @@ from openpyxl import load_workbook
 1) Script to input a list of lesions and then compare shared frameshift variant at loci across either VCF or neopipe (4_4636272626_GA_G)
 2) Script to input a list of lesions and output which of the 46 variants are present in any lesion in that list (see excel sheet)
 """
-def comb(n, k):
-    """Calculate the number of combinations (n choose k)."""
-    if k > n:
-        return 0
-    if k == 0 or k == n:
-        return 1
-    numerator = math.factorial(n)
-    denominator = math.factorial(k) * math.factorial(n - k)
-    return numerator // denominator
+
 
 def get_raw_variants(lesion, patient, hdir):
     variants = set()
@@ -45,16 +37,15 @@ def get_raw_variants(lesion, patient, hdir):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-hdir', required=True, help="path to home directory with /VCF folder")
     parser.add_argument('-lesions', required=True, help="comma-separated list of lesion ids")
     parser.add_argument('-patients', required=True, help="comma-separated list of patient ids, corresponding to lesion ids list")
-    parser.add_argument('-fs_annotation', default=False, action='store_true')
+    parser.add_argument('-fs_annotation', default=False, action='store_true', help='count frameshift only through annotation (i.e. not just looking if indel is multiple of three)')
     parser.add_argument('-shared_fs_xl', help="excel file with shared frameshift variant coordinates dataframe")
-    parser.add_argument('-check_raw', default=False, action='store_true')
+    parser.add_argument('-check_raw', default=False, action='store_true', help="check for variant in lesion raw (mutect/strelka) vcf file before counting it in a lesion")
+    parser.add_argument('-nmd', default=False, action='store_true', help='add nonsense-mediated-decay row')
     args = parser.parse_args()
 
     lesions = args.lesions.split(',')
@@ -72,7 +63,6 @@ def main():
     variant_to_nmd = dict()
 
     for lesion, patient in zip(lesions, patients):
-        logging.info(f'Lesion {lesion}')
 
         fs_variants = defaultdict(list)
 
@@ -83,15 +73,19 @@ def main():
             varcode_lines = varcode_file.readlines()
             total_lines = min(len(snpeff_lines), len(varcode_lines))
 
-            for snpeff_line, varcode_line in tqdm(zip(snpeff_lines, varcode_lines), total=total_lines, desc="Processing vcf lines", unit="line"):
+            for snpeff_line, varcode_line in zip(snpeff_lines, varcode_lines):
             
                 assert(snpeff_line.split('\t')[i] == varcode_line.split('\t')[i] for i in range(len(snpeff_line.split('\t'))) if i != 7)
+                
                 if snpeff_line.startswith('#'): continue
+                
                 variant = snpeff_line.split('\t')[2]
                 count = snpeff_line.split('\t')[10].strip()
+                
                 if not args.check_raw and (count == '0:0' or count.split(':')[-1].strip() == '0'):
                     print(f"Warning: variant {variant} has count {count} in {lesion}")
                     continue
+                
                 elif args.check_raw and not variant in raw_variants:
                     print(f"Warning: variant {variant} not present with 'PASS' filter in raw (strelka/mutect) vcf file for {lesion}")
                     continue
@@ -120,7 +114,7 @@ def main():
 
         for n in range(2, len(lesions) + 1):
             combinations = itertools.combinations(lesions, n)
-            for subset in tqdm(combinations, total=comb(len(lesions), n), desc=f"Processing combinations for n={n}"):
+            for subset in combinations:
                 variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
                 shared_variants = list(set.intersection(*variant_sets))
                 df = pd.DataFrame()
