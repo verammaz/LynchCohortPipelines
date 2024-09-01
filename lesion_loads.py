@@ -161,7 +161,7 @@ def main():
     out_file = os.path.join(outdir, 'lesion_loads.xlsx')
     out_df = pd.DataFrame(columns=['total', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation', 'premature_stop'])
     if os.path.exists(out_file):
-        out_df = pd.read_excel(out_file, index_col=000) 
+        out_df = pd.read_excel(out_file, index_col=0) 
 
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
