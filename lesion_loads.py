@@ -70,10 +70,10 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     varcode_effects = [ann.split('(')[0] for ann in varcode[1:] if ann.split('(')[1] in annotation_mapping.keys()]
     snpeff_effects_str = (', ').join(list(set(snpeff_effects)))
     varcode_effects_str = (', ').join(list(set(varcode_effects)))
-    print(varcode, snpeff)
+    #print(varcode, snpeff)
     if (set([annotation_mapping[effect] for effect in varcode_effects]) != set(snpeff_effects) or
         len(list(set(snpeff_effects))) > 1 or len(list(set(varcode_effects))) > 1):
-        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}')
+        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\n')
 
 
 def get_lesion_variants(lesions, patients, args, outdir):
@@ -158,7 +158,7 @@ def main():
         os.mkdir(outdir)
 
     out_file = os.path.join(outdir, 'lesion_loads.xlsx')
-    out_df = pd.DataFrame(columns=['total', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation'])
+    out_df = pd.DataFrame(columns=['total', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation', 'premature_stop'])
     if os.path.exists(out_file):
         out_df = pd.read_excel(out_file, index_col=0) 
 
