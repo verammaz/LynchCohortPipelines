@@ -74,7 +74,7 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     #print(varcode, snpeff)
     if (set([annotation_mapping[effect] for effect in varcode_effects]) != set(snpeff_effects) or
         len(list(set(snpeff_effects))) > 1 or len(list(set(varcode_effects))) > 1):
-        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\t{varcode}\n')
+        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\n')
 
 
 def get_lesion_variants(lesions, patients, args, outdir):
@@ -178,7 +178,7 @@ def main():
                                     'premature_stop': data[5]})
     
     out_df = out_df[::-1]
-    out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
+    out_df = out_df.loc[ np.unique( out_df.index.values, return_index = True )[1] ]
 
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
