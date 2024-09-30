@@ -173,7 +173,7 @@ def main():
         neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
         data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {neo_loads[effect]}' for effect in effects]
         print(out_df.index, out_df.columns)
-        if lesion in out_df.index and not args.overwite:
+        if lesion in out_df.index and not args.overwrite:
                 continue
         else: 
             out_df.loc[lesion] = pd.Series({'total': data[0],
