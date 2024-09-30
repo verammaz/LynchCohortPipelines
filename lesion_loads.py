@@ -172,6 +172,7 @@ def main():
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
         data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {neo_loads[effect]}' for effect in effects]
+        print(out_df.index, out_df.columns)
         if lesion in out_df.index and not args.overwite:
                 continue
         else: 
