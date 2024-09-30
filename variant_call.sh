@@ -69,7 +69,7 @@ print_progress "Launching nextflow to perform variant calling..."
 cd $NEXTFLOW_WORK
 
 module load java/11.0.2
-module load singularity/3.2.1
+module load singularity-ce/4.1.1
 module load proxies
 
 step="variant_calling"

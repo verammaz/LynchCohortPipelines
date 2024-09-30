@@ -78,6 +78,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
              -M 32000 \
              -R span[hosts=1] \
              -R "rusage[mem=4000]" \
+             -R select[osmajor=CENT7] \
              -W 30:00 \
              -q premium \
              -oo "${LOG_DIR}/${job_name}.out" \
