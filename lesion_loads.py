@@ -64,7 +64,7 @@ def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos):
 
 def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     f = open(outfile, 'a')
-    annotation_mapping = {'Substitution': 'missense_variant', 'FrameShiftTruncation': 'stop_gained', 'FrameShift': 'frameshift', 'PrematureStop': 'stop_gained'}
+    annotation_mapping = {'Substitution': 'missense_variant', 'FrameShiftTruncation': 'stop_gained', 'FrameShift': 'frameshift_variant', 'PrematureStop': 'stop_gained'}
     snpeff = snpeff_ann.split(',')
     varcode = varcode_ann.split('--')
     snpeff_effects = [ann.split('|')[1] for ann in snpeff if ann.split('|')[1] in annotation_mapping.values()]
@@ -178,8 +178,8 @@ def main():
                                     'frameshift_truncation': data[4],
                                     'premature_stop': data[5]})
     
-    out_df = out_df[::-1]
-    out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
+    #out_df = out_df[::-1]
+    #out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
 
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
