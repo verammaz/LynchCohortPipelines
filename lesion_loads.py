@@ -49,11 +49,8 @@ def get_neoantigens(patient, hdir, kd=500):
             variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
             neo = line.split('\t')[3]
             score = line.split('\t')[6]
-            if float(score) >= float(kd): # TODO: check this with Matt
+            if float(score) <= float(kd): # TODO: check this with Matt
                 variant_to_neos[variant].append(neo)
-            else:
-                print(variant, neo, score)
-    #print(variant_to_neos)
     return variant_to_neos
 
 
@@ -175,24 +172,16 @@ def main():
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
         data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {neo_loads[effect]}' for effect in effects]
-        if lesion in out_df.index:
-            if not args.overwite:
+        if lesion in out_df.index and not args.overwite:
                 continue
-            else: 
-                out_df[lesion] = pd.Series({'total': data[0],
-                                    'frameshift': data[1], 
-                                    'nonsynonymous_substitution': data[2], 
-                                    'inframe_indel': data[3], 
-                                    'frameshift_truncation': data[4],
-                                    'premature_stop': data[5]})
-        else:
+        else: 
             out_df.loc[lesion] = pd.Series({'total': data[0],
                                     'frameshift': data[1], 
                                     'nonsynonymous_substitution': data[2], 
                                     'inframe_indel': data[3], 
                                     'frameshift_truncation': data[4],
                                     'premature_stop': data[5]})
-    
+        
     #out_df = out_df[::-1]
     #out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
 
