@@ -178,7 +178,7 @@ def main():
                                     'premature_stop': data[5]})
     
     out_df = out_df[::-1]
-    out_df = out_df.loc[ np.unique( out_df.index.values, return_index = True )[1] ]
+    out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
 
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
