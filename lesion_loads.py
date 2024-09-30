@@ -49,9 +49,11 @@ def get_neoantigens(patient, hdir, kd=500):
             variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
             neo = line.split('\t')[3]
             score = line.split('\t')[6]
-            if float(score) <= float(kd): # TODO: check this with Matt
+            if float(score) >= float(kd): # TODO: check this with Matt
                 variant_to_neos[variant].append(neo)
-    print(variant_to_neos)
+            else:
+                print(variant, neo, score)
+    #print(variant_to_neos)
     return variant_to_neos
 
 
