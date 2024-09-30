@@ -163,11 +163,11 @@ def main():
     out_df = pd.DataFrame(columns=['total', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation', 'premature_stop'])
     if os.path.exists(out_file):
         out_df = pd.read_excel(out_file, index_col=0) 
+    out_df.index = out_df.index.map(str)
 
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
-    
     for patient,lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
