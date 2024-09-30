@@ -49,7 +49,7 @@ def get_neoantigens(patient, hdir, kd=500):
             variant = line.split('\t')[1]
             neo = line.split('\t')[3]
             score = line.split('\t')[6]
-            if float(score) >= float(kd):
+            if float(score) >= float(kd): # TODO: check this with Matt
                 variant_to_neos[variant].append(neo)
     return variant_to_neos
 
@@ -74,7 +74,7 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     #print(varcode, snpeff)
     if (set([annotation_mapping[effect] for effect in varcode_effects]) != set(snpeff_effects) or
         len(list(set(snpeff_effects))) > 1 or len(list(set(varcode_effects))) > 1):
-        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\n')
+        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\thi\n')
 
 
 def get_lesion_variants(lesions, patients, args, outdir):
@@ -83,7 +83,6 @@ def get_lesion_variants(lesions, patients, args, outdir):
     for lesion, patient in zip(lesions, patients):
         lesion_to_effectvariants[lesion] = {'total':[0,[]], 'fs':[0,[]], 'nonsyn':[0,[]], 'inframe_indel':[0,[]], 'fs_trunc':[0,[]], 'pre_stop':[0,[]]}
         raw_variants = get_raw_variants(lesion, patient, args.hdir) if args.check_raw else None
-        total, fs, nonsyn, inframe_indel, fs_trunc, pre_stop = 0, 0, 0, 0, 0, 0
         with open(os.path.join(args.hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
             for snpeff_line, varcode_line in zip(snpeff_file.readlines(), varcode_file.readlines()):
                 assert(snpeff_line.split('\t')[i] == varcode_line.split('\t')[i] for i in range(len(snpeff_line.split('\t'))) if i != 7)
