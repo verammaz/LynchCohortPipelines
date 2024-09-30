@@ -117,13 +117,21 @@ def get_lesion_variants(lesions, patients, args, outdir):
                         lesion_to_effectvariants[lesion]['fs'][1].append(variant)
                         lesion_to_effectvariants[lesion]['fs'][0] += 1
 
+
+                help_bool1 = False
+                help_bool2 = False
                 if 'missense_variant' in snpeff_ann or 'Substitution' in varcode_ann:
                     lesion_to_effectvariants[lesion]['nonsyn'][1].append(variant)
                     lesion_to_effectvariants[lesion]['nonsyn'][0] += 1
-                
+                    help_bool1 = True
+
                 if abs(len(ref) - len(alt)) % 3 == 0: 
                     lesion_to_effectvariants[lesion]['inframe_indel'][1].append(variant)
                     lesion_to_effectvariants[lesion]['inframe_indel'][0] += 1
+                    help_bool2 = True
+                
+                if help_bool1 and help_bool2:
+                    print(f'{variant} annotated as both missense and inframe indel')
                 
                 if ('stop_gained' in snpeff_ann and len(ref) != len(alt)) or 'FrameShiftTruncation' in varcode_ann:
                     lesion_to_effectvariants[lesion]['fs_trunc'][1].append(variant)
