@@ -46,7 +46,7 @@ def get_neoantigens(patient, hdir, kd=500):
         f = open(file, 'r')
         f.readline()
         for line in f.readlines():
-            variant = line.split('\t')[1] if 'other' not in file else ('\t').join(line.split('\t')[1][:-1])
+            variant = line.split('\t')[1] if 'other' not in file else ('\t').join(line.split('\t')[1].split('_')[:-1])
             if 'other' in file:
                 print(line)
                 print(variant)
