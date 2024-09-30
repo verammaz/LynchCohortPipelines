@@ -51,6 +51,7 @@ def get_neoantigens(patient, hdir, kd=500):
             score = line.split('\t')[6]
             if float(score) <= float(kd): # TODO: check this with Matt
                 variant_to_neos[variant].append(neo)
+    print(variant_to_neos)
     return variant_to_neos
 
 
