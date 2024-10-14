@@ -67,14 +67,27 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     annotation_mapping = {'Substitution': 'missense_variant', 'FrameShiftTruncation': 'stop_gained', 'FrameShift': 'frameshift_variant', 'PrematureStop': 'stop_gained'}
     snpeff = snpeff_ann.split(',')
     varcode = varcode_ann.split('--')
-    snpeff_effects = [ann.split('|')[1] for ann in snpeff if ann.split('|')[1] in annotation_mapping.values()]
-    varcode_effects = [ann.split('(')[0].strip() for ann in varcode[1:] if ann.split('(')[0].strip() in annotation_mapping.keys()]
+    
+    snpeff_effects = []
+    for ann in snpeff:
+        effects = ann.split('|')[1].split('&')
+        for effect in effects:
+            if effect in annotation_mapping.values():
+                snpeff_effects.append(effect)    
+    
+    varcode_effects = []
+    for ann in varcode[1:]:
+        effects = ann.split('(')[0].strip()
+        for effect in effects:
+            if effect in annotation_mapping.keys():
+                varcode_effects.append(effect)
+   
     snpeff_effects_str = (', ').join(list(set(snpeff_effects)))
     varcode_effects_str = (', ').join(list(set(varcode_effects)))
     #print(varcode, snpeff)
     if (set([annotation_mapping[effect] for effect in varcode_effects]) != set(snpeff_effects) or
         len(list(set(snpeff_effects))) > 1 or len(list(set(varcode_effects))) > 1):
-        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\t{snpeff}\n')
+        f.write(f'{variant}\t{snpeff_effects_str}\t{varcode_effects_str}\n')
 
 
 def get_lesion_variants(lesions, patients, args, outdir):
@@ -118,7 +131,7 @@ def get_lesion_variants(lesions, patients, args, outdir):
                         lesion_to_effectvariants[lesion]['fs'][0] += 1
 
 
-                if 'missense_variant' in snpeff_ann or 'Substitution' in varcode_ann:
+                if 'missense_variant' in snpeff_ann or ('Substitution' in varcode_ann and 'synonymous_variant' not in snpeff_ann):
                     lesion_to_effectvariants[lesion]['nonsyn'][1].append(variant)
                     lesion_to_effectvariants[lesion]['nonsyn'][0] += 1
 
