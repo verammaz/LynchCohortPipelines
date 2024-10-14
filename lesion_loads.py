@@ -77,9 +77,9 @@ def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     
     varcode_effects = []
     for ann in varcode[1:]:
-        effects = ann.split('(')[0].strip()
+        effects = ann.split('--')
         for effect in effects:
-            print(effect)
+            effect = effect.split('(')[0].strip()
             if effect in annotation_mapping.keys():
                 varcode_effects.append(effect)
    
