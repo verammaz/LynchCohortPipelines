@@ -41,26 +41,31 @@ def get_raw_variants(lesion, patient, hdir):
 
 def get_neoantigens(patient, hdir, kd=500):
     variant_to_neos = defaultdict(list)
+    passed_variants = set()
     noe_files =[os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_{patient}.txt'), os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_other_{patient}.txt')]
     for file in noe_files:
         f = open(file, 'r')
         f.readline()
         for line in f.readlines():
             variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
+            passed_variants.add(variant)
             neo = line.split('\t')[3]
             score = line.split('\t')[6]
-            #if float(score) <= float(kd): # TODO: check this with Matt
-            variant_to_neos[variant].append(neo)
-    return variant_to_neos
+            if float(score) <= float(kd): # TODO: check this with Matt
+                variant_to_neos[variant].append(neo)
+    return passed_variants, variant_to_neos
 
 
-def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos):
-    result = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
+def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos, passed_variants):
+    result1 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
+    result2 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     for effect, variants in lesion_to_effectvariants.items():
         for var in variants[1]:
             if len(variant_to_neos[var]) >= 1:
-                result[effect] += 1
-    return result
+                result1[effect] += 1
+            if var in passed_variants:
+                result2[effect] += 1
+    return result1, result2
 
 def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     f = open(outfile, 'a')
@@ -184,8 +189,8 @@ def main():
 
     for patient,lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
-        neo_loads = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
-        data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {neo_loads[effect]}' for effect in effects]
+        neo_loads, passed_variants = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
+        data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {passed_variants[effect]}, {neo_loads[effect]}' for effect in effects]
         #print(out_df.index, out_df.columns)
         if lesion in out_df.index and not args.overwrite:
                 continue
