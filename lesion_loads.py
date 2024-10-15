@@ -56,7 +56,7 @@ def get_neoantigens(patient, hdir, kd=500):
     return passed_variants, variant_to_neos
 
 
-def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_neos, passed_variants):
+def get_lesion_neo_loads(lesion_to_effectvariants, passed_variants, variant_to_neos,):
     result1 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     result2 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     for effect, variants in lesion_to_effectvariants.items():
@@ -189,7 +189,7 @@ def main():
 
     for patient,lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
-        neo_loads, passed_variants = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient])
+        neo_loads, passed_variants = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient][0], patient_to_neos[1])
         data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {passed_variants[effect]}, {neo_loads[effect]}' for effect in effects]
         #print(out_df.index, out_df.columns)
         if lesion in out_df.index and not args.overwrite:
