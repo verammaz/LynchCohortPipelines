@@ -139,14 +139,13 @@ def main():
 
     
     out_file = os.path.join(outdir, 'frameshift_scores.xlsx')
-    out_df = pd.DataFrame(columns=['frameshift variant', 'total nmers', 'sub 50nm nmers', 'lesions'])
+    out_df = pd.DataFrame(columns=['total nmers', 'sub 50nm nmers', 'lesions'])
     if os.path.exists(out_file):
         out_df = pd.read_excel(out_file, index_col=0) 
     out_df.index = out_df.index.map(str)
 
     for variant in data.keys():
-        out_df.loc[variant] = pd.Series({'frameshift variant': variant,
-                                         'total nmers': data[variant]['total_nmers'],
+        out_df.loc[variant] = pd.Series({'total nmers': data[variant]['total_nmers'],
                                          'sub 50nm nmers': data[variant]['sub50_nmers'],
                                          'lesions': data[variant]['lesions']})
     
