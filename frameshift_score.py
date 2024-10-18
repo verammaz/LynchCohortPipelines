@@ -75,18 +75,17 @@ def get_neoantigens(patients, hdir, kd=500):
     passed_variants = defaultdict(set) # variants included in list passed to netMHC --> some NeoPipe filters (see SnpEff.py)
     for patient in patients:
         var_to_neo = defaultdict(list)
-        pass_var = defaultdict(int)
-        noe_files =[os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_{patient}.txt'), os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_other_{patient}.txt')]
-        for file in noe_files:
-            f = open(file, 'r')
-            f.readline()
-            for line in f.readlines():
-                variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
-                pass_var[variant] += 1
-                neo = line.split('\t')[3]
-                score = line.split('\t')[6]
-                if float(score) <= float(kd): # TODO: check this with Matt
-                    var_to_neo[variant].append(neo)
+        pass_var = defaultdict(float)
+        neo_file = os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_other_{patient}.txt')
+        f = open(neo_file, 'r')
+        f.readline()
+        for line in f.readlines():
+            variant = ('_').join(line.split('\t')[1].split('_')[:-1])
+            pass_var[variant] += (1/6)
+            neo = line.split('\t')[3]
+            score = line.split('\t')[6]
+            if float(score) <= float(kd): # TODO: check this with Matt
+                var_to_neo[variant].append(neo)
         variant_to_neos[patient] = var_to_neo
         passed_variants[patient] = pass_var
     return passed_variants, variant_to_neos
@@ -130,7 +129,7 @@ def main():
                 data[variant] = dict()
                 data[variant]['total_nmers'] = total_nmers
                 data[variant]['sub50_nmers'] = sub50_nmers
-                data[variant]['lesions'] = set(lesion_source)
+                data[variant]['lesions'] = {lesion_source}
             else:
                 data[variant]['lesions'].add(lesion_source)
 
