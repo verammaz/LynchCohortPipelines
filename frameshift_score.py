@@ -123,7 +123,7 @@ def main():
             sub50_nmers = len(variant_to_neos[patient][variant])
             if variant not in fsvariant_to_lesions.keys():
                 print(f"variant {variant} not found in variant->lesion dict")
-            lesion_source = fsvariant_to_lesions[variant]
+            lesion_source = (', ').join(fsvariant_to_lesions[variant])
             if variant in data.keys() and (data[variant]['total_nmers'] != total_nmers or data[variant]['sub50_nmers'] != sub50_nmers):
                 print(f"data mismatch: curr entry: {data[variant]}, new entry: total={total_nmers}, sub50={sub50_nmers}")
             elif variant not in data.keys():
