@@ -147,7 +147,7 @@ def main():
     for variant in data.keys():
         out_df.loc[variant] = pd.Series({'total nmers': data[variant]['total_nmers'],
                                          'sub 50nm nmers': data[variant]['sub50_nmers'],
-                                         'lesions': data[variant]['lesions']})
+                                         'lesions': (", ").join(data[variant]['lesions'])})
     
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
