@@ -41,14 +41,14 @@ def get_raw_variants(lesion, patient, hdir):
 
 def get_neoantigens(patient, hdir, kd=500):
     variant_to_neos = defaultdict(list)
-    passed_variants = set()
+    passed_variants = set() # variants included in list passed to netMHC --> some NeoPipe filters (see SnpEff.py)
     noe_files =[os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_{patient}.txt'), os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_other_{patient}.txt')]
     for file in noe_files:
         f = open(file, 'r')
         f.readline()
         for line in f.readlines():
             variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
-            passed_variants.add(variant)
+            passed_variants.add(variant) 
             neo = line.split('\t')[3]
             score = line.split('\t')[6]
             if float(score) <= float(kd): # TODO: check this with Matt
@@ -187,7 +187,7 @@ def main():
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
-    for patient,lesion in zip(patients,lesions):
+    for patient, lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         neo_loads, passed_variants = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient][0], patient_to_neos[patient][1])
         data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {passed_variants[effect]}, {neo_loads[effect]}' for effect in effects]
