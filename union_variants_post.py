@@ -71,7 +71,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
                 ref = variant.ref
                 alt = variant.alt
 
-                bam_alt_count = ""
+                bam_alt_count, bam_ref_count = "", ""
 
                 if len(ref) > len(alt): #deletion
                     assert(len(alt) == 1)
@@ -84,12 +84,14 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
                 
                 try:
                     bam_alt_count = base_counts[alt].strip()
+                    bam_ref_count = base_counts[ref].strip()
                 except KeyError:
                     #print(f"Warning: {variant.id} variant alt allele {alt} not present in bam readcounts. Setting alt count to 0.")
                     bam_alt_count = "0" # how should i handle this case?
+                    bam_ref_count = "0"
                 
-
-                bamcounts[variant.id] =f"{bam_depth}:{bam_alt_count}"
+                
+                bamcounts[variant.id] =f"{bam_depth}:{bam_ref_count}"
 
                 # TODO: option to report discrepancy between vcf and bamcounts 
                 strelka_vcf_alt_count, strelka_vcf_depth = "", ""
@@ -129,7 +131,7 @@ def write_vcf_file(sample_to_variants, final_variants, out_dir, single_file=Fals
 
     columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'NORMAL']
     
-    # reporting format as DR:AP <==> total depth : alternate depth
+    # reporting format as DP:AP <==> total depth : ref depth
     
     if not single_file:
         for sample, variant_counts in sample_to_variants.items():
