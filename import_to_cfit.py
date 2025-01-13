@@ -16,7 +16,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
         for s in pat_mapping['samples']:
             samples.append(s[1])
 
-    data_dir = os.path.join(hdir, 'Raw')
+    data_dir = os.path.join(hdir, 'Raw', patient_id)
     variants_pkl = os.path.join(data_dir, f"{patient_id}_variants.pkl")
 
     all_variants = defaultdict(list)
