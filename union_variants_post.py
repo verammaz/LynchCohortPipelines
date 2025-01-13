@@ -38,7 +38,9 @@ def impute_readcounts(bamcounts_dict, variants_dict):
 # TODO: handle strelka and mutect vcf counts
 def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
     bamcounts = dict()
-    with open(bamcounts_file, 'r') as infile, open(report_file, 'a') as outfile:
+    with open(bamcounts_file, 'r') as infile:
+        outfile = open(report_file, 'w') if report_file is not None else None
+
         for line in infile.readlines():
             fields = line.split('\t')
             chrom, pos = fields[0], fields[1]
@@ -93,7 +95,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
                 
                 bamcounts[variant.id] =f"{bam_depth}:{bam_ref_count}"
 
-                if report_file is not None:
+                if outfile is not None:
                     # TODO: command line option to report discrepancy between vcf and bamcounts 
                     strelka_vcf_alt_count, strelka_vcf_depth = "", ""
                     mutect_vcf_alt_count, mutect_vcf_depth = "", ""
