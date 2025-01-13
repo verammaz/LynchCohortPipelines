@@ -9,8 +9,8 @@ from varcode.effects import Insertion, Deletion
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-patient', required=True)
-    parser.add_argument('-hdir', required=True)
+    parser.add_argument('-patient', required=True, help='patient id')
+    parser.add_argument('-hdir', required=True, help='directory with VCF subdirectory')
 
     args = parser.parse_args()
 

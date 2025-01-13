@@ -1,9 +1,61 @@
 import argparse
 import os
 import json
+import defaultdict
+import pickle
+
+from union_variants_post import read_bamcounts
 
 from cfit.util.Analysis import Analysis
 from cfit.plot.PlotTreeAll import PlotTreeAll
+
+def fix_vcf_format(hdir, patient_id, mapping):
+    samples = []
+    for s in mapping['samples']:
+        samples.append(s[1])
+
+    data_dir = os.path.join(hdir, 'Raw')
+    variants_pkl = os.path.join(data_dir, f"{patient_id}_variants.pkl")
+
+    all_variants = defaultdict(list)
+    with open(variants_pkl, 'rb') as f:
+        loaded_variants = pickle.load(f)
+
+    for variant in loaded_variants:
+        all_variants[f"{variant.chrom}_{variant.pos}"].append(variant)
+    
+    sample_to_variants = dict()
+
+    for sample in samples:
+        bamcounts_file = os.path.join(args.data_dir, sample, f'{sample}_bamcounts.txt')
+        variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample)
+        sample_to_variants[sample] = variant_to_counts
+    
+    variant_sets = (set(sample_to_variants[s].keys()) for s in samples if s != 'Normal')
+    final_variants = set.intersection(*variant_sets)
+    
+    out_dir = os.path.join(args.data_dir, "..", "..","VCF", args.patient_id)
+
+    for file in os.listdir(out_dir):
+        if file.endswith('.vcf'):
+            sample_name = file.split('_')[0]
+            with open(file, 'r') as f_in:
+                file_lines = f_in.readlines()
+            f_in.close()
+            with open(file, 'w') as f_out:
+                for line in file_lines:
+                    if line.startswith('#'):
+                        f_out.write(line)
+                    line_components = line.split('\t')
+                    variant_id = line_components[2]
+                    line_components[-1] = sample_to_variants[sample_name][variant_id] + '\n'
+                    f_out.write(('\t').join(line_components))
+            f_out.close()
+
+    
+    
+
+
 
 if __name__ == '__main__':
 
@@ -11,6 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('-hdir', required=True, help="Analysis data home directory")
     parser.add_argument('-patient_id', required=True, help='Patient identifier')
     parser.add_argument('-drivers', nargs='+', help='List of driver mutations to mark on clone tree plot')
+    parser.add_argument('-fix_vcf_format', help='there WAS a bug in union_variants_post.py for format of VCF counts, need to re-run CFIT and re-write VCF files')
 
 
     args = parser.parse_args()
@@ -43,6 +96,7 @@ if __name__ == '__main__':
                 drivers.extend(fs_recur_intrapatient)
 
 
+    
     anl = Analysis()
     anl.set_MHC_version("pan41")
    
@@ -59,6 +113,10 @@ if __name__ == '__main__':
     for data_dict in mappingjs:
         if data_dict['name'] == args.patient_id or data_dict['pname'] == args.patient_id:
             mapping.append(data_dict)
+    
+    if args.fix_vcf_format:
+        fix_vcf_format(args.hdir, args.patient_id, mapping)
+
 
     # initialize cfit patient(s):
     anl.initialize_config(config, mapping, dir=args.hdir, kd_thr=500, ns=[9], tree_format="pairtree")

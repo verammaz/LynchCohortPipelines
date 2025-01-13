@@ -36,7 +36,7 @@ def impute_readcounts(bamcounts_dict, variants_dict):
 
 
 # TODO: handle strelka and mutect vcf counts
-def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
+def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
     bamcounts = dict()
     with open(bamcounts_file, 'r') as infile, open(report_file, 'a') as outfile:
         for line in infile.readlines():
@@ -93,24 +93,25 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file):
                 
                 bamcounts[variant.id] =f"{bam_depth}:{bam_ref_count}"
 
-                # TODO: option to report discrepancy between vcf and bamcounts 
-                strelka_vcf_alt_count, strelka_vcf_depth = "", ""
-                mutect_vcf_alt_count, mutect_vcf_depth = "", ""
+                if report_file is not None:
+                    # TODO: command line option to report discrepancy between vcf and bamcounts 
+                    strelka_vcf_alt_count, strelka_vcf_depth = "", ""
+                    mutect_vcf_alt_count, mutect_vcf_depth = "", ""
 
-                if sample in variant.samples['strelka']:
-                    strelka_vcf_alt_count, strelka_vcf_depth = variant.get_sample_counts('strelka', sample)
-               
-                if sample in variant.samples['mutect']:
-                    mutect_vcf_alt_count, mutect_vcf_depth = variant.get_sample_counts('mutect', sample)
-                    
-                if (not (strelka_vcf_alt_count == bam_alt_count and strelka_vcf_depth == bam_depth)) or (not (mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)): 
-                        if (mutect_vcf_alt_count, mutect_vcf_depth) == ("", ""):
-                            if ((strelka_vcf_alt_count == bam_alt_count and strelka_vcf_depth == bam_depth)):
-                                continue
-                        if (strelka_vcf_alt_count, strelka_vcf_depth) == ("", ""):
-                            if ((mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)):
-                                continue
-                        outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_depth.strip()}:{mutect_vcf_alt_count.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
+                    if sample in variant.samples['strelka']:
+                        strelka_vcf_alt_count, strelka_vcf_depth = variant.get_sample_counts('strelka', sample)
+                
+                    if sample in variant.samples['mutect']:
+                        mutect_vcf_alt_count, mutect_vcf_depth = variant.get_sample_counts('mutect', sample)
+                        
+                    if (not (strelka_vcf_alt_count == bam_alt_count and strelka_vcf_depth == bam_depth)) or (not (mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)): 
+                            if (mutect_vcf_alt_count, mutect_vcf_depth) == ("", ""):
+                                if ((strelka_vcf_alt_count == bam_alt_count and strelka_vcf_depth == bam_depth)):
+                                    continue
+                            if (strelka_vcf_alt_count, strelka_vcf_depth) == ("", ""):
+                                if ((mutect_vcf_alt_count == bam_alt_count and mutect_vcf_depth == bam_depth)):
+                                    continue
+                            outfile.write(f"{variant.id}\t{sample}\t{strelka_vcf_depth.strip()}:{strelka_vcf_alt_count.strip()}\t{mutect_vcf_depth.strip()}:{mutect_vcf_alt_count.strip()}\t{bam_depth.strip()}:{bam_alt_count.strip()}\n")
 
     return bamcounts
 

@@ -93,7 +93,7 @@ $NEXTFLOW run nf-core/sarek \
             --genome $GENOME \
             --max_cpus 48 \
 
-print_progress "Variant calilng complete."
+print_progress "Variant calling complete."
 
 # Create a temporary file to store the modified sample sheet
 TEMP_SAMPLESHEET=$(mktemp)

@@ -70,7 +70,7 @@ def get_fs_variants(patients, lesions, hdir, check_raw, fs_annotation):
 
 
 
-def get_neoantigens(patients, hdir, kd=500):
+def get_neoantigens(patients, hdir, kd=50):
     variant_to_neos = dict()
     passed_variants = defaultdict(set) # variants included in list passed to netMHC --> some NeoPipe filters (see SnpEff.py)
     for patient in patients:
@@ -107,10 +107,6 @@ def main():
         print("Error: length of lesions and patients list do not match.")
         return 
 
-    if len(lesions) < 2:
-        print("Error: please specify at least two lesion ids.")
-        return
-
     fsvariant_to_lesions = get_fs_variants(patients, lesions, args.hdir, args.check_raw, args.fs_annotation)
     passed_variants, variant_to_neos = get_neoantigens(patients, args.hdir, kd=50)
 
@@ -145,6 +141,7 @@ def main():
     out_df.index = out_df.index.map(str)
 
     for variant in data.keys():
+        # what if variant already in xl file? 
         out_df.loc[variant] = pd.Series({'total nmers': data[variant]['total_nmers'],
                                          'sub 50nm nmers': data[variant]['sub50_nmers'],
                                          'lesions': (", ").join(data[variant]['lesions'])})

@@ -66,23 +66,35 @@ Specify paths and global variables in the config.sh file!
 Note that you should run the pipelines *per patient*.
 
 ### 1: Convert FASTQ (paired-end reads) to BAM file
-[fastq --> bam readme](fastq->bam.md)
+[fastq --> bam readme](Fastq2Bam.md)
 
 ### 2: Variant calling (via nextflow nf-core/sarek)
-[variant calling readme](variant_call.md)
+[variant calling readme](VariantCall.md)
 
 ### 3: Get union of variants across samples
-[union variants readme](union_variants.md)
+[union variants readme](UnionVariants.md)
 
 ### 4: Phylogenetic reconstruction (pairtree)
+[pairtree readme](Pairtree.md)
 
 ### 5: Neoantigen pipeline and bioinformatic preparation of datasets for fitness modeling (NeoPipe)
+[neopipe readme][NeoPipe.md]
 
 ### 6: Cancer fitness modeling (CFIT)
+[cfit readme][CFIT.md]
 
 
 # Additional scripts
 
+### HLA Typing with optitype
+[HLA call readme][HLAcall.md]
+
 ### Variant annotation with Varcode
+```bash
+cd LynchCohortPipelines
+module load python3
+python varcode_annotate.py -patient [PATIENT] -hdir [HDIR]
+```
 
 ### Variant plotting
+[figure generations readme][ForFigureGeneration.md]

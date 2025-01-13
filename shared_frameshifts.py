@@ -127,6 +127,7 @@ def main():
             df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
 
     writer.close()
+    
 
 
     if args.shared_fs_xl is not None:

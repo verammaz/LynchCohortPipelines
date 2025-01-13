@@ -40,30 +40,30 @@ def get_raw_variants(lesion, patient, hdir):
 
 
 def get_neoantigens(patient, hdir, kd=500):
-    variant_to_neos = defaultdict(list)
-    passed_variants = set() # variants included in list passed to netMHC --> some NeoPipe filters (see SnpEff.py)
+    variant_to_passed_neos = defaultdict(list) # per variant, neoantigens that passed kd thrreshold
+    variant_to_all_neos = defaultdict(dict) # all {neonatigen : score} pairs for variants passed to netmhc
     noe_files =[os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_{patient}.txt'), os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_other_{patient}.txt')]
     for file in noe_files:
         f = open(file, 'r')
         f.readline()
         for line in f.readlines():
             variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
-            passed_variants.add(variant) 
             neo = line.split('\t')[3]
             score = line.split('\t')[6]
+            variant_to_all_neos[variant][neo] = score
             if float(score) <= float(kd): # TODO: check this with Matt
-                variant_to_neos[variant].append(neo)
-    return passed_variants, variant_to_neos
+                variant_to_passed_neos[variant].append(neo)
+    return variant_to_all_neos, variant_to_passed_neos
 
 
-def get_lesion_neo_loads(lesion_to_effectvariants, passed_variants, variant_to_neos,):
+def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_all_neos, variant_to_passed_neos):
     result1 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     result2 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     for effect, variants in lesion_to_effectvariants.items():
         for var in variants[1]:
-            if len(variant_to_neos[var]) >= 1:
+            if len(variant_to_passed_neos[var]) >= 1:
                 result1[effect] += 1
-            if var in passed_variants:
+            if var in variant_to_all_neos:
                 result2[effect] += 1
     return result1, result2
 
@@ -185,15 +185,45 @@ def main():
     out_df.index = out_df.index.map(str)
 
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
-    patient_to_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
+    patient_to_vars_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
     for patient, lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
-        neo_loads, passed_variants = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_neos[patient][0], patient_to_neos[patient][1])
-        data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {passed_variants[effect]}, {neo_loads[effect]}' for effect in effects]
+        load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
+
+        ## save frameshift peptides to file
+        lesion_fs_file = os.path.join(outdir, f'{lesion}_fs_variants.txt')
+        with open(lesion_fs_file, 'w') as f:
+            f.write('variant\tneoantigens\tnetmhc_scores\n')
+            for var in lesion_to_effectvariants[lesion]['fs']:
+                neos = (',').join(list(patient_to_vars_neos[patient][0][var].keys()))
+                scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in neos])
+                f.write(f'{var}\t{neos}\t{scores}\n')
+        f.close()
+        
+        ## save variants with at least one <500nM neoantigen to file
+        sub500_var_file = os.path.join(outdir, f'{lesion}_sub500_variants.txt')
+        with open(sub500_var_file, 'w') as f:
+            f.write('variant\teffect\tneoantigens\tnetmhc_score\n')
+            for effect in lesion_to_effectvariants[lesion].keys():
+                for var in lesion_to_effectvariants[lesion][effect]:
+                    pass_neos = patient_to_vars_neos[patient][1][var]
+                    if len(pass_neos) == 0 : continue
+                    neos = (',').join(pass_neos)
+                    scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in neos])
+                    f.write(f'{var}\t{effect}\t{neos}\t{scores}\n')
+        f.close()
+
+
+
+        ## build dataframe for lesions loads
+        data = [f'{lesion_to_effectvariants[lesion][effect][0]}, {load_all[effect]}, {load_passed[effect]}' for effect in effects]
         #print(out_df.index, out_df.columns)
         if lesion in out_df.index and not args.overwrite:
                 continue
+        elif lesion in out_df.index and args.overwrite:
+            print(f"overwriting entry for lesion {lesion}... ")
+            print(f"old entry: {out_df[lesion]}, new entry: {data}")
         else: 
             out_df.loc[lesion] = pd.Series({'total': data[0],
                                     'frameshift': data[1], 
@@ -207,6 +237,7 @@ def main():
 
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
+
 
 
 if __name__ == "__main__":
