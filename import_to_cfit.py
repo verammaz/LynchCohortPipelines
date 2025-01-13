@@ -11,8 +11,10 @@ from cfit.plot.PlotTreeAll import PlotTreeAll
 
 def fix_vcf_format(hdir, patient_id, mapping):
     samples = []
-    for s in mapping['samples']:
-        samples.append(s[1])
+    for pat_mapping in mapping:
+        print(pat_mapping)
+        for s in pat_mapping['samples']:
+            samples.append(s[1])
 
     data_dir = os.path.join(hdir, 'Raw')
     variants_pkl = os.path.join(data_dir, f"{patient_id}_variants.pkl")
