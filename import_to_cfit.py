@@ -52,7 +52,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
                 print(f"Fixing VCF format in file {file}...")
                 file_lines = f_in.readlines()
             f_in.close()
-            with open(file, 'w') as f_out:
+            with open(os.path.join(vcf_dir, file), 'w') as f_out:
                 for line in file_lines:
                     if line.startswith('#'):
                         f_out.write(line)
