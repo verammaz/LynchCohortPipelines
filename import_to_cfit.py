@@ -33,7 +33,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
     
     sample_to_variants = dict()
 
-    data_dir = os.path.join(hdir, 'Raw', patient)
+    data_dir = os.path.join(hdir, 'Raw', patient_id)
 
     for sample in samples:
         bamcounts_file = os.path.join(data_dir, sample, f'{sample}_bamcounts.txt')
