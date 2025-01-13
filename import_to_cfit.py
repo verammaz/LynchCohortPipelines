@@ -22,7 +22,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
     all_variants = defaultdict(list)
 
     for sample in samples:
-        vcf_file = os.path.join(f'{sample}.vcf')
+        vcf_file = os.path.join(vcf_dir, f'{sample}.vcf')
         with open(vcf_file, 'r') as f:
             for line in f.readlines():
                 if line.startswith('#'): continue
@@ -39,8 +39,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
         variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample)
         sample_to_variants[sample] = variant_to_counts
     
-    variant_sets = (set(sample_to_variants[s].keys()) for s in samples if s != 'Normal')
-    final_variants = set.intersection(*variant_sets)
+
     
     out_dir = os.path.join(args.data_dir, "..", "..","VCF", args.patient_id)
 
