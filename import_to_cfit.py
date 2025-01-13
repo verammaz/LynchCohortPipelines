@@ -54,6 +54,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
                 for line in file_lines:
                     if line.startswith('#'):
                         f_out.write(line)
+                        continue
                     line_components = line.split('\t')
                     variant_id = line_components[2]
                     line_components[-1] = sample_to_variants[sample_name][variant_id] + '\n'
