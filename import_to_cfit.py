@@ -63,7 +63,8 @@ if __name__ == '__main__':
     parser.add_argument('-hdir', required=True, help="Analysis data home directory")
     parser.add_argument('-patient_id', required=True, help='Patient identifier')
     parser.add_argument('-drivers', nargs='+', help='List of driver mutations to mark on clone tree plot')
-    parser.add_argument('-fix_vcf_format', help='there WAS a bug in union_variants_post.py for format of VCF counts, need to re-run CFIT and re-write VCF files')
+    parser.add_argument('-fix_vcf_format', default=False, action='store_true',
+                        help='there WAS a bug in union_variants_post.py for format of VCF counts, need to re-run CFIT and re-write VCF files')
 
 
     args = parser.parse_args()
