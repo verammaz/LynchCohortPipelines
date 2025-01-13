@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 import pickle
 
+from union_variants_pre import Variant
 from union_variants_post import read_bamcounts
 
 from cfit.util.Analysis import Analysis
@@ -16,15 +17,20 @@ def fix_vcf_format(hdir, patient_id, mapping):
         for s in pat_mapping['samples']:
             samples.append(s[1])
 
-    data_dir = os.path.join(hdir, 'Raw', patient_id)
-    variants_pkl = os.path.join(data_dir, f"{patient_id}_variants.pkl")
+    vcf_dir = os.path.join(hdir, 'VCF', patient_id)
 
     all_variants = defaultdict(list)
-    with open(variants_pkl, 'rb') as f:
-        loaded_variants = pickle.load(f)
 
-    for variant in loaded_variants:
-        all_variants[f"{variant.chrom}_{variant.pos}"].append(variant)
+    for sample in samples:
+        vcf_file = os.path.join(f'{sample}.vcf')
+        with open(vcf_file, 'r') as f:
+            for line in f.readlines():
+                if line.startswith('#'): continue
+                else:
+                    chrom, pos, id, ref, alt = line.split('\t')[:5]
+                    variant = Variant(chrom, pos, ref, alt, None, None, None, None)
+                    all_variants[f"{chrom}_{pos}"].append(variant)
+
     
     sample_to_variants = dict()
 
