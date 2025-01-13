@@ -13,7 +13,6 @@ from cfit.plot.PlotTreeAll import PlotTreeAll
 def fix_vcf_format(hdir, patient_id, mapping):
     samples = []
     for pat_mapping in mapping:
-        print(pat_mapping)
         for s in pat_mapping['samples']:
             samples.append(s[1])
 
@@ -34,8 +33,10 @@ def fix_vcf_format(hdir, patient_id, mapping):
     
     sample_to_variants = dict()
 
+    data_dir = os.path.join(hdir, 'Raw', patient)
+
     for sample in samples:
-        bamcounts_file = os.path.join(args.data_dir, sample, f'{sample}_bamcounts.txt')
+        bamcounts_file = os.path.join(data_dir, sample, f'{sample}_bamcounts.txt')
         variant_to_counts = read_bamcounts(bamcounts_file, all_variants, sample)
         sample_to_variants[sample] = variant_to_counts
     
