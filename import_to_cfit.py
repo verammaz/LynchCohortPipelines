@@ -43,7 +43,9 @@ def fix_vcf_format(hdir, patient_id, mapping):
 
     
     for file in os.listdir(vcf_dir):
+        template = False
         if file.startswith('.'): continue
+        if 'template' in file: template = True
         if file.endswith('.vcf'):
             sample_name = (os.path.splitext(os.path.basename(file))[0]).split('_')[0]
             with open(os.path.join(vcf_dir, file), 'r') as f_in:
@@ -56,14 +58,16 @@ def fix_vcf_format(hdir, patient_id, mapping):
                         f_out.write(line)
                         continue
                     line_components = line.split('\t')
-                    variant_id = line_components[2]
+
+                    if template:
+                        line_components[-1] = '0:0' + '\n'
             
-                    try:
-                        line_components[-1] = sample_to_variants[sample_name][variant_id] + '\n'
-                    except:
-                        print(variant_id)
-                        print(line)
-                        assert line_components[-1].strip() == '0:0'
+                    else:
+                        variant_id = line_components[2]
+                        try:
+                            line_components[-1] = sample_to_variants[sample_name][variant_id] + '\n'
+                        except:
+                            assert line_components[-1].strip() == '0:0'
                     f_out.write(('\t').join(line_components))
             f_out.close()
 
