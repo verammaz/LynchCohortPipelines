@@ -1,7 +1,7 @@
 import argparse
 import os
 import json
-import defaultdict
+from collections import defaultdict
 import pickle
 
 from union_variants_post import read_bamcounts
