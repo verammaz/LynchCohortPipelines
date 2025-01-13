@@ -44,6 +44,7 @@ def fix_vcf_format(hdir, patient_id, mapping):
     
     for file in os.listdir(vcf_dir):
         print(file)
+        if file.startswith('.'): continue
         if file.endswith('.vcf'):
             sample_name = file.split('_')[0]
             with open(file, 'r') as f_in:
