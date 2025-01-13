@@ -57,12 +57,13 @@ def fix_vcf_format(hdir, patient_id, mapping):
                         continue
                     line_components = line.split('\t')
                     variant_id = line_components[2]
+            
                     try:
                         line_components[-1] = sample_to_variants[sample_name][variant_id] + '\n'
                     except:
                         print(variant_id)
                         print(line)
-                        assert line_components[-1] == '0:0'
+                        assert line_components[-1].strip() == '0:0'
                     f_out.write(('\t').join(line_components))
             f_out.close()
 
