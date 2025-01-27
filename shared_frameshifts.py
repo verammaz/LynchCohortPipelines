@@ -46,7 +46,7 @@ def main():
     parser.add_argument('-specific_fs_xl', help="excel file with specific frameshift variants and their coordinates in a dataframe")
     parser.add_argument('-check_raw', default=False, action='store_true', help="check for variant in lesion raw (mutect/strelka) vcf file before counting it in a lesion")
     parser.add_argument('-nmd', default=False, action='store_true', help='add nonsense-mediated-decay row to output table')
-    parser.add_argument('-v', defualt=False, action='store_true', help='enable warning messages')
+    parser.add_argument('-v', default=False, action='store_true', help='enable warning messages')
     args = parser.parse_args()
 
     lesions = args.lesions.split(',')
@@ -113,7 +113,18 @@ def main():
 
     out_file = os.path.join(outdir, 'shared_frameshifts.xlsx')
 
-    mode = 'a' if os.path.exists(out_file) else 'w'
+   
+    if os.path.exists(out_file):
+        # Check file size
+        if os.path.getsize(out_file) == 0:
+            # If zero bytes, treat as a new file
+            mode = 'w'
+        else:
+            # If non-zero bytes, append to existing file
+            mode = 'a'
+    else:
+        # File doesn’t exist, create it
+        mode = 'w'
 
     
     with pd.ExcelWriter(out_file, engine='openpyxl', mode=mode, if_sheet_exists='error') as writer:
