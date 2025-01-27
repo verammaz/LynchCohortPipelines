@@ -140,7 +140,7 @@ def main():
     
     # Write or append
     if mode == 'a':
-        with pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='error') as writer:
+        with pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
             write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
     else:
         with pd.ExcelWriter(out_file, engine='openpyxl', mode='w') as writer:
@@ -151,7 +151,7 @@ def main():
 
     if args.specific_fs_xl is not None:
         out_file = os.path.join(outdir, 'specific_fs_variants.xlsx')
-        df = pd.read_excel(args.shared_fs_xl)
+        df = pd.read_excel(args.specific_fs_xl)
         chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
         coords = list(df['COORD_HG19'])
         genes = list(df['GENE'])
