@@ -61,8 +61,9 @@ def main():
                     print(line)
             variants = [line.split('\t')[2].strip() for line in lines]
             assert all(variant == variants[0] for variant in variants)
-            var_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
+            ref_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
             total_reads = [line.split('\t')[10].split(':')[0].strip() for line in lines]
+            var_reads = [int(total) - int(ref) for total,ref in zip(ref_reads, total_reads)]
             var_prob = '1.0' if variants[0].split('_')[0] in ['X', 'Y'] and sex=='male' else '0.5'
             var_probs = [var_prob for line in lines]
             ssm.write(f"s{i}\t{variants[0]}\t{(', ').join(var_reads)}\t{(', ').join(total_reads)}\t{(', ').join(var_probs)}\n")
