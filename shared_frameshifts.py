@@ -41,7 +41,7 @@ def get_fs_variants(lesion, patient, variant_to_nmd, hdir, fs_annotation, check_
 
     raw_variants = get_raw_variants(lesion, patient, hdir) if check_raw else None
     
-    with open(os.path.join(hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
+    with open(os.path.join(hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
         snpeff_lines = snpeff_file.readlines()
         varcode_lines = varcode_file.readlines()
         total_lines = min(len(snpeff_lines), len(varcode_lines))
