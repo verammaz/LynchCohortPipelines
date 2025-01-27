@@ -43,9 +43,9 @@ def main():
     parser.add_argument('-lesions', required=True, help="comma-separated list of lesion ids")
     parser.add_argument('-patients', required=True, help="comma-separated list of patient ids, corresponding to lesion ids list")
     parser.add_argument('-fs_annotation', default=False, action='store_true', help='count frameshift only through annotation (i.e. not just looking if indel is multiple of three)')
-    parser.add_argument('-shared_fs_xl', help="excel file with shared frameshift variant coordinates dataframe")
+    parser.add_argument('-specific_fs_xl', help="excel file with specific frameshift variants and their coordinates in a dataframe")
     parser.add_argument('-check_raw', default=False, action='store_true', help="check for variant in lesion raw (mutect/strelka) vcf file before counting it in a lesion")
-    parser.add_argument('-nmd', default=False, action='store_true', help='add nonsense-mediated-decay row')
+    parser.add_argument('-nmd', default=False, action='store_true', help='add nonsense-mediated-decay row to output table')
     args = parser.parse_args()
 
     lesions = args.lesions.split(',')
@@ -130,15 +130,15 @@ def main():
     
 
 
-    if args.shared_fs_xl is not None:
-        out_file = os.path.join(outdir, '46_variants.xlsx')
+    if args.specific_fs_xl is not None:
+        out_file = os.path.join(outdir, 'specific_fs_variants.xlsx')
         df = pd.read_excel(args.shared_fs_xl)
         chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
         coords = list(df['COORD_HG19'])
         genes = list(df['GENE'])
         out_df = pd.DataFrame()
         if os.path.exists(out_file):
-            out_df = pd.read_excel(out_file, sheet_name='46 variants', index_col=0) 
+            out_df = pd.read_excel(out_file, sheet_name='specific fs variants', index_col=0) 
         else:
             out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
             out_df['gene_id'] = genes
@@ -152,7 +152,7 @@ def main():
         out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
 
         writer = pd.ExcelWriter(out_file, engine='openpyxl')
-        out_df.to_excel(writer, index=True, sheet_name='46 variants')
+        out_df.to_excel(writer, index=True, sheet_name='specific fs variants')
         writer.close()
 
 if __name__ == "__main__":
