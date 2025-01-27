@@ -36,6 +36,61 @@ def get_raw_variants(lesion, patient, hdir):
     return variants
 
 
+def get_fs_variants(lesion, patient, variant_to_nmd, hdir, fs_annotation, check_raw, v=False):
+    fs_variants = defaultdict(list)
+
+    raw_variants = get_raw_variants(lesion, patient, hdir) if check_raw else None
+    
+    with open(os.path.join(hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
+        snpeff_lines = snpeff_file.readlines()
+        varcode_lines = varcode_file.readlines()
+        total_lines = min(len(snpeff_lines), len(varcode_lines))
+
+        for snpeff_line, varcode_line in zip(snpeff_lines, varcode_lines):
+        
+            assert(snpeff_line.split('\t')[i] == varcode_line.split('\t')[i] for i in range(len(snpeff_line.split('\t'))) if i != 7)
+            
+            if snpeff_line.startswith('#'): continue
+            
+            variant = snpeff_line.split('\t')[2]
+            count = snpeff_line.split('\t')[10].strip()
+            
+            if not check_raw and (count == '0:0' or count.split(':')[-1].strip() == count.split(':')[0].strip()):
+                if v:
+                    print(f"Warning: variant {variant} has count {count} in {lesion}")
+                continue
+            
+            elif check_raw and not variant in raw_variants:
+                if v:
+                    print(f"Warning: variant {variant} not present with 'PASS' filter in raw (strelka/mutect) vcf file for {lesion}")
+                continue
+
+            variant_to_nmd[('_').join(variant.split('_')[0:2])] = 1 if 'nonsense_mediated_decay' in snpeff_line.split('\t')[7] else 0
+
+            if fs_annotation:
+                snpeff_ann, varcode_ann = snpeff_line.split('\t')[7], varcode_line.split('\t')[7]
+                if 'frameshift' in snpeff_ann or 'FrameShift' in varcode_ann:
+                    fs_variants[('_').join(variant.split('_')[0:2])].append(variant)
+
+            else:
+                ref, alt = variant.split('_')[-2], variant.split('_')[-1]
+                if (len(ref) == 1 and len(alt) != 1) or (len(alt) == 1 and len(ref) != 1) :
+                    fs_variants[('_').join(variant.split('_')[0:2])].append(variant)
+
+        return fs_variants
+    
+
+def get_xl_outfile_mode(out_file):
+    if os.path.exists(out_file):
+        if os.path.getsize(out_file) == 0:
+            mode = 'w'
+        else:
+            mode = 'a'
+    else:
+        mode = 'w'
+    
+    return mode
+
 def write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd):
      for n in range(2, len(lesions) + 1):
             combinations = itertools.combinations(lesions, n)
@@ -79,88 +134,45 @@ def main():
     variant_to_nmd = dict()
 
     for lesion, patient in zip(lesions, patients):
-
-        fs_variants = defaultdict(list)
-
-        raw_variants = get_raw_variants(lesion, patient, args.hdir) if args.check_raw else None
-        
-        with open(os.path.join(args.hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(args.hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
-            snpeff_lines = snpeff_file.readlines()
-            varcode_lines = varcode_file.readlines()
-            total_lines = min(len(snpeff_lines), len(varcode_lines))
-
-            for snpeff_line, varcode_line in zip(snpeff_lines, varcode_lines):
-            
-                assert(snpeff_line.split('\t')[i] == varcode_line.split('\t')[i] for i in range(len(snpeff_line.split('\t'))) if i != 7)
-                
-                if snpeff_line.startswith('#'): continue
-                
-                variant = snpeff_line.split('\t')[2]
-                count = snpeff_line.split('\t')[10].strip()
-                
-                if not args.check_raw and (count == '0:0' or count.split(':')[-1].strip() == '0'):
-                    if args.v:
-                        print(f"Warning: variant {variant} has count {count} in {lesion}")
-                    continue
-                
-                elif args.check_raw and not variant in raw_variants:
-                    if args.v:
-                        print(f"Warning: variant {variant} not present with 'PASS' filter in raw (strelka/mutect) vcf file for {lesion}")
-                    continue
-
-                variant_to_nmd[('_').join(variant.split('_')[0:2])] = 1 if 'nonsense_mediated_decay' in snpeff_line.split('\t')[7] else 0
-
-                if args.fs_annotation:
-                    snpeff_ann, varcode_ann = snpeff_line.split('\t')[7], varcode_line.split('\t')[7]
-                    if 'frameshift' in snpeff_ann or 'FrameShift' in varcode_ann:
-                        fs_variants[('_').join(variant.split('_')[0:2])].append(variant)
-
-                else:
-                    ref, alt = variant.split('_')[-2], variant.split('_')[-1]
-                    if (len(ref) == 1 and len(alt) != 1) or (len(alt) == 1 and len(ref) != 1) :
-                        fs_variants[('_').join(variant.split('_')[0:2])].append(variant)
     
-        lesion_to_fsvariants[lesion] = fs_variants
+        lesion_to_fsvariants[lesion] = get_fs_variants(lesion, patient, variant_to_nmd, args.hdir, args.fs_annotation, args.check_raw, v=args.v)
 
     outdir = os.path.join(args.hdir, 'LesionVariantsComparisons')
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
     out_file = os.path.join(outdir, 'shared_frameshifts.xlsx')
-
    
-    if os.path.exists(out_file):
-        if os.path.getsize(out_file) == 0:
-            mode = 'w'
-        else:
-            mode = 'a'
-    else:
-        mode = 'w'
+    mode = get_xl_outfile_mode(out_file)
 
     
     # Write or append
     if mode == 'a':
-        with pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-            write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
+        writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace')
     else:
-        with pd.ExcelWriter(out_file, engine='openpyxl', mode='w') as writer:
-            write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
+        writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='w')
+    write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
 
     
 
 
     if args.specific_fs_xl is not None:
         out_file = os.path.join(outdir, 'specific_fs_variants.xlsx')
+
+        mode = get_xl_outfile_mode(out_file)
+
         df = pd.read_excel(args.specific_fs_xl)
         chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
         coords = list(df['COORD_HG19'])
         genes = list(df['GENE'])
         out_df = pd.DataFrame()
-        if os.path.exists(out_file):
+
+        if mode == 'a':
             out_df = pd.read_excel(out_file, sheet_name='specific fs variants', index_col=0) 
         else:
             out_df['chrom_pos'] = [f'{chrom}_{coord}' for chrom, coord in zip(chroms, coords)]
             out_df['gene_id'] = genes
+        
         for lesion in lesions:
             if f'lesion_{lesion}' in out_df.columns: continue
             fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
@@ -170,9 +182,15 @@ def main():
         out_df.loc['total_variants'] = plus_df.sum(axis=0)
         out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
 
-        writer = pd.ExcelWriter(out_file, engine='openpyxl')
+
+        if mode == 'a':
+            writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace')
+        else:
+            writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='w')
+        
         out_df.to_excel(writer, index=True, sheet_name='specific fs variants')
-        writer.close()
+
+
 
 if __name__ == "__main__":
     main()
