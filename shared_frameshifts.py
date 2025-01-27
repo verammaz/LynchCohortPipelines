@@ -46,6 +46,7 @@ def main():
     parser.add_argument('-specific_fs_xl', help="excel file with specific frameshift variants and their coordinates in a dataframe")
     parser.add_argument('-check_raw', default=False, action='store_true', help="check for variant in lesion raw (mutect/strelka) vcf file before counting it in a lesion")
     parser.add_argument('-nmd', default=False, action='store_true', help='add nonsense-mediated-decay row to output table')
+    parser.add_argument('-v', defualt=False, action='store_true', help='enable warning messages')
     args = parser.parse_args()
 
     lesions = args.lesions.split(',')
@@ -83,11 +84,13 @@ def main():
                 count = snpeff_line.split('\t')[10].strip()
                 
                 if not args.check_raw and (count == '0:0' or count.split(':')[-1].strip() == '0'):
-                    print(f"Warning: variant {variant} has count {count} in {lesion}")
+                    if args.v:
+                        print(f"Warning: variant {variant} has count {count} in {lesion}")
                     continue
                 
                 elif args.check_raw and not variant in raw_variants:
-                    print(f"Warning: variant {variant} not present with 'PASS' filter in raw (strelka/mutect) vcf file for {lesion}")
+                    if args.v:
+                        print(f"Warning: variant {variant} not present with 'PASS' filter in raw (strelka/mutect) vcf file for {lesion}")
                     continue
 
                 variant_to_nmd[('_').join(variant.split('_')[0:2])] = 1 if 'nonsense_mediated_decay' in snpeff_line.split('\t')[7] else 0
@@ -109,24 +112,25 @@ def main():
         os.mkdir(outdir)
 
     out_file = os.path.join(outdir, 'shared_frameshifts.xlsx')
-    book = load_workbook(out_file) if os.path.exists(out_file) else None
-    writer = pd.ExcelWriter(out_file, engine='openpyxl')
-    writer.book = book
- 
-    for n in range(2, len(lesions) + 1):
-        combinations = itertools.combinations(lesions, n)
-        for subset in combinations:
-            variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
-            shared_variants = list(set.intersection(*variant_sets))
-            df = pd.DataFrame()
-            if len(shared_variants):
-                df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
-                for s in subset:
-                    df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
-                df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
-            df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
 
-    writer.close()
+    mode = 'a' if os.path.exists(out_file) else 'w'
+
+    
+    with pd.ExcelWriter(out_file, engine='openpyxl', mode=mode, if_sheet_exists='error') as writer:
+ 
+        for n in range(2, len(lesions) + 1):
+            combinations = itertools.combinations(lesions, n)
+            for subset in combinations:
+                variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
+                shared_variants = list(set.intersection(*variant_sets))
+                df = pd.DataFrame()
+                if len(shared_variants):
+                    df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
+                    for s in subset:
+                        df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
+                    df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
+                df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
+
     
 
 
