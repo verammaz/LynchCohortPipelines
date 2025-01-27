@@ -82,13 +82,12 @@ def get_fs_variants(lesion, patient, variant_to_nmd, hdir, fs_annotation, check_
 def get_xl_outfile_mode(out_file):
     if os.path.exists(out_file):
         if os.path.getsize(out_file) == 0:
-            mode = 'w'
+            return 'w'
         else:
-            mode = 'a'
+            return 'a'
     else:
-        mode = 'w'
+        return 'w'
     
-    return mode
 
 
 def write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd):
@@ -132,6 +131,8 @@ def main():
 
     lesion_to_fsvariants = dict()
     variant_to_nmd = dict()
+
+    print(lesion_to_fsvariants, variant_to_nmd)
 
     for lesion, patient in zip(lesions, patients):
         lesion_to_fsvariants[lesion] = get_fs_variants(lesion, patient, variant_to_nmd, args.hdir, args.fs_annotation, args.check_raw, v=args.v)
