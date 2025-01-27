@@ -44,7 +44,6 @@ def get_fs_variants(lesion, patient, variant_to_nmd, hdir, fs_annotation, check_
     with open(os.path.join(hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as snpeff_file, open(os.path.join(hdir, 'VCF', patient, lesion+'_varcode.vcf'), 'r') as varcode_file:
         snpeff_lines = snpeff_file.readlines()
         varcode_lines = varcode_file.readlines()
-        total_lines = min(len(snpeff_lines), len(varcode_lines))
 
         for snpeff_line, varcode_line in zip(snpeff_lines, varcode_lines):
         
@@ -91,6 +90,7 @@ def get_xl_outfile_mode(out_file):
     
     return mode
 
+
 def write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd):
      for n in range(2, len(lesions) + 1):
             combinations = itertools.combinations(lesions, n)
@@ -134,7 +134,6 @@ def main():
     variant_to_nmd = dict()
 
     for lesion, patient in zip(lesions, patients):
-    
         lesion_to_fsvariants[lesion] = get_fs_variants(lesion, patient, variant_to_nmd, args.hdir, args.fs_annotation, args.check_raw, v=args.v)
 
     outdir = os.path.join(args.hdir, 'LesionVariantsComparisons')
@@ -148,10 +147,11 @@ def main():
     
     # Write or append
     if mode == 'a':
-        writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace')
+        with pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+            write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
     else:
-        writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='w')
-    write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
+        with pd.ExcelWriter(out_file, engine='openpyxl', mode='w') as writer:
+            write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
 
     
 
@@ -184,11 +184,11 @@ def main():
 
 
         if mode == 'a':
-            writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace')
+            with pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                out_df.to_excel(writer, index=True, sheet_name='specific fs variants')
         else:
-            writer = pd.ExcelWriter(out_file, engine='openpyxl', mode='w')
-        
-        out_df.to_excel(writer, index=True, sheet_name='specific fs variants')
+            with pd.ExcelWriter(out_file, engine='openpyxl', mode='w') as writer:
+                out_df.to_excel(writer, index=True, sheet_name='specific fs variants')
 
 
 
