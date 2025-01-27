@@ -36,6 +36,21 @@ def get_raw_variants(lesion, patient, hdir):
     return variants
 
 
+def write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd):
+     for n in range(2, len(lesions) + 1):
+            combinations = itertools.combinations(lesions, n)
+            for subset in combinations:
+                variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
+                shared_variants = list(set.intersection(*variant_sets))
+                df = pd.DataFrame()
+                if len(shared_variants):
+                    df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
+                    for s in subset:
+                        df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
+                    df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
+                df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
+
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -115,32 +130,21 @@ def main():
 
    
     if os.path.exists(out_file):
-        # Check file size
         if os.path.getsize(out_file) == 0:
-            # If zero bytes, treat as a new file
             mode = 'w'
         else:
-            # If non-zero bytes, append to existing file
             mode = 'a'
     else:
-        # File doesn’t exist, create it
         mode = 'w'
 
     
-    with pd.ExcelWriter(out_file, engine='openpyxl', mode=mode, if_sheet_exists='error') as writer:
- 
-        for n in range(2, len(lesions) + 1):
-            combinations = itertools.combinations(lesions, n)
-            for subset in combinations:
-                variant_sets = (set(lesion_to_fsvariants[s].keys()) for s in subset)
-                shared_variants = list(set.intersection(*variant_sets))
-                df = pd.DataFrame()
-                if len(shared_variants):
-                    df = pd.DataFrame(columns=shared_variants, index=[s for s in subset])
-                    for s in subset:
-                        df.loc[s] = pd.Series({var:(',').join(lesion_to_fsvariants[s][var]) for var in shared_variants})
-                    df.loc['NMD'] = pd.Series({var: variant_to_nmd[var] for var in shared_variants})
-                df.to_excel(writer, index_label=f'Total: {len(shared_variants)}', index=True, sheet_name=(',').join(list(subset)))
+    # Write or append
+    if mode == 'a':
+        with pd.ExcelWriter(out_file, engine='openpyxl', mode='a', if_sheet_exists='error') as writer:
+            write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
+    else:
+        with pd.ExcelWriter(out_file, engine='openpyxl', mode='w') as writer:
+            write_frameshifts(writer, lesions, lesion_to_fsvariants, variant_to_nmd)
 
     
 
