@@ -212,7 +212,7 @@ def main():
                     pass_neos = patient_to_vars_neos[patient][1][var]
                     if len(pass_neos) == 0 : continue
                     neos = (',').join(pass_neos)
-                    scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in neos])
+                    scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in pass_neos])
                     f.write(f'{var}\t{effect}\t{neos}\t{scores}\n')
         f.close()
 
