@@ -226,7 +226,7 @@ def main():
                 continue
         elif lesion in out_df.index and args.overwrite:
             print(f"overwriting entry for lesion {lesion}... ")
-            print(f"old entry: {out_df[lesion]}, new entry: {data}")
+            print(f"old entry: {out_df.loc[lesion]}, new entry: {data}")
         else: 
             out_df.loc[lesion] = pd.Series({'total': data[0],
                                     'frameshift': data[1], 
