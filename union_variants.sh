@@ -85,7 +85,7 @@ module load bam-readcount >/dev/null 2>&1
 
 
 if [[ "$STEP" -eq 0  ]]; then
-    print_progress "Runing preprocessing python script." 
+    print_progress "Running preprocessing python script." 
     echo ""
 
     python ${LYNCH}/union_variants_pre.py -patient_id ${PATIENT} -samplesheet ${SAMPLESHEET} -data_dir ${RAW_DIR} \

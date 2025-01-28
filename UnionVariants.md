@@ -28,8 +28,8 @@ bsub -J ${job_name} \
      -q premium \
      -W 20:00 \
      -n 8 \
-     -oo ${LOG_DIR}/{$job_name}.out \
-     -eo ${LOG_DIR}/{$job_name}.err \
+     -oo ${LOG_DIR}/${job_name}.out \
+     -eo ${LOG_DIR}/${job_name}.err \
      ./union_variants.sh -p ${patient_id} -s ${samplesheet} --filter_variants -v
 ```
 
