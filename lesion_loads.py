@@ -190,8 +190,7 @@ def main():
     for patient, lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
-        print(lesion_to_effectvariants[lesion]['fs'])
-        print(load_passed, load_all)
+        
         ## save frameshift peptides to file
         """lesion_fsneos_file = os.path.join(outdir, f'{lesion}_fs_neoantigens.txt')
         with open(lesion_fsneos_file, 'w') as f:
@@ -224,11 +223,11 @@ def main():
         #print(out_df.index, out_df.columns)
         if lesion in out_df.index and not args.overwrite:
                 continue
-        elif lesion in out_df.index and args.overwrite:
+        if lesion in out_df.index and args.overwrite:
             print(f"overwriting entry for lesion {lesion}... ")
             print(f"old entry: {out_df.loc[lesion]}, new entry: {data}")
-        else: 
-            out_df.loc[lesion] = pd.Series({'total': data[0],
+
+        out_df.loc[lesion] = pd.Series({'total': data[0],
                                     'frameshift': data[1], 
                                     'nonsynonymous_substitution': data[2], 
                                     'inframe_indel': data[3], 
