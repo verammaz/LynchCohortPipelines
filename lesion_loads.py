@@ -192,14 +192,14 @@ def main():
         load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
 
         ## save frameshift peptides to file
-        lesion_fs_file = os.path.join(outdir, f'{lesion}_fs_variants.txt')
-        with open(lesion_fs_file, 'w') as f:
+        """lesion_fsneos_file = os.path.join(outdir, f'{lesion}_fs_neoantigens.txt')
+        with open(lesion_fsneos_file, 'w') as f:
             f.write('variant\tneoantigens\tnetmhc_scores\n')
             for var in lesion_to_effectvariants[lesion]['fs']:
                 neos = (',').join(list(patient_to_vars_neos[patient][0][var].keys()))
                 scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in neos])
                 f.write(f'{var}\t{neos}\t{scores}\n')
-        f.close()
+        f.close()"""
         
         ## save variants with at least one <500nM neoantigen to file
         sub500_var_file = os.path.join(outdir, f'{lesion}_sub500_variants.txt')
