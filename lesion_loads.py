@@ -190,7 +190,7 @@ def main():
     for patient, lesion in zip(patients,lesions):
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
-
+        print(lesion_to_effectvariants[lesion]['fs'])
         print(load_passed)
         ## save frameshift peptides to file
         """lesion_fsneos_file = os.path.join(outdir, f'{lesion}_fs_neoantigens.txt')
