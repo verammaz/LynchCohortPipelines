@@ -109,7 +109,7 @@ def get_lesion_variants(lesions, patients, args, outdir):
                 variant = snpeff_line.split('\t')[2]
                 count = snpeff_line.split('\t')[10].strip()
                 
-                if not args.check_raw and (count == '0:0' or count.split(':')[-1].strip() == '0'):
+                if not args.check_raw and (count == '0:0' or count.split(':')[-1].strip() == count.split(':')[0].strip()):
                     #print(f"Warning: variant {variant} has count {count} in {lesion}")
                     continue
                 
@@ -191,7 +191,7 @@ def main():
         effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
         print(lesion_to_effectvariants[lesion]['fs'])
-        print(load_passed)
+        print(load_passed, load_all)
         ## save frameshift peptides to file
         """lesion_fsneos_file = os.path.join(outdir, f'{lesion}_fs_neoantigens.txt')
         with open(lesion_fsneos_file, 'w') as f:
