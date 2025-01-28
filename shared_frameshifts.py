@@ -110,11 +110,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-hdir', required=True, help="path to home directory with /VCF folder")
     parser.add_argument('-lesions', required=True, help="comma-separated list of lesion ids")
-    parser.add_argument('-patients', required=True, help="comma-separated list of patient ids, corresponding to lesion ids list")
-    parser.add_argument('-fs_annotation', default=False, action='store_true', help='count frameshift only through annotation (i.e. not just looking if indel is multiple of three)')
+    parser.add_argument('-patients', required=True, help="comma-separated list of patient ids")
+    parser.add_argument('-fs_annotation', default=False, action='store_true', help='count frameshift only through annotation')
     parser.add_argument('-specific_fs_xl', help="excel file with specific frameshift variants and their coordinates in a dataframe")
-    parser.add_argument('-check_raw', default=False, action='store_true', help="check for variant in lesion raw (mutect/strelka) vcf file before counting it in a lesion")
-    parser.add_argument('-nmd', default=False, action='store_true', help='add nonsense-mediated-decay row to output table')
+    parser.add_argument('-specific_fs_cols', help="RefChromId,RefCoord,GeneId column names of dataframe in specific_fs_xl file")
+    parser.add_argument('-check_raw', default=False, action='store_true', help="check for variant in lesion raw vcf file before counting it")    
     parser.add_argument('-v', default=False, action='store_true', help='enable warning messages')
     args = parser.parse_args()
 
@@ -131,8 +131,6 @@ def main():
 
     lesion_to_fsvariants = dict()
     variant_to_nmd = dict()
-
-    print(lesion_to_fsvariants, variant_to_nmd)
 
     for lesion, patient in zip(lesions, patients):
         lesion_to_fsvariants[lesion] = get_fs_variants(lesion, patient, variant_to_nmd, args.hdir, args.fs_annotation, args.check_raw, v=args.v)
@@ -162,10 +160,16 @@ def main():
 
         mode = get_xl_outfile_mode(out_file)
 
+        if args.specific_fs_cols is None:
+            chrom_col, coords_col, gene_col = 'HG19_id', 'COORD_HG19', 'GENE'
+        else:
+            chrom_col, coords_col, gene_col = args.specific_fs_cols.split(',')
+
+
         df = pd.read_excel(args.specific_fs_xl)
-        chroms = [chrom[3:] for chrom in list(df['HG19_id'])]
-        coords = list(df['COORD_HG19'])
-        genes = list(df['GENE'])
+        chroms = [chrom[3:] for chrom in list(df[chrom_col])]
+        coords = list(df[coords_col])
+        genes = list(df[gene_col])
         out_df = pd.DataFrame()
 
         if mode == 'a':
@@ -179,7 +183,7 @@ def main():
             fs_presence = ['+' if var in lesion_to_fsvariants[lesion].keys() else '-' for var in out_df['chrom_pos']]
             out_df[f'lesion_{lesion}'] = fs_presence
         
-        plus_df = out_df.applymap(lambda x: 1 if x == '+' else 0)
+        plus_df = out_df.eq('+').astype(int)
         out_df.loc['total_variants'] = plus_df.sum(axis=0)
         out_df.loc[:,'total_lesions'] = plus_df.sum(axis=1)
 
