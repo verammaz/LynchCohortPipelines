@@ -207,7 +207,8 @@ def main():
             f.write('variant\teffect\tneoantigens\tnetmhc_score\n')
             for effect in lesion_to_effectvariants[lesion].keys():
                 for var in lesion_to_effectvariants[lesion][effect]:
-                    print(patient_to_vars_neos[patient][1])
+                    print(lesion_to_effectvariants[lesion][effect])
+                    #print(patient_to_vars_neos[patient][1])
                     pass_neos = patient_to_vars_neos[patient][1][var]
                     if len(pass_neos) == 0 : continue
                     neos = (',').join(pass_neos)
