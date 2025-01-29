@@ -188,6 +188,7 @@ def main():
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_vars_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
+    print(lesion_to_effectvariants)
     patients_processed = set()
 
     for patient, lesion in zip(patients,lesions):
@@ -230,8 +231,6 @@ def main():
                                     'frameshift_truncation': data[4],
                                     'premature_stop': data[5]})
         
-    #out_df = out_df[::-1]
-    #out_df = out_df.iloc[ np.unique( out_df.index.values, return_index = True )[1] ]
 
     with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
        out_df.to_excel(writer)
