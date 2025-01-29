@@ -180,7 +180,7 @@ def main():
         os.mkdir(outdir)
 
     out_file = os.path.join(outdir, 'lesion_loads.xlsx')
-    out_df = pd.DataFrame(columns=['total', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation', 'premature_stop'])
+    out_df = pd.DataFrame(columns=['total (vcf, netmhc, kdthr)', 'frameshift', 'nonsynonymous_substitution', 'inframe_indel', 'frameshift_truncation', 'premature_stop'])
     if os.path.exists(out_file):
         out_df = pd.read_excel(out_file, index_col=0) 
     out_df.index = out_df.index.map(str)
@@ -191,7 +191,7 @@ def main():
     patients_processed = set()
 
     for patient, lesion in zip(patients,lesions):
-        effects = ['total (vcf, netmhc, kdthr)', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
+        effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
         
         if not (patient in patients_processed):
@@ -201,6 +201,7 @@ def main():
             with open(sub500_var_file, 'w') as f:
                 f.write('variant\teffect\tneoantigens\thlas\tnetmhc_score\n')
                 for effect in lesion_to_effectvariants[lesion].keys():
+                    if effect == 'total': continue
                     for var in lesion_to_effectvariants[lesion][effect][1]:
                         pass_neos = patient_to_vars_neos[patient][1][var]
                         if len(pass_neos) == 0 : continue
