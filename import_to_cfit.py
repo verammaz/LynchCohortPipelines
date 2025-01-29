@@ -10,7 +10,7 @@ from union_variants_post import read_bamcounts
 from cfit.util.Analysis import Analysis
 from cfit.plot.PlotTreeAll import PlotTreeAll
 
-def fix_vcf_format(hdir, patient_id, mapping):
+def fix_vcf_format1(hdir, patient_id, mapping):
     samples = []
     for pat_mapping in mapping:
         for s in pat_mapping['samples']:
@@ -73,7 +73,40 @@ def fix_vcf_format(hdir, patient_id, mapping):
 
     
     
+def fix_vcf_format(hdir, patient_id, mapping):
+    samples = []
+    for pat_mapping in mapping:
+        for s in pat_mapping['samples']:
+            samples.append(s[1])
 
+    vcf_dir = os.path.join(hdir, 'VCF', patient_id)
+
+    for file in os.listdir(vcf_dir):
+        template = False
+        if file.startswith('.'): continue
+        if 'template' in file: template = True
+        if file.endswith('.vcf'):
+            sample_name = (os.path.splitext(os.path.basename(file))[0]).split('_')[0]
+            with open(os.path.join(vcf_dir, file), 'r') as f_in:
+                print(f"Fixing VCF format in file {file}...")
+                file_lines = f_in.readlines()
+            f_in.close()
+            with open(os.path.join(vcf_dir, file), 'w') as f_out:
+                for line in file_lines:
+                    if line.startswith('#'):
+                        f_out.write(line)
+                        continue
+                    line_components = line.split('\t')
+
+                    if template:
+                        line_components[-1] = '0:0' + '\n'
+            
+                    else:
+                        total, alt = line_components[-1].split(':')
+                        total, alt = int(total.strip()), int(alt.strip())
+                        line_components[-1] = f'{total}:{total-alt}'
+                    f_out.write(('\t').join(line_components))
+            f_out.close()
 
 
 if __name__ == '__main__':
