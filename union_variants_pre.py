@@ -189,6 +189,7 @@ def main():
         sample = row['sample']
         if sample == 'Normal': continue
         sample_to_vcfs[sample] = row['vcf'].split('|')
+        print(row['vcf'].split('|'))
 
     
     out_dir = args.data_dir
