@@ -189,7 +189,6 @@ def main():
         sample = row['sample']
         if sample == 'Normal': continue
         sample_to_vcfs[sample] = row['vcf'].split('|')
-        print(row['vcf'].split('|'))
 
     
     out_dir = args.data_dir
@@ -203,6 +202,8 @@ def main():
         print(f"{sample}: Reading and parsing vcf file(s)...")
         for vcf in vcf_files:
             vcf_file = os.path.join(out_dir, sample, vcf)
+            if not os.path.isfile(vcf_file):
+                print(f"Warning: {vcf_file} not a valid vcf file. Skipping...")
             regions = read_vcf(vcf_file, sample, all_variants, args.additional_filter)
             if regions == None:
                 parse_error = True
