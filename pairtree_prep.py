@@ -56,9 +56,6 @@ def main():
             file_handles[0].seek(0)
             file_handles[0].readline()
         for lines in zip(*file_handles):
-            for line in lines:
-                if len(line.split('\t')) < 2: 
-                    print(line)
             variants = [line.split('\t')[2].strip() for line in lines]
             assert all(variant == variants[0] for variant in variants)
             ref_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
@@ -92,8 +89,9 @@ def main():
                 for line in infile.readlines():
                     if line.startswith('#'): continue
                     variant = line.split('\t')[2].strip()
-                    var_reads = line.split('\t')[10].split(':')[1].strip()
+                    ref_reads = line.split('\t')[10].split(':')[1].strip()
                     total_reads = line.split('\t')[10].split(':')[0].strip()
+                    var_reads = int(total_reads) - int(ref_reads)
                     var_prob = '1.0' if variant.split('_')[0] in ['X', 'Y'] and sex=='male' else '0.5'
                     outfile.write(f"s{i}\t{variant}\t{var_reads}\t{total_reads}\t{var_prob}\n")
                     i += 1
