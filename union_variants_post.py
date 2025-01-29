@@ -92,8 +92,9 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
                     bam_alt_count = "0" # how should i handle this case?
                     bam_ref_count = "0"
                 
-                
-                bamcounts[variant.id] =f"{bam_depth}:{bam_ref_count}"
+                # DP:AP <-> total:ref
+                # sometimes, total != ref + alt, but want alt count to be accurate --> ref = total - alt
+                bamcounts[variant.id] =f"{bam_depth}:{int(bam_depth) - int(bam_alt_count)}" 
 
                 if outfile is not None:
                     # TODO: command line option to report discrepancy between vcf and bamcounts 
