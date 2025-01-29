@@ -127,7 +127,7 @@ if [[ "$STEP" -ge 1 ]]; then
                 echo "--------------------------"
             fi
 
-            if [[ "$STEP" -ge 1 ]]; then
+            if [[ "$STEP" -eq 1 ]]; then
 
                 # Run the bam-readcounts job in the background
                 print_progress "Running bam-readcounts for ${sample}"
