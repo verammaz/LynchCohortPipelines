@@ -204,6 +204,7 @@ def main():
             vcf_file = os.path.join(out_dir, sample, vcf)
             if not os.path.isfile(vcf_file):
                 print(f"Warning: {vcf_file} not a valid vcf file. Skipping...")
+                continue
             regions = read_vcf(vcf_file, sample, all_variants, args.additional_filter)
             if regions == None:
                 parse_error = True
