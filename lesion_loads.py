@@ -40,8 +40,8 @@ def get_raw_variants(lesion, patient, hdir):
 
 
 def get_neoantigens(patient, hdir, kd=500):
-    variant_to_passed_neos = defaultdict(list) # per variant, neoantigens that passed kd thrreshold
-    variant_to_all_neos = defaultdict(dict) # all {neonatigen : score} pairs for variants passed to netmhc
+    variant_to_passed_neos = defaultdict(list) # per variant, neoantigens that passed kd threshold
+    netmhc_variants = set() # all variants passed to netmhc
     noe_files =[os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_{patient}.txt'), os.path.join(hdir, 'Neoantigens', 'pan41', f'neoantigens_other_{patient}.txt')]
     for file in noe_files:
         f = open(file, 'r')
@@ -49,23 +49,24 @@ def get_neoantigens(patient, hdir, kd=500):
         for line in f.readlines():
             variant = line.split('\t')[1] if 'other' not in file else ('_').join(line.split('\t')[1].split('_')[:-1])
             neo = line.split('\t')[3]
+            hla = line.split('\t')[5]
             score = line.split('\t')[6]
-            variant_to_all_neos[variant][neo] = score
-            if float(score) <= float(kd): # TODO: check this with Matt
-                variant_to_passed_neos[variant].append(neo)
-    return variant_to_all_neos, variant_to_passed_neos
+            netmhc_variants.add(variant)
+            if float(score) <= float(kd): 
+                variant_to_passed_neos[variant].append({'neo': neo, 'score': score, 'hla': hla})
+    return netmhc_variants, variant_to_passed_neos
 
 
-def get_lesion_neo_loads(lesion_to_effectvariants, variant_to_all_neos, variant_to_passed_neos):
-    result1 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
-    result2 = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
+def get_lesion_neo_loads(lesion_to_effectvariants, netmhc_variants, variant_to_passed_neos):
+    passed = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
+    all = {'total': 0, 'fs': 0, 'nonsyn': 0, 'inframe_indel': 0, 'fs_trunc': 0, 'pre_stop': 0}
     for effect, variants in lesion_to_effectvariants.items():
         for var in variants[1]:
             if len(variant_to_passed_neos[var]) >= 1:
-                result1[effect] += 1
-            if var in variant_to_all_neos:
-                result2[effect] += 1
-    return result1, result2
+                passed[effect] += 1
+            if var in netmhc_variants:
+                all[effect] += 1
+    return passed, all
 
 def check_annotation(variant, snpeff_ann, varcode_ann, outfile):
     f = open(outfile, 'a')
@@ -187,34 +188,29 @@ def main():
     lesion_to_effectvariants = get_lesion_variants(lesions, patients, args, outdir)
     patient_to_vars_neos = {patient: get_neoantigens(patient, args.hdir) for patient in list(set(patients))}
 
+    patients_processed = set()
+
     for patient, lesion in zip(patients,lesions):
-        effects = ['total', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
+        effects = ['total (vcf, netmhc, kdthr)', 'fs', 'nonsyn', 'inframe_indel', 'fs_trunc', 'pre_stop' ]
         load_passed, load_all = get_lesion_neo_loads(lesion_to_effectvariants[lesion], patient_to_vars_neos[patient][0], patient_to_vars_neos[patient][1])
         
-        ## save frameshift peptides to file
-        """lesion_fsneos_file = os.path.join(outdir, f'{lesion}_fs_neoantigens.txt')
-        with open(lesion_fsneos_file, 'w') as f:
-            f.write('variant\tneoantigens\tnetmhc_scores\n')
-            for var in lesion_to_effectvariants[lesion]['fs']:
-                neos = (',').join(list(patient_to_vars_neos[patient][0][var].keys()))
-                scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in neos])
-                f.write(f'{var}\t{neos}\t{scores}\n')
-        f.close()"""
-        
-        ## save variants with at least one <500nM neoantigen to file
-        sub500_var_file = os.path.join(outdir, f'{lesion}_sub500_variants.txt')
-        with open(sub500_var_file, 'w') as f:
-            f.write('variant\teffect\tneoantigens\tnetmhc_score\n')
-            for effect in lesion_to_effectvariants[lesion].keys():
-                for var in lesion_to_effectvariants[lesion][effect][1]:
-                    # TODO: why are there neos with score > 500 in output file???
-                    pass_neos = patient_to_vars_neos[patient][1][var]
-                    if len(pass_neos) == 0 : continue
-                    neos = (',').join(pass_neos)
-                    scores = (',').join([patient_to_vars_neos[patient][0][var][neo] for neo in pass_neos])
-                    f.write(f'{var}\t{effect}\t{neos}\t{scores}\n')
+        if not (patient in patients_processed):
+            
+            ## save variants with at least one <500nM neoantigen to file
+            sub500_var_file = os.path.join(outdir, f'{patient}_sub500_variants.txt')
+            with open(sub500_var_file, 'w') as f:
+                f.write('variant\teffect\tneoantigens\thlas\tnetmhc_score\n')
+                for effect in lesion_to_effectvariants[lesion].keys():
+                    for var in lesion_to_effectvariants[lesion][effect][1]:
+                        pass_neos = patient_to_vars_neos[patient][1][var]
+                        if len(pass_neos) == 0 : continue
+                        neos = (',').join([entry['neo'] for entry in pass_neos])
+                        scores = (',').join([entry['score'] for entry in pass_neos])
+                        hlas = (',').join([entry['hla'] for entry in pass_neos])
+                        f.write(f'{var}\t{effect}\t{neos}\t{hlas}\t{scores}\n')
         f.close()
 
+        patients_processed.add(patient)
 
 
         ## build dataframe for lesions loads
