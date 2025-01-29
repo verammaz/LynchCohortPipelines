@@ -43,6 +43,11 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
 
         for line in infile.readlines():
             fields = line.split('\t')
+            
+            if len(fields) < 4: 
+                print(f"Warning: unable to process bamcounts line: \n {line} \n continuing...")
+                continue
+            
             chrom, pos = fields[0], fields[1]
 
             try:

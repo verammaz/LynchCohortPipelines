@@ -98,7 +98,7 @@ fi
 
 SAMPLE_ARRAY=()
 
-if [[ "$STEP" -eq 1 ]]; then
+if [[ "$STEP" -ge 1 ]]; then
     regions="${RAW_DIR}/${PATIENT}_regions.txt"
 
 
@@ -127,10 +127,13 @@ if [[ "$STEP" -eq 1 ]]; then
                 echo "--------------------------"
             fi
 
-            # Run the bam-readcounts job in the background
-            print_progress "Running bam-readcounts for ${sample}"
-            echo ""
-            bam-readcount -w1 -i -f $REF_FASTA $bam -l $regions -b 15 > $bamcounts &
+            if [[ "$STEP" -ge 1 ]]; then
+
+                # Run the bam-readcounts job in the background
+                print_progress "Running bam-readcounts for ${sample}"
+                echo ""
+                bam-readcount -w1 -i -f $REF_FASTA $bam -l $regions -b 15 > $bamcounts &
+            fi
 
         fi
 
