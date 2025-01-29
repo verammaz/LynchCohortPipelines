@@ -245,15 +245,6 @@ def main():
                     del all_variants[variant_id]
                     continue
         
-        if args.strelka_mutect_snvintersect: # assume both caller vcf files processed --> #TODO: add extra check
-            for variant_id, variant in all_variants.items():
-                if variant.mut_type == 'indel': continue
-                if 'mutect' not in variant.counts.keys() or 'strelka' not in variant.counts.keys():
-                    del all_variants[variant_id]
-                    continue
-                if set(variant.samples['mutect']).isdisjoint(set(variant.samples['strelka'])):
-                    del all_variants[variant_id]
-                    continue
 
         variants_file = os.path.join(out_dir, f"{args.patient_id}_variants.pkl")
         print(f"Writing variant objects to {os.path.basename(variants_file)} ...", end="")
