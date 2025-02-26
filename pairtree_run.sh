@@ -1,7 +1,15 @@
 #!/bin/bash
 
 scripts_path=$1
-python -c "from scipy.special import cython_special; print(dir(cython_special))"
+module purge  # Clears any conflicting modules
+module load python/3.10  # Adjust to an available Python version
+module load scipy
+module load numba
+
+module list
+
+python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
+
 ########################################################################################################################
 # input:
 #   patient id 
