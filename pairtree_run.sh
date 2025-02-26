@@ -1,17 +1,11 @@
 #!/bin/bash
 
 scripts_path=$1
-module load anaconda3
-conda create -n pairtree --file $scripts_path/requirements.txt --yes
-conda init bash
-exec bash
-conda activate pairtree
-#module purge  # Clears any conflicting modules
-#module load python  # Adjust to an available Python version
 
-#module list
+module purge  
+module load python 
 
-#python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
+python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
 
 ########################################################################################################################
 # input:
