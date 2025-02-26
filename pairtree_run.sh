@@ -2,7 +2,9 @@
 
 scripts_path=$1
 
-module load scipy/1.8.0
+module load python/3.7.3
+module load anaconda3
+conda activate pairtree
 
 ########################################################################################################################
 # input:
