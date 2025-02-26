@@ -2,7 +2,6 @@
 
 scripts_path=$1
 
-module load python/3.7.3
 module load anaconda3
 conda activate pairtree
 
