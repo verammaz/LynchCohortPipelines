@@ -3,7 +3,6 @@
 scripts_path=$1
 module purge  # Clears any conflicting modules
 module load python/3.10  # Adjust to an available Python version
-module load scipy
 module load numba
 
 module list
