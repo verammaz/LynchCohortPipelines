@@ -1,9 +1,7 @@
 #!/bin/bash
 
 scripts_path=$1
-python
-from scipy.special import cython_special
-print(dir(cython_special))
+python -c "import scipy; print(scipy.__version__)"
 ########################################################################################################################
 # input:
 #   patient id 
