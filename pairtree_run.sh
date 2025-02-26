@@ -2,10 +2,6 @@
 
 scripts_path=$1
 
-module load anaconda3
-conda init
-conda activate pairtree
-
 ########################################################################################################################
 # input:
 #   patient id 
