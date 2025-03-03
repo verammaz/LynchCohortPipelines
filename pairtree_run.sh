@@ -2,10 +2,10 @@
 
 scripts_path=$1
 
-module purge  
-module load python/
+#module purge  
+#module load python
 
-python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
+#python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
 
 ########################################################################################################################
 # input:
