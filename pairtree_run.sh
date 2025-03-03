@@ -2,7 +2,11 @@
 
 scripts_path=$1
 
-#module purge  
+module purge  
+
+module load anaconda3
+conda create -n pairtree --file $scripts_path/requirements.txt --yes
+conda activate pairtree
 #module load python
 
 #python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
