@@ -64,19 +64,19 @@ fi
 
 # -------------------- Run clustervars ---------------------- #
 echo && echo "Running bin/clustervars"
-python3 $scripts_path/bin/clustervars $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_PARAMS
+python $scripts_path/bin/clustervars $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_PARAMS
                          
 # -------------------- Run pairtree -------------------- #
 echo && echo "Running bin/pairtree"
-python3 $scripts_path/bin/pairtree --params $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_SSM $OUT_DIR/$FN_RESULTS_NPZ --seed 5555
+python $scripts_path/bin/pairtree --params $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_SSM $OUT_DIR/$FN_RESULTS_NPZ --seed 5555
                          
 # -------------------- Run plottree -------------------- #
 echo && echo "Running bin/plottree"
-python3 $scripts_path/bin/plottree --runid $ID $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_PLOTTREE
+python $scripts_path/bin/plottree --runid $ID $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_PLOTTREE
 
 # -------------------- Run summposterior ---------------- #
 echo && echo "Running bin/summposterior"
-python3 $scripts_path/bin/summposterior --runid $ID $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_SUMMPOSTERIOR
+python $scripts_path/bin/summposterior --runid $ID $OUT_DIR/$FN_SSM $OUT_DIR/$FN_PARAMS $OUT_DIR/$FN_RESULTS_NPZ $OUT_DIR/$FN_HTML_SUMMPOSTERIOR
 
 # ----------------------- Completion message ------------------------ #
 echo && echo "Completed."
