@@ -3,7 +3,7 @@
 scripts_path=$1
 
 module purge  
-module load python/2.7.17
+module load python/
 
 python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
 
