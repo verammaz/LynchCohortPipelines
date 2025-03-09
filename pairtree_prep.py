@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
     parser.add_argument("-vcf_dir", required=True)
-    parser.add_argument("-total_alt", defualt=False, type=lambda x: (str(x).lower() == '1'))
+    parser.add_argument("-total_alt", default=False, type=lambda x: (str(x).lower() == '1'))
     parser.add_argument("-patient_sex_info_file")
     parser.add_argument("-single_sample_trees", default=False, type=lambda x: (str(x).lower() == '1'))
 
