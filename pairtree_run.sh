@@ -1,18 +1,19 @@
 #!/bin/bash
 source ./config.sh
 
-scripts_path=$1
-
 module purge  
+# Manually source Conda (instead of running 'conda init')
+export CONDA_BASE=$(conda info --base)
+source $CONDA_BASE/etc/profile.d/conda.sh
 
-module load anaconda3
-#conda create -n pairtree --file $scripts_path/requirements.txt --yes
-conda init
+# Debug: Check if Conda is set up
+conda info --envs
+
+# Activate the environment
 conda activate $PAIRTREE_ENV
-#module load python
 
-#python -c "import scipy; import numba; print(f'SciPy: {scipy.__version__}, Numba: {numba.__version__}')"
-
+# Debug: Verify activation
+conda info --envs
 ########################################################################################################################
 # input:
 #   patient id 
@@ -25,6 +26,9 @@ conda activate $PAIRTREE_ENV
 #    $dir/${patient}_plottree.html
 #    $dir/${patient}_summposterior.html
 ########################################################################################################################
+
+# pairtree scripts
+scripts_path=$1
 
 # patient id
 ID=$2
