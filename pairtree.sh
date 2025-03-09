@@ -58,7 +58,7 @@ fi
 python "$LYNCH/pairtree_prep.py" -patient_id $PATIENT \
                                  -vcf_dir $VCF_DIR \
                                  -single_sample_trees $SINGLE_TREES \
-                                 -total_alt $TOTAL_ALT \ 
+                                 -total_alt $TOTAL_ALT \
                                  ${SEX_FILE:+-patient_sex_info_file $SEX_FILE}
 
 script="$LYNCH/pairtree_run.sh"
