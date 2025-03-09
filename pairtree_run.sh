@@ -2,18 +2,14 @@
 source ./config.sh
 
 module purge  
-# Manually source Conda (instead of running 'conda init')
+
+# manually source Conda (instead of running 'conda init')
 export CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
 
-# Debug: Check if Conda is set up
-conda info --envs
-
-# Activate the environment
+# activate pairtree environment
 conda activate $PAIRTREE_ENV
 
-# Debug: Verify activation
-conda info --envs
 ########################################################################################################################
 # input:
 #   patient id 
