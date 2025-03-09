@@ -18,6 +18,7 @@ Options:
     -vcf_dir </path/to/VCF/Patient>         Directory with all sample VCF files for patient
     -patient_sex_file <patient_sex.txt>     File with patient sex info
     --single_sample_trees                   Create single sample trees
+    --total_alt                             Flag that VCF file is in total:alt format
 }
 
 EOF
@@ -30,6 +31,7 @@ PATIENT=
 SINGLE_TREES=0
 VCF_DIR=
 SEX_FILE=
+TOTAL_ALT=
 
 while [[ "$#" -gt 0 ]]; do
     case "$1" in 
@@ -39,6 +41,7 @@ while [[ "$#" -gt 0 ]]; do
         -vcf_dir) VCF_DIR="$2"; shift ;;
         -patient_sex_file) SEX_FILE="$2"; shift ;;
         --single_sample_trees) SINGLE_TREES=1 ;;
+        --total_alt) TOTAL_ALT=1 ;;
         *) echo "Error: Unkown argument/option: $1" ; usage ;;
     esac
     shift
@@ -55,6 +58,7 @@ fi
 python "$LYNCH/pairtree_prep.py" -patient_id $PATIENT \
                                  -vcf_dir $VCF_DIR \
                                  -single_sample_trees $SINGLE_TREES \
+                                 -total_alt $TOTAL_ALT \ 
                                  ${SEX_FILE:+-patient_sex_info_file $SEX_FILE}
 
 script="$LYNCH/pairtree_run.sh"
