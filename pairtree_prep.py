@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-patient_id", required=True)
     parser.add_argument("-vcf_dir", required=True)
+    parser.add_argument("-total_alt", defualt=False, action='store_true')
     parser.add_argument("-patient_sex_info_file")
     parser.add_argument("-single_sample_trees", default=False, type=lambda x: (str(x).lower() == '1'))
 
@@ -60,7 +61,7 @@ def main():
             assert all(variant == variants[0] for variant in variants)
             ref_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
             total_reads = [line.split('\t')[10].split(':')[0].strip() for line in lines]
-            var_reads = [str(int(total) - int(ref)) for total,ref in zip(ref_reads, total_reads)]
+            var_reads = [str(int(total) - int(ref)) for total,ref in zip(ref_reads, total_reads)] if not args.total_alt else ref_reads
             var_prob = '1.0' if variants[0].split('_')[0] in ['X', 'Y'] and sex=='male' else '0.5'
             var_probs = [var_prob for line in lines]
             ssm.write(f"s{i}\t{variants[0]}\t{(', ').join(var_reads)}\t{(', ').join(total_reads)}\t{(', ').join(var_probs)}\n")
