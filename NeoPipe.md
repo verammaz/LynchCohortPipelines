@@ -40,6 +40,7 @@ rm snpEff_v4_3t_core.zip
 Add the path to this snpeff folder in your config.sh file in the variable `SNPEFF`.
 
 # NeoPipe
+See git repo [here](https://github.com/LukszaLab/NeoPipe/).
 
 ### Installation
 
@@ -55,18 +56,22 @@ pip install . --user
 To update, run:
 ```bash
 module load python/3.7.3
+module load git
 cd NeoPipe
 git pull
 pip install . --user
 ```
 
+### Usage 
 
 There is a wrapper script that calls various NeoPipe functionalities.
 1. Annotate VCF files with snpEff and extract wildtype and mutant peptides.
 2. Compute neoantigens using netMHC.
 3. Prepare config files required for CFIT.
 
-You can run it with the command    
+First, set the `NEOPIPE` variable in your config.sh.
+
+You can now run the NeoPipe wrapper script with the command    
 ```bash
 cd LynchCohortPipelines
 ./neopipe.sh [OPTIONS] -p <patient_id> -sample_info <sample_info.txt>
@@ -79,8 +84,8 @@ cd LynchCohortPipelines
 ```
 
 Below are the `sample_info.txt` file column meanings (do not include row for 'Normal'):
-- Sample: sample identifier (should be consitent with the identifier in `samplesheet.csv`).
-- Patient: patient identifier (should be consitent with the identifier in `samplesheet.csv`).
+- Sample: sample identifier (should be consistent with the identifier in `samplesheet.csv`).
+- Patient: patient identifier (should be consistent with the identifier in `samplesheet.csv`).
 - TimePoint: one of Adenoma, Precancerous, Tumor, Normal, Normal(hysterectomy). If a patient has multiple samples with the same TimePoint label, add a number (e.g. Adenoma1, Adenoma2).
 - Tissue: sample tissue origin.
 

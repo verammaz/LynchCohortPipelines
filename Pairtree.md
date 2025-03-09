@@ -15,7 +15,6 @@ For more details and full information about pairtree, visit:
 ## Installation on Minerva
 
 ```bash
-cd ~/
 git clone https://github.com/jwintersinger/pairtree
 cd pairtree/lib
 git clone https://github.com/ethanumn/projectppm
@@ -35,19 +34,23 @@ conda create -n pairtree --file requirements.txt --yes
 
 There is a wrapper script [pairtree.sh](pairtree.sh) that prepares the input files for pairtree and runs the entire pairtree pipeline.
 
-- Input: Single sample VCF files
-- Output: Combined sample tree (and optionally, single sample trees)
+First, set the `PAIRTREE_ENV` variable in your config.sh.
+
+> Note: you can get the full path my running `conda env list` and copying the path corresponding to 'pairtree'.
+
 
 ### Usage
 
-Make sure your analysis data home folder has a VCF/Patient subfolder with processed VCF files for all samples of the patient. Run pairtree wrapper script with the following command:
+- Input: Single sample VCF files
+- Output: Combined sample tree (and optionally, single sample trees)
+
+Make sure your analysis data home folder has a VCF/Patient subfolder with processed VCF files for all samples of the patient. Run the pairtree wrapper script with the following command:
 ```bash
 cd LynchCohortPipelines
-module load anaconda3 #optional
-conda activate pairtree #optional (pairtree plotting may not work without this)
-./pairtree -p <patient_id> [-patient_sex_file <sex.txt> --single_sample_trees]
+./pairtree.sh -p <patient_id> [-patient_sex_file <sex.txt> --single_sample_trees --total_alt]
 ```
 
 #### Options:
 `-patient_sex_file`: Tab-deliminated file with 'patient' and 'sex' columns (multiple patients can be in same file). If this file is not provided, sex will be inferred based on whether there are any Y chromosome variants. \
 `--single_sample_trees`: Flag to produce single sample trees.
+`--total_alt`: Flag that VCF file(s) in total:alt format. Default assumes total:ref format.

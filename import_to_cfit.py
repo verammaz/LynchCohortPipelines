@@ -104,7 +104,6 @@ def fix_vcf_format(hdir, patient_id, mapping):
                     else:
                         total, alt = line_components[-1].split(':')
                         total, alt = int(total.strip()), int(alt.strip())
-                        print(total, alt)
                         line_components[-1] = f'{total}:{total-alt}\n'
                     
                     f_out.write(('\t').join(line_components))

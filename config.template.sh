@@ -49,6 +49,9 @@ CFIT='/hpc/users/mazeev01/CFIT'
 # Pairtree directory
 PAIRTREE='/hpc/users/mazeev01/pairtree'
 
+# specify path to conda pairtree environment
+PAIRTREE_ENV='/hpc/users/mazeev01/.conda/envs/pairtree' 
+
 #specify path to LynchCohortPipelines folder
 LYNCH='/hpc/users/mazeev01/LynchCohortPipelines'
 

@@ -14,7 +14,7 @@ import numpy as np
 
 
 def get_variants(hdir, lesion, patient):
-    variants = dict()
+    variants_vcf_data = dict()
     max_vaf = 0
     with open(os.path.join(hdir, 'VCF', patient, lesion+'_ann.vcf'), 'r') as f:
         for line in f.readlines():
@@ -25,8 +25,8 @@ def get_variants(hdir, lesion, patient):
             vaf = (int(tumor_total) - int(tumor_ref)) / int(tumor_total)
             if vaf > max_vaf:
                 max_vaf = vaf
-            variants[var] = {'nmd': nmd, 'vaf': vaf}
-    return variants, max_vaf
+            variants_vcf_data[var] = {'nmd': nmd, 'vaf': vaf}
+    return variants_vcf_data, max_vaf
 
 
 
@@ -49,27 +49,35 @@ def main():
     
     outdir = os.path.join(args.hdir, 'LesionVariantsComparisons')
 
-    for lesion, patient in zip(lesions, patients):
-        sub500_variants_file = os.path.join(outdir,f'{lesion}_sub500_variants.txt')
-        if not os.path.exists(sub500_variants_file):
-            print(f"Error: file for variants that encode at least one <500nM peptide does not exist for lesion {lesion}.")
-            print(f"Please run lesions_loads.py for lesion {lesion}")
-        variants, max_vaf = get_variants(args.hdir, lesion, patient)
-        
+    patient_to_sub500variants = dict()
 
-        sub500_variants = dict()
+    for patient in patients:
+        sub500_variants = set()
         with open(sub500_variants_file, 'r') as f:
             f.readline()
             for line in f.readlines():
                 var, effect, neos, scores = line.split('\t')
-                vcf_data = variants.get(var, None)
+                vcf_data = variants_vcf_data.get(var, None)
                 if vcf_data is None:
-                    print(f'Warning: variant {var} present in {lesion}_sub500_variants.txt but not found in {lesion}_ann.vcf')
-                sub500_variants[var] = f'{var}\t{effect}\t{neos}\t{scores}\t{vcf_data['nmd']}\t{vcf_data['vaf']/max_vaf}\n'
+                    print(f'Warning: variant {var} present in {patient}_sub500_variants.txt but not found in {lesion}_ann.vcf')
+                sub500_variants.add(var)
+        patient_to_sub500variants[patient] = sub500_variants
 
-        with open(sub500_variants_file, 'w') as f:
-            f.write('variant\teffect\tneoantigens\tnetmhc_scores\tnmd_status\tccf_vcf\tccf_cfit\n')
-            for _, line in sub500_variants.items():
-                f.write(line)
+    for lesion, patient in zip(lesions, patients):
+        sub500_variants_file = os.path.join(outdir,f'{patient}_sub500_variants.txt')
+        if not os.path.exists(sub500_variants_file):
+            print(f"Error: file for variants that encode at least one <500nM peptide does not exist for patient {patient}.")
+            print(f"Please run lesions_loads.py for lesion {lesion} and patient {patient}.")
+        
+        variants_vcf_data, max_vaf = get_variants(args.hdir, lesion, patient)
+        
+        sub500_variants_data = dict()
+        for var in patient_to_sub500variants[patient]:
+            sub500_variants_data[var] = {'nmd': vcf_data['nmd'], 'ccf_vcf': vcf_data['vaf'] / max_vaf}
+        
+        out_df = pd.DataFrame()
+        out_df.columns = ['variant', 'nmd', 'ccf_vcf', 'ccf_cfit']
+
+ 
 
 
