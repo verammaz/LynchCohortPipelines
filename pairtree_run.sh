@@ -7,6 +7,7 @@ module purge
 
 module load anaconda3
 #conda create -n pairtree --file $scripts_path/requirements.txt --yes
+conda init
 conda activate $PAIRTREE_ENV
 #module load python
 
