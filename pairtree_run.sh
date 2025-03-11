@@ -14,6 +14,7 @@ conda info --envs
 
 # Activate the environment
 conda activate $PAIRTREE_ENV
+echo $PAIRTREE_ENV
 
 # Debug: Verify activation
 conda info --envs
