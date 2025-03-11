@@ -3,6 +3,8 @@ source ./config.sh
 
 module purge  
 
+module load anaconda3
+
 # manually source Conda (instead of running 'conda init')
 export CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
