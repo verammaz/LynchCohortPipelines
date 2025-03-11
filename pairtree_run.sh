@@ -9,8 +9,14 @@ module load anaconda3
 export CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
 
-# activate pairtree environment
+# Debug: Check if Conda is set up
+conda info --envs
+
+# Activate the environment
 conda activate $PAIRTREE_ENV
+
+# Debug: Verify activation
+conda info --envs
 
 ########################################################################################################################
 # input:
