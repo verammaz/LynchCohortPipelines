@@ -61,9 +61,7 @@ def main():
             assert all(variant == variants[0] for variant in variants)
             ref_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
             total_reads = [line.split('\t')[10].split(':')[0].strip() for line in lines]
-            print(f"total: {total_reads}, ref: {ref_reads}, alt: {int(total_reads[0]) - int(ref_reads[0])}")
-            var_reads = [str(int(int(total) - int(ref))) for total,ref in zip(ref_reads, total_reads)] if not args.total_alt else ref_reads
-            print(var_reads)
+            var_reads = [str(int(total) - int(ref)) for total,ref in zip(total_reads, ref_reads)] if not args.total_alt else ref_reads
             var_prob = '1.0' if variants[0].split('_')[0] in ['X', 'Y'] and sex=='male' else '0.5'
             var_probs = [var_prob for line in lines]
             ssm.write(f"s{i}\t{variants[0]}\t{(', ').join(var_reads)}\t{(', ').join(total_reads)}\t{(', ').join(var_probs)}\n")
@@ -94,7 +92,7 @@ def main():
                     variant = line.split('\t')[2].strip()
                     ref_reads = line.split('\t')[10].split(':')[1].strip()
                     total_reads = line.split('\t')[10].split(':')[0].strip()
-                    var_reads = int(total_reads) - int(ref_reads)
+                    var_reads = int(total_reads) - int(ref_reads) if not args.total_alt else ref_reads
                     var_prob = '1.0' if variant.split('_')[0] in ['X', 'Y'] and sex=='male' else '0.5'
                     outfile.write(f"s{i}\t{variant}\t{var_reads}\t{total_reads}\t{var_prob}\n")
                     i += 1
