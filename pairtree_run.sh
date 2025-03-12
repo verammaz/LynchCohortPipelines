@@ -18,6 +18,8 @@ echo $PAIRTREE_ENV
 
 # Debug: Verify activation
 conda info --envs
+conda list
+
 
 ########################################################################################################################
 # input:
