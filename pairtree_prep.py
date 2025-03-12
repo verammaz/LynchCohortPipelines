@@ -61,6 +61,7 @@ def main():
             assert all(variant == variants[0] for variant in variants)
             ref_reads = [line.split('\t')[10].split(':')[1].strip() for line in lines]
             total_reads = [line.split('\t')[10].split(':')[0].strip() for line in lines]
+            print(f"total: {total_reads}, ref: {ref_reads}, alt: {int(total_reads) - int(ref_reads)}")
             var_reads = [str(int(total) - int(ref)) for total,ref in zip(ref_reads, total_reads)] if not args.total_alt else ref_reads
             var_prob = '1.0' if variants[0].split('_')[0] in ['X', 'Y'] and sex=='male' else '0.5'
             var_probs = [var_prob for line in lines]
