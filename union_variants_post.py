@@ -93,6 +93,8 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
                     bam_alt_count = base_counts[alt].strip()
                     bam_ref_count = base_counts[ref].strip()
                 except KeyError:
+                    print(base_counts)
+                    
                     print(f"Warning: {variant.id} variant alt allele {alt} not present in bam readcounts. Setting alt count to 0.")
                     bam_alt_count = "0" # how should i handle this case?
                     bam_ref_count = "0"
