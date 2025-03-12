@@ -31,7 +31,7 @@ PATIENT=
 SINGLE_TREES=0
 VCF_DIR=
 SEX_FILE=
-TOTAL_ALT=
+TOTAL_ALT=0
 
 while [[ "$#" -gt 0 ]]; do
     case "$1" in 
