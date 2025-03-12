@@ -31,7 +31,10 @@ def main():
 
     for file_name in os.listdir(args.vcf_dir):
         if file_name.startswith('.'): continue
-        if file_name.endswith('.vcf'):
+        if (file_name.endswith('.vcf') and 
+            'ann' not in file_name and
+            'template' not in file_name and 
+            'varcode' not in file_name):
             file_path = os.path.join(args.vcf_dir, file_name)
             vcf_files.append(file_path)
             sample_names.append(os.path.splitext(os.path.basename(file_path))[0])
