@@ -54,7 +54,7 @@ if __name__ == '__main__':
     anl.initialize_config(config, mapping, dir=args.hdir, kd_thr=500, ns=[9], tree_format="pairtree")
 
     assert(len(anl.patients.values()) == 1)
-    patient = anl.patients.values().pop()
+    patient = set(anl.patients.values()).pop()
 
     outdir = os.path.join(args.hdir, config["tree_dir"], patient.name)
     
