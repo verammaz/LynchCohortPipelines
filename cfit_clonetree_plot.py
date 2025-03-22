@@ -11,9 +11,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-hdir', required=True, help="Analysis data home directory")
-    parser.add_argument('-patient_id', required=True, help='Patient identifier')
-    parser.add_argument('-gene_ann_files', nargs='+', help='List of driver mutations to mark on clone tree plot')
-    parser.add_argument('-config', required=False, dafault='cfit_config.json')
+    parser.add_argument('-patient_id', required=True, help='Patient/Sample identifier')
+    parser.add_argument('-gene_ann_files', nargs='+', help='File(s) with list of driver mutations to mark on clone tree plot')
+    parser.add_argument('-config', required=False, default='cfit_config.json')
     parser.add_argument('-mapping', required=False, default='cfit_mapping.json')
     parser.add_argument('-outdir', required=False)
 
