@@ -28,7 +28,7 @@ if __name__ == '__main__':
     if gene_ann_files is not None:
         for file in gene_ann_files:
             with open(os.path.join(args.hdir, file), 'r') as f:
-                for line in f.readlines:
+                for line in f.readlines():
                     drivers.append(line.strip())
 
     
