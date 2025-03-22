@@ -64,7 +64,7 @@ if __name__ == '__main__':
     filename = f"{patient.name}_clonetree.html"
 
     with open(os.path.join(outdir, filename), 'w') as f:
-        f.write("<html> <body> <h1> {} Clone Tree for \
+        f.write("<html> <body> <h1> Clone Tree for \
         <font color = #000000>{}</font></h1>\n \
         </body></html>".format(patient.name))
         f.write(plottree.figs[0].to_html(full_html=False, include_plotlyjs='cdn'))
