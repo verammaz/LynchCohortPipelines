@@ -16,14 +16,16 @@ echo "project: $project"
 module purge
 module load star
 
+cores=8
+
 bsub -J "star" \
     -P ${project} \
-    -n 8 \
+    -n ${cores} \
     -R span[hosts=1] \
     -R rusage[mem=4000] \
     -W 12:00 \
     -q premium \
     -oo "${LOG_DIR}/star.out" \
     -eo "${LOG_DIR}/star.err" \
-    ${script} -r r1,r2
+    ${script} -r r1,r2 --threads ${cores}
 

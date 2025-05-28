@@ -27,6 +27,8 @@ EOF
 # Variables
 READS=()
 OUTPUT_PREFIX=
+THREADS=
+VERBOSE=
 
 
 # Parse command-line arguments
