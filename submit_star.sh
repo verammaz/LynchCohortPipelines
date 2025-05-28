@@ -57,10 +57,10 @@ module load star
 bsub -J "star" \
     -P ${project} \
     -n ${cores} \
-    -M 32000 \
+    -M 2000 \
     -R span[hosts=1] \
     -R "rusage[mem=4000]" \
-    -W 40:00 \
+    -W 10:00 \
     -q premium \
     -oo "${LOG_DIR}/star.out" \
     -eo "${LOG_DIR}/star.err" \
