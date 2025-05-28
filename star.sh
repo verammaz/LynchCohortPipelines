@@ -16,12 +16,14 @@ source ./config.sh
 
 module load star                           # load star module
 GENOME_DIR='/sc/arion/scratch/mazeev01/STAR'
-create_directory "$GENOME_DIR"
 
-STAR --runMode genomeGenerate \
-             --runThreadN 8 \
-             --genomeDir ${GENOME_DIR} \
-             --outFileNamePrefix "${GENOME_DIR}/star" \
-             --genomeFastaFiles ${REF_FASTA} \
-             --sjdbGTFfile ${GTF_FILE} \
-             --sjdbOverhang 100  # Adjust depending on read length - 1
+READ1=
+READ2=
+
+STAR --runThreadN 8 \
+     --genomeDir "$GENOME_DIR" \
+     --readFilesIn "$READ1" "$READ2" \
+     --readFilesCommand zcat \
+     --outFileNamePrefix "/sc/arion/scratch/mazeev01/star_out_" \
+     --outSAMtype BAM SortedByCoordinate \
+     --quantMode TranscriptomeSAM GeneCounts

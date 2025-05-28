@@ -63,7 +63,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Check that mandatory arguments are provided
-if [ "$STEP" -eq 0 ] && [ -z "$READS" ] || [ -z "$OUTPUT_PREFIX" ] || [ -z "$PATIENT" ]; then
+if [ "$STEP" -eq 0 ] && [ -z "$READS" ] || [ -z "$OUTPUT_PREFIX" ] ; then
     echo "Error: Not all required arguments provided."
     usage
 fi
