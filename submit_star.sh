@@ -25,5 +25,5 @@ bsub -J "star" \
     -q premium \
     -oo "${LOG_DIR}/star.out" \
     -eo "${LOG_DIR}/star.err" \
-    ${script} -r r1, r2
+    ${script} -r r1,r2
 
