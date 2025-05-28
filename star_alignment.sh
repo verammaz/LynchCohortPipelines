@@ -55,10 +55,11 @@ READS_1=${READ_ARRAY[0]}
 READS_2=${READ_ARRAY[1]}
 
 # Check fastq read files
-if [ "$STEP" -eq 0 ] && [ ! -f "$READS_1" ] || [ ! -f "$READS_2" ]; then
-    echo "Error: One or both fastq read files do not exist or are not readable."
-    exit 1
-fi
+#if [ ! -f "$READS_1" ] || [ ! -f "$READS_2" ]; then
+    #echo "Error: One or both fastq read files do not exist or are not readable."
+    #exit 1
+#fi
+
 # Check reference genome file
 if [ ! -f "${REF_FASTA}" ]; then
     echo "Reference file ${REF_FASTA} not found!"
