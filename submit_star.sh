@@ -48,10 +48,13 @@ done
 script="$LYNCH/star_alignment.sh"
 chmod +x $script
 
+echo "script: $script"
+echo "project: $project"
+
 module purge
 module load star
 
-bsub -J ${job_name} \
+bsub -J "star" \
     -P ${project} \
     -n ${cores} \
     -M 32000 \

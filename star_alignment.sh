@@ -4,7 +4,7 @@
 source ./config.sh
 
 # Exit immediately if a command exits with a non-zero status.
-set -e
+#set -e
 
 # Function to print usage
 usage() {
@@ -32,26 +32,6 @@ EOF
 PATIENT=
 READS=()
 OUTPUT_PREFIX=
-VERBOSE=0
-INDEX=0
-THREADS=8
-SAMPLE=
-
-# Parse command-line arguments
-while [[ "$#" -gt 0 ]]; do
-    case "$1" in
-        -h) usage ;;
-        -v) VERBOSE=1 ;;
-        --index_ref) INDEX=1 ;;
-        --threads) THREADS="$2"; shift ;;
-        --patient) PATIENT="$2"; shift ;;
-        --sample) SAMPLE="$2"; shift ;;
-        -r) READS="$2"; shift ;;
-        -o) OUTPUT_PREFIX="$2"; shift ;;
-        *) echo "Error: Unkown argument/option: $1" ; usage ;;
-    esac
-    shift
-done
 
 
 # Check reference genome file
