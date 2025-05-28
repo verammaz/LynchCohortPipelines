@@ -19,7 +19,7 @@ GENOME_DIR='/sc/arion/scratch/mazeev01/STAR'
 create_directory "$GENOME_DIR"
 
 STAR --runMode genomeGenerate \
-             --runThreadN ${THREADS} \
+             --runThreadN 8 \
              --genomeDir ${GENOME_DIR} \
              --genomeFastaFiles ${REF_FASTA} \
              --sjdbGTFfile ${GTF_FILE} \
