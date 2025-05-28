@@ -18,9 +18,9 @@ module load star
 
 bsub -J "star" \
     -P ${project} \
-    -n ${cores} \
+    -n 8 \
     -R span[hosts=1] \
-    -R rusage[mem=40000] \
+    -R rusage[mem=4000] \
     -W 12:00 \
     -q premium \
     -oo "${LOG_DIR}/star.out" \
