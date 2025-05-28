@@ -4,7 +4,7 @@
 #BSUB -q premium                        # queue
 #BSUB -n 8                                    # number of compute cores
 #BSUB -W 12:00                            # walltime in HH:MM
-#BSUB -R rusage[mem=4000]      # 32 GB of memory (4 GB per core)
+#BSUB -R rusage[mem=40000]      # 32 GB of memory (4 GB per core)
 #BSUB -R span[hosts=1]            # all cores from the same node
 #BSUB -o %J.stdout                     # output log (%J : JobID)
 #BSUB -eo %J.stderr                   # error log
@@ -21,7 +21,7 @@ create_directory "$GENOME_DIR"
 STAR --runMode genomeGenerate \
              --runThreadN 8 \
              --genomeDir ${GENOME_DIR} \
-             --outFileNamePrefix "${GENOME_DIR}/star_" \
+             --outFileNamePrefix "${GENOME_DIR}/star" \
              --genomeFastaFiles ${REF_FASTA} \
              --sjdbGTFfile ${GTF_FILE} \
              --sjdbOverhang 100  # Adjust depending on read length - 1
