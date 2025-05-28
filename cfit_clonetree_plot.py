@@ -68,5 +68,7 @@ if __name__ == '__main__':
         <font color = #000000>{}</font></h1>\n \
         </body></html>".format(patient.name))
         f.write(plottree.figs[0].to_html(full_html=False, include_plotlyjs='cdn'))
-    
+        if len(plottree.figs) == 2:
+            print("huh")
+            f.write(plottree.figs[1].to_html(full_html=False, include_plotlyjs='cdn'))
 

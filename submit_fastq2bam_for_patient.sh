@@ -70,7 +70,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     echo $sample
     if [[ $patient == $PATIENT ]] || [[ -z $PATIENT ]]; then
 
-        job_name="fastq_to_bam_$sample"
+        job_name="fastq_to_bam_$patient_$sample"
         create_directory "$RAW_DIR/$sample"
         output_prefix="$RAW_DIR/$sample/$sample"
 

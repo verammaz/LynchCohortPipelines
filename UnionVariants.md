@@ -51,7 +51,7 @@ bsub -J ${job_name} \
 |  `--strelka_mutect_snv_intersect` | Only consider snv variants at intersection of strelka mutect callers.
 | `--strelka_mutect_indel_intersect` | Only consider snv variants at intersection of strelka mutect callers.
 |  `--single_output_file` | Write single output vcf file.
-| `--step` | Starting step for pipeline execution. Default 0. Options are 0=preprocess, 1=bam-readcount, 2=postprocess). |
+| `--step` | Starting step for pipeline execution. Default 0. Options are 0=preprocess, 1=bam-readcount, 2=postprocess. |
 
 >Intersect options not yet implemented.
 

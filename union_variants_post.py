@@ -89,18 +89,23 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
                     assert(len(ref) == 1)
                     alt = "+"+alt[1:]
                 
-                bam_alt_count = base_counts.get(alt, "0").strip()
-                """ bam_ref_count = base_counts[ref].strip()
-                except KeyError:
-                    print(base_counts)
-                    print( base_counts[alt])
-                    print(f"Warning: {variant.id} variant alt allele {alt} not present in bam readcounts. Setting alt count to 0.\n")
-                    bam_alt_count = "0" # how should i handle this case?
-                    bam_ref_count = "0" """
-                
                 # DP:AP <-> total:ref
-                # sometimes, total != ref + alt, but want alt count to be accurate --> ref = total - alt
-                bamcounts[variant.id] =f"{bam_depth}:{int(bam_depth) - int(bam_alt_count)}" 
+
+                try:
+                    bam_alt_count = base_counts[alt].strip()
+                    # sometimes, total != ref + alt, but want alt count to be accurate --> ref = total - alt
+                    bamcounts[variant.id] =f"{bam_depth}:{int(bam_depth) - int(bam_alt_count)}" 
+
+                except KeyError:
+                    try:
+                        # sometimes (esp for indels), alt allele not in bamcounts --> use ref
+                        bam_ref_count = base_counts[ref].strip()
+                        bamcounts[variant.id] =f"{bam_depth}:{int(bam_ref_count)}" 
+                    except KeyError:
+                        # shouldn't really get to this case
+                        print(f"Warning: ref {ref} and alt {alt} alleles not present in bam readcounts. Using depth count")
+                        bamcounts[variant.id] =f"{bam_depth}:{int(bam_depth)}" 
+
 
                 if outfile is not None:
                     # TODO: command line option to report discrepancy between vcf and bamcounts 
@@ -127,6 +132,7 @@ def read_bamcounts(bamcounts_file, variants_dict, sample, report_file=None):
 
 def write_vcf_file(sample_to_variants, final_variants, out_dir, single_file=False):
     print("Writing output vcf file(s)...", end="")
+    
     def sort_key(key):
         prefix, suffix = key.split('_', 1)
         if prefix.isdigit():
@@ -207,7 +213,7 @@ def main():
 
     report_file = os.path.join(args.data_dir, "vcf_bamcounts_report.txt")
     with open(report_file, 'w') as f:
-        f.write("variant_id\tsample_origin\tstrelka_vcf_counts\tmutect_vcf_counts\tbam_counts\n")
+        f.write("variant\tsample\tstrelka_vcf_depth:strelka_vcf_alt_count\tmutect_vcf_depth:mutect_vcf_alt_count\tbam_depth:bam_alt_count\n")
     
     # TODO: consider incorporating 'NORMAL' column data from original vcf file (currently just setting 'NORMAL' with DP:AP = 0:0 in output vcf)
 

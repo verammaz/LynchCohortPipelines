@@ -8,7 +8,6 @@ vi config.sh
 Specify paths and global variables in the config.sh file!
 
 
-
 # Home Directory Structure
 
     .

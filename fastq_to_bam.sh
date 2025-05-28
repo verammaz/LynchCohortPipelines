@@ -57,14 +57,14 @@ while [[ "$#" -gt 0 ]]; do
         --sample) SAMPLE="$2"; shift ;;
         -r) READS="$2"; shift ;;
         -o) OUTPUT_PREFIX="$2"; shift ;;
-        *) echo "Error: Unkown argument/option: $1" ; usage ;;
+        *) echo "Error: Unknown argument/option: $1" ; usage ;;
     esac
     shift
 done
 
 # Check that mandatory arguments are provided
 if [ "$STEP" -eq 0 ] && [ -z "$READS" ] || [ -z "$OUTPUT_PREFIX" ] || [ -z "$PATIENT" ]; then
-    echo "Error: Not all required arguemnts provided."
+    echo "Error: Not all required arguments provided."
     usage
 fi
 
