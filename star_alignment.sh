@@ -48,14 +48,10 @@ check_star_index_complete() {
 
 # Decide whether to run indexing
 RUN_INDEX=0
-check_star_index_complete
-    if [ $? -ne 0 ]; then
-        echo "STAR genome index is incomplete. Running STAR indexing."
-        RUN_INDEX=1
-    else
-        echo "STAR index exists and is complete."
-    fi
-
+if ! check_star_index_complete; then
+    echo "Indexing required: STAR index is incomplete."
+    RUN_INDEX=1
+fi
 
 # Actually run STAR indexing if flagged
 if [ $RUN_INDEX -eq 1 ]; then
