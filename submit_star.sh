@@ -120,7 +120,6 @@ fi
 
 
 
-
 # If verbose mode is enabled, print the parameters
 if [ $VERBOSE -eq 1 ]; then
     
