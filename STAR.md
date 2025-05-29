@@ -13,11 +13,9 @@ Before running STAR genome indexing or alignment, ensure that the chromosome nam
 #### Automated compatibility check (included in script)
 The pipeline includes a compatibility check that compares chromosome naming conventions in both files. It will:
 
-Extract the first chromosome name from the GTF and FASTA
-
-Warn you if one uses chr prefixes while the other does not
-
-Exit early with a helpful message if a mismatch is detected
+1. Extract the first chromosome name from the GTF and FASTA
+2. Warn you if one uses chr prefixes while the other does not
+3. Exit early with a helpful message if a mismatch is detected
 
 #### Manual check (optional)
 To manually inspect the chromosome naming formats:
@@ -59,6 +57,6 @@ STAR_DIR=""
 
 ```bash
 cd LynchCohortPipelines
-./submit_star.sh -r <reads1.fastq.gz, reads2.fastq.gz> -o <output_prefix>
+./submit_star.sh -r <reads1.fastq.gz,reads2.fastq.gz> -o <output_prefix>
 ```
 
