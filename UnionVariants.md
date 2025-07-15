@@ -56,12 +56,12 @@ bsub -J ${job_name} \
 >Intersect options not yet implemented.
 
 #### Input .csv file
-`samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor), bam, bai, vcf. The vcf column should have file paths separated by a '|'. Example:
+`samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor), bam, bai, vcf, ref. The vcf column should have file paths separated by a '|'. Example:
 
 ```csv
-patient,sample,fastq_1,fastq_2,status,bam,bai,vcf
-Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0,full/path/to/Normal.bam,full/path/to/Normal.bai,na
-Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,full/path/to/S1.bam,full/path/to/S1.bai,full/path/to/S1_1.vcf|full/path/to/S1_2.vcf|full/path/to/S1_3.vcf
+patient,sample,fastq_1,fastq_2,status,bam,bai,vcf,ref
+Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0,full/path/to/Normal.bam,full/path/to/Normal.bai,na,hg19
+Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,full/path/to/S1.bam,full/path/to/S1.bai,full/path/to/S1_1.vcf|full/path/to/S1_2.vcf|full/path/to/S1_3.vcf,hg19
 ```
 
 

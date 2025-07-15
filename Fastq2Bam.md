@@ -53,7 +53,7 @@ On subsequent execution using the same reference, run without the `--index_ref` 
 
 > *Important*: Keep reference fasta and reference index files in the same directory, and make sure the file prefix names are consistent!
 
-> Need at least the following set in your [config](config.sh): `REF_FASTA`, `SITES_OF_VARIATION` (optional), `INDELS_{1,2}` (optional), `EXOME_INTERVALS` (optional) 
+> Need at least the following set in your [config](config.sh): `REF_FASTA_{genome}`, `SITES_OF_VARIATION_{genome}` (optional), `INDELS_{1,2}_{genome}` (optional), `EXOME_INTERVALS_{genome}` (optional) 
 
 #### Required arguments:
 ```
@@ -69,6 +69,7 @@ On subsequent execution using the same reference, run without the `--index_ref` 
 | :----------------------------------------: | :------: |
 | `-v` | Enable verbose mode. |
 | `-h` | Display usage message. |
+| `--ref` |  Reference genome, specified as either hg19 or hg38. Default hg19.
 | `--patient` |  Patient id for sample data, required for downstream compatability during nextflow variant calling. Default none.
 | `--index_ref` | Flag for running the indexing step for reference.
 | `--keep_intermediate` | Flag to keep intermediate files produced during pipeline execution.
@@ -126,6 +127,14 @@ Sample/ and Normal/ subdirectories.
 -p         Patient identifier.
 -s         CSV file with raw input data files configuration.
 ```
+
+#### Optional arguments:
+
+| Parameter                 | Description   |	
+| :----------------------------------------: | :------: |
+| `--ref` |  Reference genome, specified as either hg19 or hg38. Default hg19.
+| `--step` | Starting step for pipeline execution. Default 0. Options are 0=alignment, 1=markdup, 2=indelrealign, 3=baserecal. |
+
 #### Input .csv file
 `samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor). This file will change to include bam and bai columns before the fastq->bam jobs per sample are submitted. Note, that downstream analysis scripts assume normal sample is named 'Normal', so ensure this is the case for your data. Example:
 

@@ -20,6 +20,7 @@ Options:
   -h                               Display this message.
   -v                               Enable verbose mode.
   -s <sample_id>                   Sample id (used for job name only).
+  --ref                           Reference genome (default=hg19)          
 
 EOF
     exit 1
@@ -30,6 +31,7 @@ READS=()
 OUTPUT_PREFIX=
 VERBOSE=0
 SAMPLE=
+REF="hg19"
 
 
 # Parse command-line arguments
@@ -40,6 +42,7 @@ while [[ "$#" -gt 0 ]]; do
         -r) READS="$2"; shift ;;
         -o) OUTPUT_PREFIX="$2"; shift ;;
         -s) SAMPLE="$2"; shift ;;
+        --ref) REF="$2"; shift ;;
         *) echo "Error: Unknown argument/option: $1" ; usage ;;
     esac
     shift
@@ -68,10 +71,30 @@ READS_2=${READ_ARRAY[1]}
     #exit 1
 #fi
 
+REF_FASTA=
+
+if [[ "$REF" == 'hg19' ]]; then
+    REF_FASTA=$REF_FASTA_hg19
+fi
+
+if [[ "$REF" == 'hg38' ]]; then
+    REF_FASTA=$REF_FASTA_hg38
+fi
+
 # Check reference genome file
 if [ ! -f "${REF_FASTA}" ]; then
     echo "Reference file ${REF_FASTA} not found!"
     exit 1
+fi
+
+GTF_FILE=
+
+if [[ "$REF" == 'hg19' ]]; then
+    GTF_FILE=$GTF_hg19
+fi
+
+if [[ "$REF" == 'hg38' ]]; then
+    GTF_FILE=$GTF_hg38
 fi
 
 # Check gtf annotation file

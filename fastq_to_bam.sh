@@ -19,6 +19,7 @@ Options:
   -h                               Display this message.
   -v                               Enable verbose mode.
   --patient                        Patient id.
+  --ref                            Reference fasta file.
   --index_ref                      Run bwa_index step.
   --keep_intermediate              Keep intermediate files.
   --post_process                   Carry out post processing of BAM file after alignment.
@@ -34,6 +35,7 @@ EOF
 # Variables
 PATIENT=
 READS=()
+REF_FASTA=
 OUTPUT_PREFIX=
 VERBOSE=0
 INDEX=0
@@ -48,6 +50,7 @@ while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -h) usage ;;
         -v) VERBOSE=1 ;;
+        --ref) REF_FASTA="$2"; shift ;;
         --keep_intermediate) KEEP_INTERMEDIATE=1 ;;
         --post_process) POST_PROCESS=1 ;;
         --index_ref) INDEX=1 ;;
@@ -149,7 +152,7 @@ if [ $STEP -eq 0 ] && [ $INDEX -eq 1 ]; then
     fi
 fi
 
-# Check that required files for post processing are accesable
+# Check that required files for post processing are accessible
 if [ $POST_PROCESS -eq 1 ]; then
     if [ ! -f "$SITES_OF_VARIATION" ]; then
         echo "Error: Sites of variation ${SITES_OF_VARIATION} file not found. Required for post-processing base recalibration step."
@@ -249,9 +252,8 @@ if [ $STEP -eq 1 ]; then
         STEP=2
 fi
 
-if [ $POST_PROCESS -eq 1 ] || [ $STEP -eq 2 ]; then
+if [ $POST_PROCESS -eq 1 ]; then
 
-    POST_PROCESS=1
 
     if [ -f "$EXOME_INTERVALS" ]; then
         INTERVALS_OPTION="-L $EXOME_INTERVALS -ip 100"

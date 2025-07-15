@@ -9,6 +9,7 @@ PATIENT=
 SAMPLESHEET=
 SAMPLE=
 STEP=
+GENOME="GATK.GRCh37"
 
 # parse command line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -17,6 +18,7 @@ while [[ "$#" -gt 0 ]]; do
         --samplesheet) SAMPLESHEET="$2"; shift ;;
         --sample) SAMPLE="$2"; shift ;; 
         --step) STEP="$2"; shift ;;
+        --genome) GENOME="$2"; shift ;;
         *) echo "Error: Unkown argument/option: $1" ; exit ;;
     esac
     shift
@@ -32,9 +34,9 @@ if [[ -f $SAMPLE_SAMPLESHEET ]]; then
 fi
 
 if [[ $STEP -eq 0 ]]; then
-    echo "patient,sample,fastq_1,fastq_2,status" >> "$SAMPLE_SAMPLESHEET"
+    echo "patient,sample,fastq_1,fastq_2,status,ref" >> "$SAMPLE_SAMPLESHEET"
 else 
-    echo "patient,sample,fastq_1,fastq_2,status,bam,bai" >> "$SAMPLE_SAMPLESHEET"
+    echo "patient,sample,fastq_1,fastq_2,status,bam,bai,ref" >> "$SAMPLE_SAMPLESHEET"
 fi
 
 
@@ -46,14 +48,14 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     [[ -z "$line" ]] && continue
 
     # Split the line into fields using awk to handle potential edge cases
-    IFS=',' read -r patient sample fastq1 fastq2 status bam bai <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
+    IFS=',' read -r patient sample fastq1 fastq2 status bam bai ref <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
 
     if [[ "$patient" == "$PATIENT" && ("$sample" == "$SAMPLE" || "$sample" == "Normal") ]]; then
 
         if [[ $STEP -eq 0 ]]; then
-            echo "$patient,$sample,$fastq1,$fastq2,$status" >> "$SAMPLE_SAMPLESHEET"
+            echo "$patient,$sample,$fastq1,$fastq2,$status,$ref" >> "$SAMPLE_SAMPLESHEET"
         else
-            echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai" >> "$SAMPLE_SAMPLESHEET"
+            echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$ref" >> "$SAMPLE_SAMPLESHEET"
         fi
     fi
 
@@ -75,7 +77,9 @@ module load proxies
 step="variant_calling"
 
 if [[ $STEP -eq 0 ]]; then
-    step="mapping"
+    print_progress "Mapping step currently not supported, sorry. Exiting..."
+    exit 0
+    step="mapping" #TODO: mapping step requires lane column in samplesheet
 fi
 
 $NEXTFLOW run nf-core/sarek \
@@ -98,7 +102,7 @@ print_progress "Variant calling complete."
 # Create a temporary file to store the modified sample sheet
 TEMP_SAMPLESHEET=$(mktemp)
 
-echo "patient,sample,fastq_1,fastq_2,status,bam,bai,vcf" >> "$TEMP_SAMPLESHEET"
+echo "patient,sample,fastq_1,fastq_2,status,bam,bai,vcf,ref" >> "$TEMP_SAMPLESHEET"
 
 strelka_dir="${OUT_DIR}/variant_calling/strelka"
 mutect_dir="${OUT_DIR}/variant_calling/mutect2"
@@ -111,7 +115,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     [[ -z "$line" ]] && continue
 
     # Split the line into fields using awk to handle potential edge cases
-    IFS=',' read -r patient sample fastq1 fastq2 status bam bai <<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
+    IFS=',' read -r patient sample fastq1 fastq2 status bam bai ref<<< "$(awk -F',' '{print $1,$2,$3,$4,$5,$6,$7}' OFS=',' <<< "$line")"
 
     if [[ $STEP -eq 0 ]] || [[ -z "$bam" ]] || [[ -z "$bai" ]]; then
        
@@ -157,10 +161,10 @@ while IFS= read -r line || [[ -n "$line" ]]; do
 
         vcf_files="$strelka_indel_file|$strelka_snv_file|$mutect_file"
 
-        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$vcf_files" >> "$TEMP_SAMPLESHEET"    
+        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,$vcf_files,$ref" >> "$TEMP_SAMPLESHEET"    
 
     elif [[ $sample == "Normal" ]]; then
-        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,na" >> "$TEMP_SAMPLESHEET"    
+        echo "$patient,$sample,$fastq1,$fastq2,$status,$bam,$bai,na,$ref" >> "$TEMP_SAMPLESHEET"    
     fi
 
 done

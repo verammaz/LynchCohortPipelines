@@ -2,90 +2,110 @@
 
 ###################################### General ##################################
 # specify project
-project='acc_FLAI'
+project=''
 
 # specify cores
 cores=24
 
+# specify path to the fastq_to_bam singularity image file
+CONTAINER_FASTQ2BAM=''
+
+# specify path to OpiType config.ini file
+OPTITYE_CONFIG=''
+
+# specify path to conda pairtree environment
+PAIRTREE_ENV='' 
+
 #################################################################################
 
 
-####################################### Reference ###############################
-##### Ensure that reference files are compatible! 
-#################################################################################
-
-# specify reference genome (GATK.GRCh38, GATK.GRCh37, Ensembl.GRCh37, NCBI.GRCh38)
-GENOME="GATK.GRCh37"
+####################################### Reference hg19 ###############################
+# specify reference genome
+GENOME_hg19="GATK.GRCh37"
 
 # specify file path for reference fasta file
-REF_FASTA="/path/to/human_g1k_v37_decoy.fasta"
+REF_FASTA_hg19="human_g1k_v37_decoy.fasta"
 
 # specify file path for sites_of_variation.vcf 
-SITES_OF_VARIATION="/path/to/dbsnp_138.b37.vcf"
+SITES_OF_VARIATION_hg19="dbsnp_138.b37.vcf"
 
 # specify file paths for reference files for indel realignment
-INDELS_1="/path/to/1000G_phase1.indels.b37.vcf"
-INDELS_2="/path/to/Mills_and_1000G_gold_standard.indels.b37.vcf"
+INDELS_1_hg19="1000G_phase1.indels.b37.vcf"
+INDELS_2_hg19="Mills_and_1000G_gold_standard.indels.b37.vcf"
 
 # specify path to exome target intervals file (this one not required!)
-EXOME_INTERVALS="/path/to/Broad.human.exome.b37.interval_list"
+EXOME_INTERVALS_hg19="Broad.human.exome.b37.interval_list"
 
 # pon file for mutect variant filtering
-PON='/sc/arion/projects/FLAI/vera/References/Mutect2-exome-panel.vcf.gz'
+PON_hg19="Mutect2-exome-panel.vcf.gz"
+
+# specify file path for COMPATIBLE gtf annotations (required for STAR indexing)
+GTF_hg19=""
 
 ##################################################################################
 
+####################################### Reference hg38 ###############################
+# specify reference genome
+GENOME_hg38="GATK.GRCh38"
+
+# specify file path for reference fasta file
+REF_FASTA_hg38=""
+
+# specify file path for sites_of_variation.vcf 
+SITES_OF_VARIATION_hg38=""
+
+# specify file paths for reference files for indel realignment
+INDELS_1_hg38=""
+INDELS_2_hg38=""
+
+# specify path to exome target intervals file (this one not required!)
+EXOME_INTERVALS_hg38=""
+
+# pon file for mutect variant filtering
+PON_hg38=""
+
+# specify file path for COMPATIBLE gtf annotations (required for STAR indexing)
+GTF_hg38=""
+
+##################################################################################
 
 ############################### Scripts / Executables ############################
 # nextflow executable
-NEXTFLOW='/hpc/users/mazeev01/nextflow'
+NEXTFLOW=''
 
 # NeoPipe directory
-NEOPIPE='/hpc/users/mazeev01/NeoPipe'
+NEOPIPE=''
 
 # CFIT directory
-CFIT='/hpc/users/mazeev01/CFIT'
+CFIT=''
 
 # Pairtree directory
-PAIRTREE='/hpc/users/mazeev01/pairtree'
-
-# specify path to conda pairtree environment
-PAIRTREE_ENV='/hpc/users/mazeev01/.conda/envs/pairtree' 
+PAIRTREE=''
 
 #specify path to LynchCohortPipelines folder
-LYNCH='/hpc/users/mazeev01/LynchCohortPipelines'
-
-# specify path to the fastq_to_bam singularity image file
-CONTAINER_FASTQ2BAM='~/fastq2bam_0.3.sif'
-
-# specify path to snpeff
-SNPEFF='~/snpEff.v4.3t/'
-
-# specify path to netmhc
-NETMHC='~/netMHCpan-4.1/'
-
-# specify path to OpiType config.ini file
-OPTITYE_CONFIG='/sc/arion/projects/MSIH-seq/data/MattBrown/Whole_Exome_Sequencing/MattBrownWESAug2023/optitypeResults/config.ini'
+LYNCH=''
 
 #################################################################################
-
 
 ######### Directories ( make sure these have enough disk space ! ) ###############
 
 # home directory for data and output files
-HOME_DIR='sc/arion/projects/FLAI/vera/matt_lynch'
+HOME_DIR=''
 
 # nextflow output directory
-NEXTFLOW_OUT='/sc/arion/scratch/mazeev01/nextflow_out'
+NEXTFLOW_OUT=''
 
 # nextflow work directory
-NEXTFLOW_WORK='/sc/arion/scratch/mazeev01'
+NEXTFLOW_WORK=''
 
 # specify temporary directory (this is for fastq->bam intermediate files during sorting)
-TEMP_DIR="/sc/arion/scratch/mazeev01/temp"
+TEMP_DIR=""
 
 # specify directory for log files 
-LOG_DIR='/sc/arion/work/mazeev01/logs'
+LOG_DIR=''
+
+# specify directory for STAR indexing files
+STAR_DIR=""
 
 ##################################################################################
 
@@ -103,6 +123,8 @@ function create_directory() {
     if [ ! -d "$dir" ]; then
         mkdir -p "$dir"
         echo "Directory created: $dir"
+    else
+        echo "Directory already exists: $dir"
     fi
 }
 
@@ -110,7 +132,7 @@ function create_directory() {
 #####################################################################################
 
 # Ensure all global directories exist 
-create_directory "$NEXTFLOW_OUT"
-create_directory "$NEXTFLOW_WORK"
-create_directory "$TEMP_DIR"
-create_directory "$LOG_DIR"
+#create_directory "$NEXTFLOW_OUT"
+#create_directory "$NEXTFLOW_WORK"
+#create_directory "$TEMP_DIR"
+#create_directory "$LOG_DIR"

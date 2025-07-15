@@ -44,7 +44,7 @@ Set the following file and directory paths in your `config.sh` file:
 
 ```bash
 # specify file path for COMPATIBLE gtf annotations (required for STAR indexing)
-GTF_FILE=""
+GTF_hg19="" # or GTF_hg38
 
 # specify directory for STAR indexing files
 STAR_DIR=""
@@ -57,6 +57,6 @@ STAR_DIR=""
 
 ```bash
 cd LynchCohortPipelines
-./submit_star.sh -r <reads1.fastq.gz,reads2.fastq.gz> -o <output_prefix>
+./submit_star.sh -r <reads1.fastq.gz,reads2.fastq.gz> -o <output_prefix> --ref <hg19>
 ```
 

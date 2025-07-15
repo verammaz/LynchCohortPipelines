@@ -39,16 +39,18 @@ cd LynchCohortPipelines
 -s         CSV file with raw input data files configuration. Required.
 --step     Step to start nextflow nf-core/sarek from. 
            Options are 0=mapping, 1=variant_calling (default)
+--ref      Reference genome.
+           Options are hg19 (default) or hg38
 ```
 
 
 #### Input .csv file
-`samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor), bam, bai. Example:
+`samplesheet.csv` needs to have the columns patient, sample, fastq_1, fastq_2, status (0=Normal, 1=Tumor), bam, bai, ref. Example:
 
 ```csv
-patient,sample,fastq_1,fastq_2,status,bam,bai
-Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0,full/path/to/Normal.bam,full/path/to/Normal.bai
-Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,full/path/to/S1.bam,full/path/to/S1.bai
+patient,sample,fastq_1,fastq_2,status,bam,bai,ref
+Patient1,Normal,full/path/to/Normal_R1_001.fastq.gz,full/path/to/Normal_R2_001.fastq.gz,0,full/path/to/Normal.bam,full/path/to/Normal.bai,hg19
+Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1,full/path/to/S1.bam,full/path/to/S1.bai,hg19
 ```
 
 > Note that you don't need the bam and bai columns if running from the mapping step (step=0).
