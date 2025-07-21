@@ -47,8 +47,7 @@ fi
 
 java -jar $PICARD_JAR SamToFastq \
      I=$BAM \
-     FASTQ=$READ1 \ 
-     SECOND_END_FASTQ=$READ2 
+     FASTQ=$READS1 SECOND_END_FASTQ=$READS2 
 
 
 
