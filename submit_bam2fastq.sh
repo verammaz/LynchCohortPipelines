@@ -44,15 +44,23 @@ if [ -z "$READS1" ] || [ -z "$READS2" ] || [ -z "$BAM" ] ; then
     usage
 fi
 
-module purge
-module load samtools v1.17
-module load java v1.8
-module load picard v2.2.4
 
-java -jar $PICARD_JAR SamToFastq \
-     I=$BAM \
-     FASTQ=$READ1 \ 
-     SECOND_END_FASTQ=$READ2 
+job_name="bam2fastq"
+script="$LYNCH/bam_to_fastq.sh"
 
+echo "Script: $script"
+echo "BAM: $BAM"
+echo "Reads: $READS1, $READS2"
 
+chmod +x $script
 
+bsub -J "$job_name" \
+    -P "$project" \
+    -n 8 \
+    -R "span[hosts=1]" \
+    -R "rusage[mem=40000]" \
+    -W 6:00 \
+    -q premium \
+    -oo "${LOG_DIR}/${job_name}.out" \
+    -eo "${LOG_DIR}/${job_name}.err" \
+    ${script} -b ${BAM} -r1 ${READS1} -r2 ${READS2}
