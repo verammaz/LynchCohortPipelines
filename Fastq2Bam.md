@@ -146,3 +146,31 @@ Patient1,S1,full/path/to/S1_R1_001.fastq.gz,full/path/to/S1_R2_001.fastq.gz,1
 > *Important*: Current version assumes all samples are run on single lane!
 
 
+# BAM to FASTQ
+
+To revert a bam file to two paired-end fastq files, run the following:
+
+```bash
+cd LynchCohortPipelines
+source ./config
+
+bam=            # fill in full path to input bam file
+reads1=         # fill in pull path to paired end read fastq files
+reads2=
+
+job_name="bam2fastq"
+script="bam_to_fastq.sh"
+
+bsub -J "$job_name" \
+    -P "$project" \
+    -n 8 \
+    -R "span[hosts=1]" \
+    -R "rusage[mem=40000]" \
+    -W 6:00 \
+    -q premium \
+    -oo "${LOG_DIR}/${job_name}.out" \
+    -eo "${LOG_DIR}/${job_name}.err" \
+    ${script} -b ${bam} -r1 ${reads1} -r2 ${reads2}
+```
+
+

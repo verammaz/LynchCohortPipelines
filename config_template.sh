@@ -20,7 +20,7 @@ PAIRTREE_ENV=''
 
 
 ####################################### Reference hg19 ###############################
-# specify reference genome
+# reference genome
 GENOME_hg19="GATK.GRCh37"
 
 # specify file path for reference fasta file
@@ -45,7 +45,7 @@ GTF_hg19=""
 ##################################################################################
 
 ####################################### Reference hg38 ###############################
-# specify reference genome
+# reference genome
 GENOME_hg38="GATK.GRCh38"
 
 # specify file path for reference fasta file

@@ -12,6 +12,7 @@ usage() {
 Usage: $0 [options] -f <reference.fa> -r <read1.fastq,read2.fastq> -o <output_prefix>
 
 Required Arguments:
+  -f                               Reference fasta file.
   -r <read1.fastq,read2.fastq>     Comma-separated list of two FASTQ files.
   -o <output_prefix>               Prefix for output files.
 
@@ -19,7 +20,6 @@ Options:
   -h                               Display this message.
   -v                               Enable verbose mode.
   --patient                        Patient id.
-  --ref                            Reference fasta file.
   --index_ref                      Run bwa_index step.
   --keep_intermediate              Keep intermediate files.
   --post_process                   Carry out post processing of BAM file after alignment.
@@ -50,7 +50,6 @@ while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -h) usage ;;
         -v) VERBOSE=1 ;;
-        --ref) REF_FASTA="$2"; shift ;;
         --keep_intermediate) KEEP_INTERMEDIATE=1 ;;
         --post_process) POST_PROCESS=1 ;;
         --index_ref) INDEX=1 ;;
@@ -58,6 +57,7 @@ while [[ "$#" -gt 0 ]]; do
         --step) STEP="$2"; shift ;;
         --patient) PATIENT="$2"; shift ;;
         --sample) SAMPLE="$2"; shift ;;
+        -f) REF_FASTA="$2"; shift ;;
         -r) READS="$2"; shift ;;
         -o) OUTPUT_PREFIX="$2"; shift ;;
         *) echo "Error: Unknown argument/option: $1" ; usage ;;

@@ -117,7 +117,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
                     --threads "${cores}" \
                     $POST_PROCESS_FLAG \
                     --index_ref \
-                    --ref "${REF_FASTA}"
+                    -f "${REF_FASTA}"
 
         # Overwrite bam and bai with new paths
         bam="${output_prefix}.bam"
