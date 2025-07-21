@@ -31,7 +31,7 @@ while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -h) usage ;;
         -r1) READS1="$2"; shift ;;
-        r2) READS2="$2"; shift ;; 
+        -r2) READS2="$2"; shift ;; 
         -b) BAM="$2"; shift ;;
         *) echo "Error: Unknown argument/option: $1" ; usage ;;
     esac
