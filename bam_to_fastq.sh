@@ -44,10 +44,6 @@ if [ -z "$READS1" ] || [ -z "$READS2" ] || [ -z "$BAM" ] ; then
     usage
 fi
 
-module purge
-module load samtools/1.17
-module load java/1.8
-module load picard/2.2.4
 
 java -jar $PICARD_JAR SamToFastq \
      I=$BAM \

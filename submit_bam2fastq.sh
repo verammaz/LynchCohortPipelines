@@ -54,6 +54,9 @@ echo "Reads: $READS1, $READS2"
 
 chmod +x $script
 
+module purge
+module load singularity/3.6.4
+
 bsub -J "$job_name" \
     -P "$project" \
     -n 8 \
@@ -63,4 +66,4 @@ bsub -J "$job_name" \
     -q premium \
     -oo "${LOG_DIR}/${job_name}.out" \
     -eo "${LOG_DIR}/${job_name}.err" \
-    ${script} -b ${BAM} -r1 ${READS1} -r2 ${READS2}
+    singularity exec "${CONTAINER_FASTQ2BAM}" ${script} -b ${BAM} -r1 ${READS1} -r2 ${READS2}
