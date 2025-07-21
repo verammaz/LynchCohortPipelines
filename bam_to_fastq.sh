@@ -51,7 +51,7 @@ module load picard v2.2.4
 java -jar $PICARD_JAR SamToFastq \
      I=$BAM \
      FASTQ=$READ1 \ 
-     SECOND_END_FASTQ=$READ2 \
+     SECOND_END_FASTQ=$READ2 
 
 
 
